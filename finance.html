@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Panyero Wallet - Finance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="/manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #18385e;
+        }
+        .bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+        .border-primary {
+            border-color: var(--primary-color) !important;
+        }
+        .hover\:bg-primary-dark:hover {
+            background-color: #122a47 !important;
+        }
+        .finance-card {
+            transition: transform 0.2s ease-in-out;
+        }
+        .finance-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+    <!-- Header -->
+    <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center space-x-4 sticky top-0 z-50">
+        <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+        <div class="flex-1 text-center">Finance</div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+        <!-- Financial Overview -->
+        <div class="bg-white rounded-lg p-4 shadow w-full">
+            <h2 class="text-lg font-semibold mb-2">Financial Overview</h2>
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <p class="text-sm text-gray-600">Total Balance</p>
+                    <p id="totalBalance" class="text-2xl font-bold">₱0.00</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">This Month's Spending</p>
+                    <p id="monthlySpending" class="text-2xl font-bold">₱0.00</p>
+                </div>
+            </div>
+            <div class="h-40 w-full">
+                <canvas id="spendingChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Financial Services -->
+        <div class="grid grid-cols-2 gap-4 w-full">
+            <!-- Banking -->
+            <div class="finance-card bg-white rounded-lg p-4 shadow cursor-pointer" onclick="window.location.href='finance_banking.html'">
+                <div class="flex flex-col items-center">
+                    <span class="material-icons text-4xl text-primary mb-2">account_balance</span>
+                    <p class="text-center font-medium">Banking</p>
+                </div>
+            </div>
+            
+            <!-- Investments -->
+            <div class="finance-card bg-white rounded-lg p-4 shadow cursor-pointer" onclick="window.location.href='finance_investments.html'">
+                <div class="flex flex-col items-center">
+                    <span class="material-icons text-4xl text-primary mb-2">trending_up</span>
+                    <p class="text-center font-medium">Investments</p>
+                </div>
+            </div>
+            
+            <!-- Loans -->
+            <div class="finance-card bg-white rounded-lg p-4 shadow cursor-pointer" onclick="window.location.href='finance_loans.html'">
+                <div class="flex flex-col items-center">
+                    <span class="material-icons text-4xl text-primary mb-2">payments</span>
+                    <p class="text-center font-medium">Loans</p>
+                </div>
+            </div>
+            
+            <!-- Insurance -->
+            <div class="finance-card bg-white rounded-lg p-4 shadow cursor-pointer" onclick="window.location.href='finance_insurance.html'">
+                <div class="flex flex-col items-center">
+                    <span class="material-icons text-4xl text-primary mb-2">health_and_safety</span>
+                    <p class="text-center font-medium">Insurance</p>
+                </div>
+            </div>
+            
+            <!-- Budgeting -->
+            <div class="finance-card bg-white rounded-lg p-4 shadow cursor-pointer" onclick="window.location.href='finance_budgeting.html'">
+                <div class="flex flex-col items-center">
+                    <span class="material-icons text-4xl text-primary mb-2">savings</span>
+                    <p class="text-center font-medium">Budgeting</p>
+                </div>
+            </div>
+            
+            <!-- Financial Advisory -->
+            <div class="finance-card bg-white rounded-lg p-4 shadow cursor-pointer" onclick="window.location.href='financial_advisory.html'">
+                <div class="flex flex-col items-center">
+                    <span class="material-icons text-4xl text-primary mb-2">support_agent</span>
+                    <p class="text-center font-medium">Advisory</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="bg-white rounded-lg p-4 shadow w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold">Recent Transactions</h2>
+                <a href="transactions.html" class="text-primary text-sm">View All</a>
+            </div>
+            <div id="recentTransactions" class="space-y-3">
+                <!-- Transactions will be populated here -->
+                <p class="text-gray-500 text-sm text-center">No recent transactions found.</p>
+            </div>
+        </div>
+
+        <!-- Financial Tips -->
+        <div class="bg-white rounded-lg p-4 shadow w-full">
+            <h2 class="text-lg font-semibold mb-2">Financial Tips</h2>
+            <div class="bg-blue-50 border-l-4 border-primary p-3 rounded">
+                <p class="text-sm text-gray-700">Set aside at least 20% of your income for savings and investments to build long-term wealth.</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+            authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+            projectId: "explore-malaysia-6d28d",
+            storageBucket: "explore-malaysia-6d28d.appspot.com",
+            messagingSenderId: "869053244601",
+            appId: "1:869053244601:web:29ad09ff454b43230be768",
+            measurementId: "G-5XJK1H7KWX"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Initialize spending chart
+        function initializeSpendingChart() {
+            const ctx = document.getElementById('spendingChart').getContext('2d');
+            
+            // Sample data - would be replaced with actual user data
+            const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+            const data = {
+                labels: labels,
+                datasets: [{
+                    label: 'Monthly Spending',
+                    data: [1200, 1900, 1500, 2200, 1800, 2400],
+                    backgroundColor: 'rgba(24, 56, 94, 0.2)',
+                    borderColor: '#18385e',
+                    borderWidth: 2,
+                    tension: 0.4
+                }]
+            };
+            
+            const config = {
+                type: 'line',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₱' + value;
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            
+            new Chart(ctx, config);
+        }
+
+        // Fetch and display financial data
+        function fetchFinancialData() {
+            const user = auth.currentUser;
+            if (user) {
+                db.collection('users').doc(user.uid).get()
+                    .then(doc => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            document.getElementById('totalBalance').textContent = `₱${(data.balance || 0).toFixed(2)}`;
+                            
+                            // This would be calculated from transaction history in a real app
+                            const monthlySpending = 1500; // Placeholder value
+                            document.getElementById('monthlySpending').textContent = `₱${monthlySpending.toFixed(2)}`;
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error fetching financial data:", error);
+                    });
+            }
+        }
+
+        // Fetch and display recent transactions
+        function fetchRecentTransactions() {
+            const user = auth.currentUser;
+            if (user) {
+                const userRef = db.collection('users').doc(user.uid);
+                
+                userRef.collection('transactions')
+                    .orderBy('timestamp', 'desc')
+                    .limit(5)
+                    .get()
+                    .then(querySnapshot => {
+                        const transactionsDiv = document.getElementById('recentTransactions');
+                        
+                        if (querySnapshot.empty) {
+                            transactionsDiv.innerHTML = '<p class="text-gray-500 text-sm text-center">No recent transactions found.</p>';
+                            return;
+                        }
+                        
+                        transactionsDiv.innerHTML = '';
+                        querySnapshot.forEach(doc => {
+                            const transaction = doc.data();
+                            const date = transaction.timestamp ? new Date(transaction.timestamp.seconds * 1000).toLocaleDateString() : 'N/A';
+                            
+                            const transactionItem = document.createElement('div');
+                            transactionItem.className = 'flex justify-between items-center border-b border-gray-200 pb-2';
+                            transactionItem.innerHTML = `
+                                <div>
+                                    <p class="font-medium">${transaction.type || 'Transaction'}</p>
+                                    <p class="text-xs text-gray-500">${date}</p>
+                                </div>
+                                <p class="font-medium ${transaction.amount < 0 ? 'text-red-500' : 'text-green-500'}">
+                                    ${transaction.amount < 0 ? '-' : '+'}₱${Math.abs(transaction.amount || 0).toFixed(2)}
+                                </p>
+                            `;
+                            
+                            transactionsDiv.appendChild(transactionItem);
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Error fetching recent transactions:", error);
+                        document.getElementById('recentTransactions').innerHTML = '<p class="text-red-500 text-sm text-center">Error loading recent transactions.</p>';
+                    });
+            }
+        }
+
+        // Check authentication state
+        auth.onAuthStateChanged(user => {
+            if (!user) {
+                window.location.href = 'signin.html';
+                return;
+            }
+            
+            initializeSpendingChart();
+            fetchFinancialData();
+            fetchRecentTransactions();
+        });
+    </script>
+</body>
+</html>
+

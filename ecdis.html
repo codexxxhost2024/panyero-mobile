@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SeaCoder ECDIS Concept</title>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+            background-color: #18385e; /* Navy blue background */
+            color: #eee; /* Light text color */
+        }
+
+        #map {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .control-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(24, 56, 94, 0.8); /* Semi-transparent navy blue */
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 1; /* Ensure panel stays on top */
+        }
+
+        .control-panel h2 {
+            margin-top: 0;
+            font-size: 1.2em;
+            color: #4a9eff; /* Light blue for headings */
+        }
+
+        .control-panel label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .control-panel input[type="text"],
+        .control-panel input[type="number"],
+        .control-panel select {
+            background-color: #001e33;
+            border: 1px solid #00a0d2;
+            color: #eee;
+            padding: 5px;
+            border-radius: 3px;
+        }
+
+        .weather-info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(24, 56, 94, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+        }
+
+        .weather-info p {
+            margin: 5px 0;
+        }
+
+        .api-placeholders {
+            margin-top: 20px;
+        }
+
+        .api-placeholders h3 {
+            color: #00a0d2;
+            margin-bottom: 5px;
+        }
+
+        .api-placeholders ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .api-placeholders li {
+            margin-bottom: 5px;
+        }
+
+        #routeCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Allows interaction with the map underneath */
+        }
+
+        .route-info {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(24, 56, 94, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <canvas id="routeCanvas"></canvas>
+
+    <div class="control-panel">
+        <h2>ECDIS Control</h2>
+        <label for="latitude">Latitude:</label>
+        <input type="number" id="latitude" value="34.0522">
+        <label for="longitude">Longitude:</label>
+        <input type="number" id="longitude" value="-118.2437">
+        <button id="updateLocation">Update Location</button>
+
+        <h2>Route Planning</h2>
+        <label for="waypointInput">Add Waypoint (lat, lon):</label>
+        <input type="text" id="waypointInput" placeholder="e.g., 35.6895, 139.6917">
+        <button id="addWaypoint">Add</button>
+        <ul id="waypointList"></ul>
+
+        <div class="api-placeholders">
+            <h3>API Placeholders</h3>
+            <ul>
+                <li><b>Mapbox API Key:</b> YOUR_MAPBOX_API_KEY</li>
+                <li><b>OpenWeatherMap API Key:</b> YOUR_OPENWEATHERMAP_API_KEY</li>
+                <li><b>Weather Data API:</b> Placeholder for StormGeo/MeteoGroup/The Weather Company API. Provides detailed forecast data, including wind speed and direction at different heights, wave height and direction, and even ocean currents. Some offer specialized maritime APIs.</li>
+                <li><b>Current Data API:</b> Placeholder for CMEMS/HYCOM. Provides data on ocean currents, but it's more complex to integrate and might require some data processing.</li>
+                <li><b>Sea Traffic Data:</b> Placeholder for MarineTraffic/Spire Maritime API. Provides real-time and historical AIS data. This would allow us to show other vessels on the map.</li>
+                <li><b>Port and Vessel Traffic Service (VTS) Data:</b> Placeholder for Port/VTS APIs. Many major ports have their own APIs that provide information on berths, availability, and contact details.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="weather-info">
+        <h2>Weather</h2>
+        <p>Location: <span id="weather-location"></span></p>
+        <p>Temperature: <span id="weather-temp"></span></p>
+        <p>Condition: <span id="weather-condition"></span></p>
+        <p>Wind: <span id="weather-wind"></span></p>
+    </div>
+
+     <div class="route-info">
+        <p>Estimated Distance: <span id="route-distance">0 km</span></p>
+        <p>Estimated Time: <span id="route-time">0 hrs</span></p>
+    </div>
+
+    <script>
+        mapboxgl.accessToken = 'YOUR_MAPBOX_API_KEY'; // Replace with your Mapbox API key
+
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/navigation-night-v1',
+            center: [-118.2437, 34.0522], // Default: Los Angeles
+            zoom: 10,
+            pitch: 50, // Tilt for 3D effect
+            bearing: -17.6, // Rotate slightly
+        });
+
+        map.on('load', () => {
+            map.addLayer({
+                'id': '3d-buildings',
+                'source': 'composite',
+                'source-layer': 'building',
+                'filter': ['==', 'extrude', 'true'],
+                'type': 'fill-extrusion',
+                'minzoom': 15,
+                'paint': {
+                    'fill-extrusion-color': '#aaa',
+                    'fill-extrusion-height': [
+                        'interpolate',
+                        ['linear'],
+                        ['zoom'],
+                        15,
+                        0,
+                        15.05,
+                        ['get', 'height']
+                    ],
+                    'fill-extrusion-base': [
+                        'interpolate',
+                        ['linear'],
+                        ['zoom'],
+                        15,
+                        0,
+                        15.05,
+                        ['get', 'min_height']
+                    ],
+                    'fill-extrusion-opacity': 0.6
+                }
+            });
+        });
+
+        // --- API Placeholders and Dummy Data ---
+        const openWeatherApiKey = 'YOUR_OPENWEATHERMAP_API_KEY'; // Replace with your OpenWeatherMap API key
+
+        // Placeholder functions for other APIs (would be implemented with actual API calls)
+        function fetchAdvancedWeatherData(lat, lon) {
+            console.log(`Fetching advanced weather data for ${lat}, ${lon} from placeholder API`);
+            // In a real implementation, you would make an API call to StormGeo, MeteoGroup, etc.
+            return {
+                detailedForecast: "Detailed forecast data here",
+                waveHeight: "2m",
+                wind: "15 knots from NW",
+                currents: "1 knot to the East"
+            };
+        }
+
+        function fetchCurrentData(lat, lon) {
+            console.log(`Fetching current data for ${lat}, ${lon} from placeholder API`);
+            // In a real implementation, you would make an API call to CMEMS or HYCOM
+            return {
+                speed: "0.5 knots",
+                direction: "NE"
+            };
+        }
+
+        function fetchSeaTrafficData(lat, lon, radius) {
+            console.log(`Fetching sea traffic data near ${lat}, ${lon} from placeholder API`);
+            // In a real implementation, you would make an API call to MarineTraffic or Spire
+            return {
+                nearbyVessels: 15,
+                congestionLevel: "Low"
+            };
+        }
+
+        function fetchPortData(portId) {
+            console.log(`Fetching data for port ${portId} from placeholder API`);
+            // In a real implementation, you would make an API call to the specific port's API
+            return {
+                berthAvailability: "3 berths available",
+                restrictions: "None",
+                contact: "portauthority@example.com"
+            };
+        }
+
+        // --- Weather API Integration (using OpenWeatherMap as an example) ---
+        const weatherLocation = document.getElementById('weather-location');
+        const weatherTemp = document.getElementById('weather-temp');
+        const weatherCondition = document.getElementById('weather-condition');
+        const weatherWind = document.getElementById('weather-wind');
+
+        function fetchWeather(lat, lon) {
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${openWeatherApiKey}&units=metric`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    weatherLocation.textContent = data.name;
+                    weatherTemp.textContent = `${data.main.temp}°C`;
+                    weatherCondition.textContent = data.weather[0].description;
+                    weatherWind.textContent = `${data.wind.speed} m/s, ${data.wind.deg}°`;
+
+                    // Example of using placeholder data from other APIs:
+                    const advancedWeather = fetchAdvancedWeatherData(lat, lon);
+                    console.log("Advanced Weather:", advancedWeather);
+                    const currentData = fetchCurrentData(lat, lon);
+                    console.log("Current Data:", currentData);
+                    const seaTraffic = fetchSeaTrafficData(lat, lon, 50); // 50km radius
+                    console.log("Sea Traffic:", seaTraffic);
+                    const portData = fetchPortData("SomePortId"); // Example port ID
+                    console.log("Port Data:", portData);
+                })
+                .catch(error => {
+                    console.error('Error fetching weather data:', error);
+                    weatherLocation.textContent = 'Error';
+                    weatherTemp.textContent = 'N/A';
+                    weatherCondition.textContent = 'N/A';
+                    weatherWind.textContent = 'N/A';
+                });
+        }
+
+        // Initial weather fetch
+        fetchWeather(34.0522, -118.2437); // Default: Los Angeles
+
+        // --- Location Update ---
+        document.getElementById('updateLocation').addEventListener('click', () => {
+            const lat = parseFloat(document.getElementById('latitude').value);
+            const lon = parseFloat(document.getElementById('longitude').value);
+
+            if (!isNaN(lat) && !isNaN(lon)) {
+                map.flyTo({
+                    center: [lon, lat],
+                    essential: true
+                });
+                fetchWeather(lat, lon);
+            } else {
+                alert('Invalid coordinates');
+            }
+        });
+
+        // --- Route Drawing and Calculation (Simplified) ---
+        const routeCanvas = document.getElementById('routeCanvas');
+        const routeCtx = routeCanvas.getContext('2d');
+        const waypoints = [];
+
+        document.getElementById('addWaypoint').addEventListener('click', () => {
+            const waypointInput = document.getElementById('waypointInput');
+            const waypointCoords = waypointInput.value.split(',').map(coord => parseFloat(coord.trim()));
+
+            if (waypointCoords.length === 2 && !isNaN(waypointCoords[0]) && !isNaN(waypointCoords[1])) {
+                waypoints.push(waypointCoords);
+                waypointInput.value = '';
+                updateWaypointList();
+                drawRoute();
+                calculateRouteInfo();
+            } else {
+                alert('Invalid waypoint format');
+            }
+        });
+
+        function updateWaypointList() {
+            const waypointList = document.getElementById('waypointList');
+            waypointList.innerHTML = '';
+            waypoints.forEach((waypoint, index) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `Waypoint ${index + 1}: ${waypoint[0]}, ${waypoint[1]}`;
+                waypointList.appendChild(listItem);
+            });
+        }
+
+        function drawRoute() {
+            routeCtx.clearRect(0, 0, routeCanvas.width, routeCanvas.height);
+            routeCtx.strokeStyle = '#00a0d2';
+            routeCtx.lineWidth = 3;
+
+            if (waypoints.length > 1) {
+                routeCtx.beginPath();
+                const startPoint = map.project(new mapboxgl.LngLat(waypoints[0][1], waypoints[0][0]));
+                routeCtx.moveTo(startPoint.x, startPoint.y);
+
+                for (let i = 1; i < waypoints.length; i++) {
+                    const point = map.project(new mapboxgl.LngLat(waypoints[i][1], waypoints[i][0]));
+                    routeCtx.lineTo(point.x, point.y);
+                }
+
+                routeCtx.stroke();
+            }
+        }
+        // Placeholder for route information
+        const routeDistance = document.getElementById('route-distance');
+        const routeTime = document.getElementById('route-time');
+
+        function calculateRouteInfo() {
+            if (waypoints.length > 1) {
+                let totalDistance = 0;
+                for (let i = 0; i < waypoints.length - 1; i++) {
+                    const from = new mapboxgl.LngLat(waypoints[i][1], waypoints[i][0]);
+                    const to = new mapboxgl.LngLat(waypoints[i + 1][1], waypoints[i + 1][0]);
+                    totalDistance += from.distanceTo(to);
+                }
+        
+                // Assuming an average speed of 15 knots (adjust as needed)
+                const averageSpeedKnots = 15;
+                const distanceInNauticalMiles = totalDistance / 1852; // Convert meters to nautical miles
+                const timeInHours = distanceInNauticalMiles / averageSpeedKnots;
+        
+                routeDistance.textContent = `${(totalDistance / 1000).toFixed(2)} km`; // Display in kilometers
+                routeTime.textContent = `${timeInHours.toFixed(2)} hrs`;
+            } else {
+                routeDistance.textContent = '0 km';
+                routeTime.textContent = '0 hrs';
+            }
+        }
+
+        // Update route when map moves
+        map.on('move', () => {
+            drawRoute();
+        });
+
+        // Resize canvas
+        function resizeCanvas() {
+            routeCanvas.width = window.innerWidth;
+            routeCanvas.height = window.innerHeight;
+            drawRoute();
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+    </script>
+</body>
+</html>
+

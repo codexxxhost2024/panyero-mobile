@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Panyero - Movies</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #18385e;
+    }
+    .bg-primary {
+      background-color: var(--primary-color) !important;
+    }
+    .text-primary {
+      color: var(--primary-color) !important;
+    }
+    .border-primary {
+      border-color: var(--primary-color) !important;
+    }
+    .hover\:bg-primary-dark:hover {
+      background-color: #122a47 !important;
+    }
+    
+    /* Movie card hover effect */
+    .movie-card {
+      transition: transform 0.3s ease;
+    }
+    
+    .movie-card:hover {
+      transform: scale(1.03);
+    }
+    
+    /* Rating stars */
+    .rating {
+      color: #ffc107;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+  <!-- Header -->
+  <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center space-x-4 sticky top-0 z-50">
+    <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+    <div class="flex-1 text-center">Movies</div>
+    <span class="material-icons cursor-pointer" onclick="toggleSearch()">search</span>
+  </header>
+
+  <!-- Search Bar (Hidden by default) -->
+  <div id="search-bar" class="bg-white p-2 hidden">
+    <div class="flex items-center border rounded-lg px-2">
+      <span class="material-icons text-gray-400">search</span>
+      <input type="text" placeholder="Search movies..." class="flex-1 p-2 outline-none" onkeyup="searchMovies(this.value)">
+      <span class="material-icons text-gray-400 cursor-pointer" onclick="clearSearch()">close</span>
+    </div>
+  </div>
+
+  <!-- Category Tabs -->
+  <div class="bg-white flex space-x-4 overflow-x-auto p-2 text-sm font-medium sticky top-16 z-40 shadow-sm">
+    <button class="category-tab active px-3 py-1 rounded-full bg-primary text-white" onclick="filterMovies('all')">All</button>
+    <button class="category-tab px-3 py-1 rounded-full text-gray-600" onclick="filterMovies('action')">Action</button>
+    <button class="category-tab px-3 py-1 rounded-full text-gray-600" onclick="filterMovies('comedy')">Comedy</button>
+    <button class="category-tab px-3 py-1 rounded-full text-gray-600" onclick="filterMovies('drama')">Drama</button>
+    <button class="category-tab px-3 py-1 rounded-full text-gray-600" onclick="filterMovies('horror')">Horror</button>
+    <button class="category-tab px-3 py-1 rounded-full text-gray-600" onclick="filterMovies('sci-fi')">Sci-Fi</button>
+  </div>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+    <!-- Featured Movie -->
+    <div class="bg-white rounded-lg overflow-hidden shadow w-full">
+      <div class="relative">
+        <img src="https://via.placeholder.com/400x200?text=Featured+Movie" alt="Featured Movie" class="w-full h-48 object-cover">
+        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+          <h2 class="text-xl font-bold text-white">The Adventure Begins</h2>
+          <div class="flex items-center">
+            <span class="rating material-icons text-sm">star</span>
+            <span class="rating material-icons text-sm">star</span>
+            <span class="rating material-icons text-sm">star</span>
+            <span class="rating material-icons text-sm">star</span>
+            <span class="rating material-icons text-sm">star_half</span>
+            <span class="text-white text-sm ml-1">4.5</span>
+          </div>
+        </div>
+        <button class="absolute top-4 right-4 bg-primary text-white rounded-full p-2 shadow-lg">
+          <span class="material-icons">play_arrow</span>
+        </button>
+      </div>
+      <div class="p-4">
+        <div class="flex justify-between items-center mb-2">
+          <div class="text-sm text-gray-600">2023 • Action, Adventure • 2h 15m</div>
+          <button class="text-primary flex items-center text-sm font-medium">
+            <span class="material-icons text-sm mr-1">add</span> Watchlist
+          </button>
+        </div>
+        <p class="text-sm text-gray-700">A thrilling adventure that follows a group of explorers as they discover a hidden world filled with danger and mystery.</p>
+      </div>
+    </div>
+    
+    <!-- Popular Movies -->
+    <div class="w-full">
+      <h2 class="text-xl font-semibold mb-4">Popular Movies</h2>
+      <div id="popular-movies" class="grid grid-cols-2 gap-4">
+        <!-- Movies will be populated here -->
+      </div>
+    </div>
+    
+    <!-- New Releases -->
+    <div class="w-full">
+      <h2 class="text-xl font-semibold mb-4">New Releases</h2>
+      <div id="new-releases" class="grid grid-cols-2 gap-4">
+        <!-- Movies will be populated here -->
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Sample movie data
+    const movies = [
+      { 
+        id: 1, 
+        title: "Cosmic Odyssey", 
+        genre: ["sci-fi", "adventure"], 
+        year: 2023, 
+        rating: 4.7, 
+        duration: "2h 10m", 
+        poster: "https://via.placeholder.com/150x225?text=Cosmic+Odyssey",
+        isNew: true
+      },
+      { 
+        id: 2, 
+        title: "Laugh Out Loud", 
+        genre: ["comedy"], 
+        year: 2023, 
+        rating: 4.2, 
+        duration: "1h 45m", 
+        poster: "https://via.placeholder.com/150x225?text=Laugh+Out+Loud",
+        isNew: true
+      },
+      { 
+        id: 3, 
+        title: "Heart's Journey", 
+        genre: ["drama", "romance"], 
+        year: 2022, 
+        rating: 4.5, 
+        duration: "2h 5m", 
+        poster: "https://via.placeholder.com/150x225?text=Heart's+Journey",
+        isNew: false
+      },
+      { 
+        id: 4, 
+        title: "Midnight Terror", 
+        genre: ["horror", "thriller"], 
+        year: 2023, 
+        rating: 4.0, 
+        duration: "1h 50m", 
+        poster: "https://via.placeholder.com/150x225?text=Midnight+Terror",
+        isNew: true
+      },
+      { 
+        id: 5, 
+        title: "Action Heroes", 
+        genre: ["action"], 
+        year: 2022, 
+        rating: 4.3, 
+        duration: "2h 15m", 
+        poster: "https://via.placeholder.com/150x225?text=Action+Heroes",
+        isNew: false
+      },
+      { 
+        id: 6, 
+        title: "Future World", 
+        genre: ["sci-fi", "action"], 
+        year: 2022, 
+        rating: 4.1, 
+        duration: "2h 20m", 
+        poster: "https://via.placeholder.com/150x225?text=Future+World",
+        isNew: false
+      },
+      { 
+        id: 7, 
+        title: "Family Fun", 
+        genre: ["comedy", "family"], 
+        year: 2023, 
+        rating: 4.4, 
+        duration: "1h 40m", 
+        poster: "https://via.placeholder.com/150x225?text=Family+Fun",
+        isNew: true
+      },
+      { 
+        id: 8, 
+        title: "Dark Shadows", 
+        genre: ["horror", "mystery"], 
+        year: 2022, 
+        rating: 3.9, 
+        duration: "1h 55m", 
+        poster: "https://via.placeholder.com/150x225?text=Dark+Shadows",
+        isNew: false
+      }
+    ];
+    
+    // Initialize movie lists
+    function initMovieLists() {
+      const popularMoviesContainer = document.getElementById('popular-movies');
+      const newReleasesContainer = document.getElementById('new-releases');
+      
+      popularMoviesContainer.innerHTML = '';
+      newReleasesContainer.innerHTML = '';
+      
+      // Sort by rating for popular movies
+      const popularMovies = [...movies].sort((a, b) => b.rating - a.rating).slice(0, 4);
+      
+      // Filter new releases
+      const newReleases = movies.filter(movie => movie.isNew).slice(0, 4);
+      
+      // Populate popular movies
+      popularMovies.forEach(movie => {
+        const movieCard = createMovieCard(movie);
+        popularMoviesContainer.appendChild(movieCard);
+      });
+      
+      // Populate new releases
+      newReleases.forEach(movie => {
+        const movieCard = createMovieCard(movie);
+        newReleasesContainer.appendChild(movieCard);
+      });
+    }
+    
+    // Create movie card element
+    function createMovieCard(movie) {
+      const div = document.createElement('div');
+      div.className = 'movie-card bg-white rounded-lg overflow-hidden shadow';
+      div.setAttribute('data-genres', movie.genre.join(','));
+      
+      div.innerHTML = `
+        <div class="relative">
+          <img src="${movie.poster}" alt="${movie.title}" class="w-full h-48 object-cover">
+          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-2">
+            <div class="flex items-center">
+              <span class="rating material-icons text-xs">star</span>
+              <span class="text-white text-xs ml-1">${movie.rating}</span>
+            </div>
+          </div>
+          ${movie.isNew ? '<span class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">NEW</span>' : ''}
+        </div>
+        <div class="p-2">
+          <h3 class="font-medium text-sm">${movie.title}</h3>
+          <div class="flex justify-between items-center mt-1">
+            <div class="text-xs text-gray-500">${movie.year} • ${movie.duration}</div>
+            <button class="text-primary">
+              <span class="material-icons text-sm">more_vert</span>
+            </button>
+          </div>
+        </div>
+      `;
+      
+      div.addEventListener('click', () => showMovieDetails(movie));
+      
+      return div;
+    }
+    
+    // Show movie details
+    function showMovieDetails(movie) {
+      alert(`Movie details for "${movie.title}" will be shown here. This feature is coming soon!`);
+    }
+    
+    // Toggle search bar
+    function toggleSearch() {
+      const searchBar = document.getElementById('search-bar');
+      searchBar.classList.toggle('hidden');
+      if (!searchBar.classList.contains('hidden')) {
+        searchBar.querySelector('input').focus();
+      }
+    }
+    
+    // Clear search
+    function clearSearch() {
+      document.querySelector('#search-bar input').value = '';
+      initMovieLists();
+      toggleSearch();
+    }
+    
+    // Search movies
+    function searchMovies(query) {
+      if (!query) {
+        initMovieLists();
+        return;
+      }
+      
+      const popularMoviesContainer = document.getElementById('popular-movies');
+      const newReleasesContainer = document.getElementById('new-releases');
+      
+      popularMoviesContainer.innerHTML = '';
+      newReleasesContainer.innerHTML = '';
+      
+      const filteredMovies = movies.filter(movie => 
+        movie.title.toLowerCase().includes(query.toLowerCase()) || 
+        movie.genre.some(g => g.toLowerCase().includes(query.toLowerCase()))
+      );
+      
+      if (filteredMovies.length === 0) {
+        popularMoviesContainer.innerHTML = '<div class="col-span-2 text-center p-4 text-gray-500">No movies found</div>';
+        return;
+      }
+      
+      filteredMovies.forEach(movie => {
+        const movieCard = createMovieCard(movie);
+        popularMoviesContainer.appendChild(movieCard);
+      });
+    }
+    
+    // Filter movies by category
+    function filterMovies(category) {
+      // Update active tab
+      document.querySelectorAll('.category-tab').forEach(tab => {
+        if (tab.textContent.toLowerCase() === category || (tab.textContent.toLowerCase() === 'all' && category === 'all')) {
+          tab.classList.add('bg-primary', 'text-white');
+          tab.classList.remove('text-gray-600');
+        } else {
+          tab.classList.remove('bg-primary', 'text-white');
+          tab.classList.add('text-gray-600');
+        }
+      });
+      
+      if (category === 'all') {
+        initMovieLists();
+        return;
+      }
+      
+      const popularMoviesContainer = document.getElementById('popular-movies');
+      const newReleasesContainer = document.getElementById('new-releases');
+      
+      popularMoviesContainer.innerHTML = '';
+      newReleasesContainer.innerHTML = '';
+      
+      const filteredMovies = movies.filter(movie => movie.genre.includes(category));
+      
+      if (filteredMovies.length === 0) {
+        popularMoviesContainer.innerHTML = '<div class="col-span-2 text-center p-4 text-gray-500">No movies found in this category</div>';
+        return;
+      }
+      
+      filteredMovies.forEach(movie => {
+        const movieCard = createMovieCard(movie);
+        popularMoviesContainer.appendChild(movieCard);
+      });
+    }
+    
+    // Initialize
+    initMovieLists();
+  </script>
+</body>
+</html>
+

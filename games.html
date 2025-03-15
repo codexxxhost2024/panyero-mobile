@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GameHub</title>
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 140px; /* Adjusted for sticky header and tabs */
+        }
+
+        /* Modern Sticky Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #18385e; /* Primary color header */
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        header .back-icon {
+            color: #fff;
+            font-size: 28px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        header .back-icon:hover {
+            transform: scale(1.1);
+        }
+        header h1 {
+            font-size: 1.6rem;
+            color: #fff;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Category Tabs */
+        .category-tabs {
+            position: fixed;
+            top: 60px; /* Below the header */
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            display: flex;
+            overflow-x: auto; /* Enable horizontal scrolling */
+            white-space: nowrap; /* Prevent wrapping */
+            padding: 10px 0;
+            z-index: 999;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        .category-tabs::-webkit-scrollbar {
+            height: 6px; /* Scrollbar height */
+        }
+        .category-tabs::-webkit-scrollbar-thumb {
+            background: #00ff88; /* Scrollbar thumb color */
+            border-radius: 10px;
+        }
+        .category-tabs::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1); /* Scrollbar track color */
+        }
+        .category-tabs button {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: background 0.3s ease, transform 0.2s ease;
+            flex: 0 0 auto; /* Prevent buttons from shrinking */
+        }
+        .category-tabs button.active {
+            background: #00ff88;
+            color: #1a1a2e;
+        }
+        .category-tabs button:hover {
+            transform: scale(1.05);
+        }
+
+        /* Centered Container */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Wallet Section */
+        .wallet {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .wallet:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+        .wallet .icon {
+            fill: #00ff88;
+            width: 24px;
+            height: 24px;
+        }
+        .wallet span {
+            font-weight: 700;
+            color: #00ff88;
+        }
+
+        /* Transactions Section */
+        .transactions {
+            width: 100%;
+            max-width: 500px;
+            margin-top: 20px;
+        }
+        .transactions h2 {
+            font-size: 1.2rem;
+            color: #00ff88;
+            margin-bottom: 10px;
+        }
+        .transactions ul {
+            list-style: none;
+            padding: 0;
+        }
+        .transactions li {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: #eee;
+        }
+
+        /* Game List */
+        .game-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 500px; /* Match wallet width */
+            padding: 0; /* Remove padding to align with wallet */
+        }
+        .game-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .game-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+        .game-item h3 {
+            margin: 0 0 10px;
+            font-size: 1.3rem;
+            color: #00ff88;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+        .game-item p {
+            margin: 5px 0;
+            color: #eee;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+
+        /* Bet Form */
+        .bet-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+            width: 100%;
+        }
+        .bet-form input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-size: 1rem;
+            text-align: center;
+            outline: none;
+        }
+        .bet-form input::placeholder {
+            color: #ddd;
+        }
+        .bet-form button {
+            width: 100%;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #18385e, #122a47);
+            color: #fff;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .bet-form button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0, 255, 136, 0.3);
+        }
+
+        /* Media Queries for Larger Screens */
+        @media (min-width: 768px) {
+            .game-list {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 25px;
+            }
+            .game-item {
+                padding: 25px;
+            }
+            .game-item h3 {
+                font-size: 1.4rem;
+            }
+            .game-item p {
+                font-size: 1rem;
+            }
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-white {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sticky Header -->
+    <header>
+        <span class="material-icons back-icon" onclick="goBack()">arrow_back</span>
+        <h1>GameHub</h1>
+        <div></div> <!-- Empty div for spacing -->
+    </header>
+
+    <!-- Category Tabs -->
+    <div class="category-tabs">
+        <button class="active" onclick="switchCategory('sports')">Sports</button>
+        <button onclick="switchCategory('pinoy')">Pinoy</button>
+        <button onclick="switchCategory('splatter')">Splatter</button>
+        <button onclick="switchCategory('arcade')">Arcade</button>
+        <button onclick="switchCategory('casino')">Casino</button>
+        <button onclick="switchCategory('esports')">Esports</button>
+        <button onclick="switchCategory('lottery')">Lottery</button>
+        <button onclick="switchCategory('virtual')">Virtual</button>
+    </div>
+
+    <!-- Centered Container -->
+    <div class="container">
+        <!-- Wallet Section -->
+        <div class="wallet">
+            <svg class="icon" viewBox="0 0 24 24">
+                <path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+            </svg>
+            Balance: ₱<span id="wallet-balance">0.00</span>
+        </div>
+
+        <!-- Transactions Section -->
+        <div class="transactions">
+            <h2>Recent Transactions</h2>
+            <ul id="transactions-list">
+                <!-- Transactions will be dynamically inserted here -->
+            </ul>
+        </div>
+
+        <!-- Game List -->
+        <div class="game-list" id="game-list">
+            <!-- Games will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+            authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+            projectId: "explore-malaysia-6d28d",
+            storageBucket: "explore-malaysia-6d28d.appspot.com",
+            messagingSenderId: "869053244601",
+            appId: "1:869053244601:web:29ad09ff454b43230be768",
+            measurementId: "G-5XJK1H7KWX"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Wallet balance
+        let walletBalance = 0;
+
+        // Fetch user balance from Firestore
+        const fetchUserBalance = async (userId) => {
+            const userDoc = await db.collection('users').doc(userId).get();
+            if (userDoc.exists) {
+                const userData = userDoc.data();
+                walletBalance = userData.balance || 0;
+                document.getElementById('wallet-balance').textContent = walletBalance.toFixed(2);
+            }
+        };
+
+        // Update user balance in Firestore
+        const updateUserBalance = async (userId, newBalance) => {
+            await db.collection('users').doc(userId).update({
+                balance: newBalance
+            });
+        };
+
+        // Add a transaction to Firestore
+        const addTransaction = async (userId, amount, gameKey) => {
+            await db.collection('transactions').add({
+                userId,
+                amount,
+                gameKey,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        };
+
+        // Fetch transactions for the current user
+        const fetchTransactions = async (userId) => {
+            const transactionsList = document.getElementById('transactions-list');
+            transactionsList.innerHTML = ""; // Clear existing transactions
+
+            const transactionsSnapshot = await db.collection('transactions')
+                .where('userId', '==', userId)
+                .orderBy('timestamp', 'desc')
+                .limit(5) // Show only the last 5 transactions
+                .get();
+
+            transactionsSnapshot.forEach(doc => {
+                const transaction = doc.data();
+                const li = document.createElement('li');
+                li.textContent = `Bet ₱${transaction.amount.toFixed(2)} on ${transaction.gameKey}`;
+                transactionsList.appendChild(li);
+            });
+        };
+
+        // Fetch games from the API
+        const API_URL = "https://api.the-odds-api.com/v4/sports";
+        const API_KEY = "dd2bba6c27d491a81049a4520107a16f";
+
+        async function fetchGames(category = 'sports') {
+            try {
+                const gameList = document.getElementById("game-list");
+                gameList.innerHTML = "<p class='text-center text-white'>Loading games...</p>";
+                
+                const response = await fetch(`${API_URL}?apiKey=${API_KEY}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch games: ${response.status} ${response.statusText}`);
+                }
+                
+                const sportsData = await response.json();
+                if (sportsData.length === 0) {
+                    gameList.innerHTML = "<p class='text-center text-white'>No games available at the moment.</p>";
+                    return;
+                }
+                
+                displayGames(sportsData, category);
+            } catch (error) {
+                console.error("Error fetching games:", error);
+                document.getElementById("game-list").innerHTML = `<p class='text-center text-white'>Failed to load games: ${error.message}. Please try again later.</p>`;
+            }
+        }
+
+        // Display games in the HTML
+        function displayGames(games, category) {
+            const gameList = document.getElementById("game-list");
+            gameList.innerHTML = ""; // Clear any existing content
+
+            if (games.length === 0) {
+                gameList.innerHTML = "<p class='text-center text-white'>No games available for this category.</p>";
+                return;
+            }
+
+            games.forEach(game => {
+                const gameItem = document.createElement("div");
+                gameItem.className = "game-item";
+                gameItem.innerHTML = `
+                    <h3>${game.title || 'Unnamed Game'}</h3>
+                    <p><strong>Key:</strong> ${game.key || 'N/A'}</p>
+                    <div class="bet-form">
+                        <input type="number" id="bet-amount-${game.key}" placeholder="Enter bet amount" min="1" max="${walletBalance}">
+                        <button onclick="placeBet('${game.key}')">Place Bet</button>
+                    </div>
+                `;
+                gameList.appendChild(gameItem);
+            });
+        }
+
+        // Place a bet
+        async function placeBet(gameKey) {
+            const betAmountInput = document.getElementById(`bet-amount-${gameKey}`);
+            const betAmount = parseFloat(betAmountInput.value);
+
+            if (isNaN(betAmount) || betAmount <= 0) {
+                alert("Please enter a valid bet amount.");
+                return;
+            }
+
+            if (betAmount > walletBalance) {
+                alert("Insufficient funds in your wallet.");
+                return;
+            }
+
+            // Deduct the bet amount from the wallet
+            walletBalance -= betAmount;
+            document.getElementById("wallet-balance").textContent = walletBalance.toFixed(2);
+
+            // Update the user's balance in Firestore
+            const user = auth.currentUser;
+            if (user) {
+                await updateUserBalance(user.uid, walletBalance);
+                await addTransaction(user.uid, betAmount, gameKey); // Add transaction
+                await fetchTransactions(user.uid); // Refresh transactions list
+            }
+
+            alert(`You have successfully placed a bet of ₱${betAmount.toFixed(2)} on ${gameKey}.`);
+        }
+
+        // Update bet input max values
+        function updateBetInputs() {
+            const betInputs = document.querySelectorAll('input[id^="bet-amount-"]');
+            betInputs.forEach(input => {
+                input.max = walletBalance;
+            });
+        }
+
+        // Go back function
+        function goBack() {
+            window.history.back(); // Navigate back
+        }
+
+        // Switch category
+        function switchCategory(category) {
+            // Remove active class from all buttons
+            document.querySelectorAll('.category-tabs button').forEach(button => {
+                button.classList.remove('active');
+            });
+
+            // Add active class to the clicked button
+            event.target.classList.add('active');
+
+            // Fetch and display games for the selected category
+            fetchGames(category);
+        }
+
+        // Ensure user is authenticated
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'signin.html';
+                return;
+            }
+
+            // Fetch and display the user's balance
+            fetchUserBalance(user.uid);
+
+            // Fetch transactions for the user
+            fetchTransactions(user.uid);
+
+            // Fetch games when the page loads
+            fetchGames();
+        });
+
+        // Copy to clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Copied to clipboard: " + text);
+            }).catch(err => {
+                console.error("Failed to copy: ", err);
+            });
+        }
+    </script>
+</body>
+</html>
+

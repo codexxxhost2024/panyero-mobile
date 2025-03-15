@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - Credit</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <style>
+  :root {
+    --primary-color: #18385e;
+  }
+  .bg-primary {
+    background-color: var(--primary-color);
+  }
+  .text-primary {
+    color: var(--primary-color);
+  }
+  .border-primary {
+    border-color: var(--primary-color);
+  }
+  .bg-green-600 {
+    background-color: var(--primary-color);
+  }
+  button.bg-green-600 {
+    background-color: var(--primary-color);
+  }
+  button.bg-green-600:hover {
+    background-color: #122a47;
+  }
+</style>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
+
+  <!-- Header -->
+  <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center space-x-4 sticky top-0 z-50">
+    <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+    <div class="flex-1 text-center">Credit</div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+    <div class="bg-white rounded-lg p-4 shadow w-full">
+      <h2 class="text-xl font-semibold mb-4">Your Credit Services</h2>
+      <div id="creditInfo" class="mb-4">
+        <p class="text-sm text-gray-700"><strong>Credit Score:</strong> <span id="creditScore">N/A</span></p>
+        <p class="text-sm text-gray-700"><strong>Available Credit:</strong> ₱<span id="availableCredit">0</span></p>
+      </div>
+      <form id="creditForm" class="space-y-4">
+        <div>
+          <label for="creditType" class="block text-sm font-medium text-gray-700">Credit Type</label>
+          <select id="creditType" name="creditType" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500">
+            <option value="">Select Credit Type</option>
+            <option value="personal">Personal Credit</option>
+            <option value="business">Business Credit</option>
+            <option value="student">Student Credit</option>
+          </select>
+        </div>
+        <div>
+          <label for="creditAmount" class="block text-sm font-medium text-gray-700">Credit Amount (₱)</label>
+          <input type="number" id="creditAmount" name="creditAmount" required min="1000" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500">
+        </div>
+        <div>
+          <label for="repaymentTerm" class="block text-sm font-medium text-gray-700">Repayment Term (Months)</label>
+          <input type="number" id="repaymentTerm" name="repaymentTerm" required min="1" max="60" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500">
+        </div>
+        <button type="submit" class="w-full bg-green-600 text-white py-2 rounded font-medium">Apply for Credit</button>
+      </form>
+      <div class="mt-6">
+        <h3 class="text-lg font-semibold mb-2">Your Credit Applications</h3>
+        <ul id="creditApplicationsList" class="space-y-2">
+          <!-- Credit applications will be populated here -->
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const creditScore = document.getElementById('creditScore');
+    const availableCredit = document.getElementById('availableCredit');
+    const creditForm = document.getElementById('creditForm');
+    const creditApplicationsList = document.getElementById('creditApplicationsList');
+
+    auth.onAuthStateChanged(async user => {
+      if (!user) {
+        window.location.href = 'signin.html';
+        return;
+      }
+
+      // Fetch user credit data
+      const userDoc = await db.collection('users').doc(user.uid).get();
+      if (userDoc.exists) {
+        const data = userDoc.data();
+        creditScore.textContent = data.creditScore || 'N/A';
+        availableCredit.textContent = data.availableCredit || 0;
+
+        // Populate credit applications
+        if (data.creditApplications && data.creditApplications.length > 0) {
+          creditApplicationsList.innerHTML = '';
+          data.creditApplications.forEach(app => {
+            const appItem = `
+              <li class="p-2 border border-gray-200 rounded-md">
+                <p class="text-sm text-gray-800"><strong>Type:</strong> ${app.type}</p>
+                <p class="text-sm text-gray-600"><strong>Amount:</strong> ₱${app.amount}</p>
+                <p class="text-sm text-gray-600"><strong>Term:</strong> ${app.term} months</p>
+                <p class="text-sm text-gray-600"><strong>Status:</strong> ${app.status}</p>
+              </li>
+            `;
+            creditApplicationsList.innerHTML += appItem;
+          });
+        } else {
+          creditApplicationsList.innerHTML = '<p class="text-gray-600">No credit applications found.</p>';
+        }
+      }
+    });
+
+    creditForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const creditType = document.getElementById('creditType').value;
+      const creditAmount = parseFloat(document.getElementById('creditAmount').value);
+      const repaymentTerm = parseInt(document.getElementById('repaymentTerm').value);
+      const user = auth.currentUser;
+
+      if (!user) {
+        alert('You must be signed in to perform this action.');
+        window.location.href = 'signin.html';
+        return;
+      }
+
+      if (!(creditType && creditAmount >= 1000 && repaymentTerm >=1 && repaymentTerm <=60)) {
+        alert('Please fill out all required fields with valid data.');
+        return;
+      }
+
+      try {
+        // Add credit application to user's document
+        await db.collection('users').doc(user.uid).update({
+          creditApplications: firebase.firestore.FieldValue.arrayUnion({
+            type: creditType,
+            amount: creditAmount,
+            term: repaymentTerm,
+            status: 'pending',
+            appliedAt: firebase.firestore.FieldValue.serverTimestamp()
+          })
+        });
+
+        // Create notification for Admin
+        await db.collection('notifications').add({
+          userId: 'admin', // Assuming 'admin' is the UID for Admin
+          type: 'creditApplication',
+          message: `User ${user.displayName || user.email} has applied for ${creditType} credit of ₱${creditAmount}.`,
+          creditApplicationId: '',
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          read: false
+        });
+
+        alert('Credit application submitted successfully and is pending confirmation!');
+        creditForm.reset();
+      } catch (error) {
+        console.error('Error submitting credit application:', error);
+        alert('There was an error processing your application. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>
+

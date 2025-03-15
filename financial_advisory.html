@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Panyero Wallet - Financial Advisory</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="manifest" href="/manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+<style>
+  :root {
+    --primary-color: #18385e;
+  }
+  .bg-primary {
+    background-color: var(--primary-color) !important;
+  }
+  .text-primary {
+    color: var(--primary-color) !important;
+  }
+  .border-primary {
+    border-color: var(--primary-color) !important;
+  }
+  .hover\:bg-primary-dark:hover {
+    background-color: #122a47 !important;
+  }
+  .focus\:ring-primary:focus {
+    --tw-ring-color: var(--primary-color) !important;
+  }
+  .focus\:border-primary:focus {
+    border-color: var(--primary-color) !important;
+  }
+</style>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+    authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+    projectId: "explore-malaysia-6d28d",
+    storageBucket: "explore-malaysia-6d28d.appspot.com",
+    messagingSenderId: "869053244601",
+    appId: "1:869053244601:web:29ad09ff454b43230be768",
+    measurementId: "G-5XJK1H7KWX"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
+
+<!-- Header -->
+<header class="bg-primary text-white p-4 text-lg font-semibold flex items-center space-x-4 sticky top-0 z-50">
+  <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+  <div class="flex-1 text-center">Financial Advisory</div>
+</header>
+
+<!-- Main Content -->
+<main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+  <div class="bg-white rounded-lg p-4 shadow w-full">
+    <h2 class="text-xl font-semibold mb-4">Get Expert Financial Advice</h2>
+    <form id="advisoryForm" class="space-y-4">
+      <div>
+        <label for="advisoryType" class="block text-sm font-medium text-gray-700">Advisory Type</label>
+        <select id="advisoryType" name="advisoryType" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+          <option value="">Select Advisory Type</option>
+          <option value="personal_finance">Personal Finance</option>
+          <option value="investment">Investment</option>
+          <option value="credit_management">Credit Management</option>
+          <option value="retirement_planning">Retirement Planning</option>
+        </select>
+      </div>
+      <div>
+        <label for="details" class="block text-sm font-medium text-gray-700">Details</label>
+        <textarea id="details" name="details" rows="4" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" placeholder="Describe your financial advisory needs"></textarea>
+      </div>
+      <button type="submit" class="w-full bg-primary text-white py-2 rounded font-medium hover:bg-primary-dark">Request Advisory</button>
+    </form>
+    <div class="mt-6">
+      <h3 class="text-lg font-semibold mb-2">Your Advisory Requests</h3>
+      <ul id="advisoryRequestsList" class="space-y-2">
+        <!-- Advisory requests will be populated here -->
+      </ul>
+    </div>
+  </div>
+</main>
+
+<script>
+  const advisoryForm = document.getElementById('advisoryForm');
+  const advisoryRequestsList = document.getElementById('advisoryRequestsList');
+
+  auth.onAuthStateChanged(async user => {
+    if (!user) {
+      window.location.href = 'signin.html';
+      return;
+    }
+
+    // Listen for real-time updates to advisory requests
+    db.collection('financialAdvisories')
+      .where('userId', '==', user.uid)
+      .orderBy('timestamp', 'desc')
+      .onSnapshot(snapshot => {
+        advisoryRequestsList.innerHTML = '';
+        if (snapshot.empty) {
+          advisoryRequestsList.innerHTML = '<p class="text-gray-600">No advisory requests found.</p>';
+          return;
+        }
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const date = data.timestamp ? data.timestamp.toDate().toLocaleString() : '';
+          const advisoryItem = `
+            <li class="p-2 border border-gray-200 rounded-md">
+              <p class="text-sm text-gray-800"><strong>Type:</strong> ${data.advisoryType}</p>
+              <p class="text-sm text-gray-600"><strong>Details:</strong> ${data.details}</p>
+              <p class="text-sm text-gray-600"><strong>Status:</strong> ${data.status}</p>
+              <p class="text-xs text-gray-500">${date}</p>
+            </li>
+          `;
+          advisoryRequestsList.innerHTML += advisoryItem;
+        });
+      });
+  });
+
+  advisoryForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const advisoryType = document.getElementById('advisoryType').value;
+    const details = document.getElementById('details').value.trim();
+    const user = auth.currentUser;
+
+    if (!user) {
+      alert('You must be signed in to perform this action.');
+      window.location.href = 'signin.html';
+      return;
+    }
+
+    if (!(advisoryType && details)) {
+      alert('Please fill out all required fields.');
+      return;
+    }
+
+    try {
+      // Create financial advisory request
+      await db.collection('financialAdvisories').add({
+        userId: user.uid,
+        advisoryType: advisoryType,
+        details: details,
+        status: 'pending',
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      // Create notification for Admin
+      await db.collection('notifications').add({
+        userId: 'admin',
+        type: 'financialAdvisory',
+        message: `User ${user.displayName || user.email} has requested financial advisory on ${advisoryType}.`,
+        advisoryId: '',
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        read: false
+      });
+
+      alert('Financial advisory request submitted successfully and is pending confirmation!');
+      advisoryForm.reset();
+    } catch (error) {
+      console.error('Error submitting financial advisory request:', error);
+      alert('There was an error processing your request. Please try again.');
+    }
+  });
+</script>
+</body>
+</html>
+

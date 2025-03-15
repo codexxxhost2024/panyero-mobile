@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Panyero Wallet - Profile</title>
+    <link rel="apple-touch-icon" href="assets/images/logo/panyero.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #18385e;
+        }
+
+        .bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+
+        .edit-profile-button,
+        .upload-id-button {
+            background-color: var(--primary-color) !important;
+        }
+
+        .edit-profile-button:hover,
+        .upload-id-button:hover {
+            background-color: #122a47 !important;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <style>
+        .profile-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ddd;
+            margin-bottom: 10px;
+        }
+
+        .icon-button {
+            border: none;
+            background: none;
+            padding: 5px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .setting-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .profile-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: black;
+        }
+
+        .profile-email {
+            font-size: 0.9rem;
+            color: gray;
+        }
+
+        .edit-profile-button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .edit-profile-button:hover {
+            background-color: #122a47;
+        }
+
+        .profile-list {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .profile-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .profile-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .profile-item span {
+            color: #71717a;
+        }
+
+        .profile-item .material-icons {
+            font-size: 1.1rem;
+            color: #71717a;
+        }
+
+        .upload-id-button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .upload-id-button:hover {
+            background-color: #122a47;
+        }
+
+        .admin-icon {
+            width: 24px;
+            height: 24px;
+            transition: transform 0.2s;
+        }
+
+        .admin-icon:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen">
+    <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center justify-between sticky top-0 z-50">
+        <h1 class="text-xl font-bold">Profile</h1>
+        <a href="#" class="icon-button" onclick="window.history.back();">
+            <span class="material-icons">close</span>
+        </a>
+    </header>
+    <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto">
+        <div id="mainProfileView" class="w-full relative">
+            <div id="profileContainer" class="profile-container">
+                <img id="profileAvatar" class="profile-avatar" src="/placeholder.svg" alt="Profile Avatar" />
+                <h3 id="profileName" class="profile-name"></h3>
+                <p id="profileEmail" class="profile-email"></p>
+                <button id="editProfileButton" class="edit-profile-button">Edit Profile</button>
+            </div>
+            <nav>
+                <ul id="profileList" class="profile-list">
+                    <li class="profile-item">
+                        <span>Favourites</span> <span class="material-icons">chevron_right</span>
+                    </li>
+                    <li class="profile-item">
+                        <span>Downloads</span><span class="material-icons">chevron_right</span>
+                    </li>
+                    <li class="profile-item">
+                        <span>Language</span><span class="material-icons">chevron_right</span>
+                    </li>
+                    <li class="profile-item">
+                        <span>Location</span><span class="material-icons">chevron_right</span>
+                    </li>
+                    <li class="profile-item">
+                        <span>Display</span><span class="material-icons">chevron_right</span>
+                    </li>
+                    <li class="profile-item">
+                        <span>Feed preference</span><span class="material-icons">chevron_right</span>
+                    </li>
+                    <li class="profile-item" onclick="window.location.href='subscription.html'">
+                        <span>Subscription</span><span class="material-icons">chevron_right</span>
+                    </li>
+                    <li class="profile-item">
+                        <span>Clear Cache</span><span class="material-icons">chevron_right</span>
+                    </li>
+                    <li class="profile-item">
+                        <span>Clear history</span><span class="material-icons">chevron_right</span>
+                    </li>
+                    <li id="logout" class="profile-item">
+                        <span>Log Out</span><span class="material-icons">chevron_right</span>
+                    </li>
+                    <li id="uploadIdVerificationItem" class="profile-item">
+                        <span id="verificationStatus">Pending for Verification</span><span
+                            class="material-icons">chevron_right</span>
+                    </li>
+                    <li class="profile-item">
+                        <span class="profile-name">Sponsor Phone:</span>
+                        <span id="sponsorPhone" class="profile-email"></span>
+                    </li>
+                    <button id="uploadIdButton" class="upload-id-button">Upload ID for Verification</button>
+                </ul>
+            </nav>
+        </div>
+        <p id="error-message"></p>
+    </main>
+    <footer class="bg-white border-t border-gray-300 w-full flex justify-around items-center py-2 fixed bottom-0 left-1/2 transform -translate-x-1/2">
+        <!-- Footer content goes here -->
+    </footer>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+            authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+            projectId: "explore-malaysia-6d28d",
+            storageBucket: "explore-malaysia-6d28d.appspot.com",
+            messagingSenderId: "869053244601",
+            appId: "1:869053244601:web:29ad09ff454b43230be768",
+            measurementId: "G-5XJK1H7KWX"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+    </script>
+    <script>
+        const profileContainer = document.getElementById('profileContainer');
+        const mainProfileView = document.getElementById('mainProfileView');
+        const profileAvatar = document.getElementById('profileAvatar');
+        const profileName = document.getElementById('profileName');
+        const profileEmail = document.getElementById('profileEmail');
+        const editProfileButton = document.getElementById('editProfileButton');
+        const profileList = document.getElementById('profileList');
+        const logout = document.getElementById('logout');
+        const backButtonHeader = document.getElementById('backButtonHeader');
+        const errorMessage = document.getElementById('error-message');
+        const uploadIdVerificationItem = document.getElementById('uploadIdVerificationItem');
+        const uploadIdButton = document.getElementById('uploadIdButton');
+        const verificationStatus = document.getElementById('verificationStatus');
+        const sponsorPhone = document.getElementById('sponsorPhone');
+
+        let currentUserId = null;
+        let avatarUrl = null;
+        let hasUploadedId = false;
+
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'signin.html';
+                return;
+            }
+            currentUserId = user.uid;
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists) {
+                    const data = userDoc.data();
+                    profileName.textContent = data.displayName || `${data.firstName || ''} ${data.lastName || ''}`;
+                    profileEmail.textContent = data.email || '';
+                    sponsorPhone.textContent = data.sponsorAccountNumber || 'N/A';
+                    avatarUrl = data.photo || null;
+                    hasUploadedId = !!data.idUrl;
+
+                    if (avatarUrl) {
+                        profileAvatar.src = avatarUrl;
+                        profileAvatar.style.display = "block";
+                    } else {
+                        profileAvatar.src = "https://cdn-icons-png.flaticon.com/256/5600/5600583.png";
+                        profileAvatar.style.display = "block";
+                    }
+
+                    updateVerificationStatus(hasUploadedId);
+                }
+            } catch (error) {
+                console.error("Error fetching user data: ", error);
+                errorMessage.textContent = 'Error loading profile information, please try again.';
+            }
+        });
+
+        function updateVerificationStatus(hasUploadedId) {
+            if (hasUploadedId) {
+                verificationStatus.textContent = 'Verified';
+                uploadIdButton.style.display = "none";
+                uploadIdVerificationItem.style.cursor = "default";
+            } else {
+                verificationStatus.textContent = 'Pending for Verification';
+                uploadIdButton.style.display = "inline-block";
+                uploadIdVerificationItem.style.cursor = "pointer";
+            }
+        }
+
+        editProfileButton.addEventListener('click', () => {
+            window.location.href = 'edit-profile.html';
+        });
+
+        logout.addEventListener('click', () => {
+            auth.signOut()
+                .then(() => window.location.href = 'signin.html')
+                .catch(err => console.error('Logout error:', err));
+        });
+
+        uploadIdButton.addEventListener('click', () => {
+            window.location.href = 'signup2.html';
+        });
+    </script>
+</body>
+
+</html>
+

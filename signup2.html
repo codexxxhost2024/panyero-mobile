@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Panyero - Complete Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #E3FCEC, #D6F5E7);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        h1 {
+            font-size: 20px;
+            font-weight: bold;
+            color: #059669;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .step {
+            flex: 1;
+            text-align: center;
+            font-size: 12px;
+            color: #059669;
+            border-bottom: 3px solid #059669;
+            padding-bottom: 5px;
+        }
+        .step:not(:last-child)::after {
+            content: '';
+            width: 100%;
+            height: 3px;
+            background: #e0e0e0;
+            display: block;
+            margin: 0 auto;
+        }
+        .upload-section {
+            background: #f9f9f9;
+            border: 2px dashed #bbb;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .upload-section img {
+            width: 60px;
+            margin-bottom: 10px;
+        }
+        .upload-section:hover {
+            border-color: #059669;
+        }
+        .btn {
+            background-color: #059669;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            background-color: #047857;
+            transform: scale(1.03);
+        }
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .preview {
+            margin-top: 10px;
+            text-align: center;
+        }
+        .preview img {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .input-container {
+            margin-bottom: 20px; /* Added space below input fields */
+        }
+        .input-container input,
+        .input-container select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #CCC;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: #F5F5F5;
+        }
+        .input-container input::placeholder {
+            color: #aaa;
+        }
+        .input-container select {
+            appearance: none;
+            background: url('data:image/svg+xml;utf8,<svg mybot.gif viewBox="0 0 24 24" fill="gray"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center;
+            background-color: #F5F5F5;
+        }
+        .skip-link {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .skip-link a {
+            color: #059669;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .skip-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Moved "Complete Your Profile" to the top -->
+        <h1>Complete Your Profile</h1>
+        <div class="step-indicator">
+            <div class="step">1. FRONT</div>
+            <div class="step">2. BACK</div>
+            <div class="step">3. SELFIE</div>
+        </div>
+        <p>Please upload a photo of the front of your government-issued ID.</p>
+        <form id="additionalInfoForm">
+            <div class="input-container">
+                <input type="date" id="dob" placeholder="Date of Birth" required>
+            </div>
+            <div class="input-container">
+                <select id="gender" required>
+                    <option value="" disabled selected>Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="input-container">
+                <input type="text" id="address" placeholder="Address" required>
+            </div>
+
+            <!-- Upload Section -->
+            <div class="upload-section" onclick="document.getElementById('idFile').click()">
+                <img id="uploadIcon" src="https://cdn-icons-png.flaticon.com/512/833/833281.png" alt="Upload Icon" onerror="this.style.display='none'">
+                <p id="uploadText">Click here to upload or drag and drop your ID</p>
+                <div class="preview" id="previewContainer">
+                    <img id="previewImg" alt="ID Preview" style="display: none;">
+                </div>
+            </div>
+            <input id="idFile" type="file" accept="image/*" style="display: none;">
+
+            <button type="submit" class="btn">Continue</button>
+        </form>
+        <div class="skip-link">
+            <a href="index.html">I'll do it later</a>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+            authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+            projectId: "explore-malaysia-6d28d",
+            storageBucket: "explore-malaysia-6d28d.appspot.com",
+            messagingSenderId: "869053244601",
+            appId: "1:869053244601:web:29ad09ff454b43230be768",
+            measurementId: "G-5XJK1H7KWX",
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        const idFile = document.getElementById('idFile');
+        const previewImg = document.getElementById('previewImg');
+        const uploadIcon = document.getElementById('uploadIcon');
+        const uploadText = document.getElementById('uploadText');
+        const skipLink = document.querySelector('.skip-link a');
+
+        let fileData = null;
+
+        idFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    fileData = ev.target.result;
+                    previewImg.src = fileData;
+                    previewImg.style.display = 'block';
+                    uploadIcon.style.display = 'none'; // Hide the upload icon
+                    uploadText.style.display = 'none'; // Hide the upload text
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        skipLink.addEventListener('click', async function(event) {
+            event.preventDefault();
+            const user = auth.currentUser;
+            if (user) {
+                try {
+                    await db.collection('users').doc(user.uid).update({
+                        isVerified: 'pending'
+                    });
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    alert('Error updating verification status: ' + error.message);
+                }
+            } else {
+                alert('No user is currently logged in. Please sign up first.');
+                window.location.href = 'signup.html';
+            }
+        });
+
+        document.getElementById('additionalInfoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const user = auth.currentUser;
+            if (user) {
+                const additionalInfo = {
+                    dateOfBirth: document.getElementById('dob').value,
+                    gender: document.getElementById('gender').value,
+                    address: document.getElementById('address').value,
+                    idFrontImage: fileData, // Include the uploaded image
+                    isVerified: 'pending'
+                };
+                try {
+                    // Update or create the user document in Firestore
+                    await db.collection('users').doc(user.uid).set(additionalInfo, { merge: true });
+                    alert('Profile updated successfully!');
+                    window.location.href = 'signup3.html';
+                } catch (error) {
+                    alert('Error updating profile: ' + error.message);
+                }
+            } else {
+                alert('No user is currently logged in. Please sign up first.');
+                window.location.href = 'signup.html';
+            }
+        });
+    </script>
+</body>
+</html>
+

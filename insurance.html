@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - Insurance</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #18385e;
+    }
+    .bg-primary {
+      background-color: var(--primary-color) !important;
+    }
+    .text-primary {
+      color: var(--primary-color) !important;
+    }
+    .border-primary {
+      border-color: var(--primary-color) !important;
+    }
+    .hover\:bg-primary-dark:hover {
+      background-color: #122a47 !important;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+  
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
+  
+  <!-- Header -->
+  <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center space-x-4 sticky top-0 z-50">
+    <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+    <div class="flex-1 text-center">Insurance</div>
+  </header>
+  
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+    <div class="bg-white rounded-lg p-4 shadow w-full">
+      <h2 class="text-xl font-semibold mb-4">Insurance Plans</h2>
+      <ul id="insuranceList" class="space-y-4">
+        <!-- Insurance plans will be populated here -->
+      </ul>
+    </div>
+  </main>
+  
+  <script>
+    const insuranceList = document.getElementById('insuranceList');
+
+    auth.onAuthStateChanged(async user => {
+      if (!user) {
+        window.location.href = 'signin.html';
+        return;
+      }
+
+      // Fetch available insurance plans
+      const insuranceSnapshot = await db.collection('insurancePlans').get();
+      if (insuranceSnapshot.empty) {
+        insuranceList.innerHTML = '<p class="text-gray-600">No insurance plans available at the moment.</p>';
+        return;
+      }
+
+      insuranceSnapshot.forEach(doc => {
+        const data = doc.data();
+        const insuranceItem = `
+          <li class="p-4 border border-gray-200 rounded-md">
+            <h3 class="text-lg font-medium text-gray-800">${data.name}</h3>
+            <p class="text-sm text-gray-600 mt-2">${data.description}</p>
+            <p class="text-sm text-gray-600"><strong>Premium:</strong> ₱${data.premium}</p>
+            <p class="text-sm text-gray-600"><strong>Coverage:</strong> ${data.coverage}</p>
+            <button onclick="purchaseInsurance('${doc.id}')" class="mt-2 bg-primary text-white py-1 px-3 rounded hover:bg-primary-dark">Purchase</button>
+          </li>
+        `;
+        insuranceList.innerHTML += insuranceItem;
+      });
+    });
+
+    async function purchaseInsurance(insuranceId) {
+      const user = auth.currentUser;
+      if (!user) {
+        alert('You must be signed in to perform this action.');
+        window.location.href = 'signin.html';
+        return;
+      }
+
+      try {
+        // Fetch insurance plan details
+        const insuranceDoc = await db.collection('insurancePlans').doc(insuranceId).get();
+        if (!insuranceDoc.exists) {
+          alert('Insurance plan not found.');
+          return;
+        }
+        const insuranceData = insuranceDoc.data();
+
+        // Create insurance purchase
+        await db.collection('insurancePurchases').add({
+          userId: user.uid,
+          insuranceId: insuranceId,
+          insuranceName: insuranceData.name,
+          premium: insuranceData.premium,
+          coverage: insuranceData.coverage,
+          status: 'active',
+          purchasedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // Update user's balance
+        await db.collection('users').doc(user.uid).update({
+          balance: firebase.firestore.FieldValue.increment(-insuranceData.premium)
+        });
+
+        // Create notification for Admin
+        await db.collection('notifications').add({
+          userId: 'admin',
+          type: 'insurancePurchase',
+          message: `User ${user.displayName || user.email} has purchased ${insuranceData.name} insurance.`,
+          purchaseId: '',
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          read: false
+        });
+
+        alert(`Successfully purchased ${insuranceData.name} insurance!`);
+      } catch (error) {
+        console.error('Error purchasing insurance:', error);
+        alert('There was an error processing your purchase. Please try again.');
+      }
+    }
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - Weather App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen w-full">
+  <!-- Header -->
+  <header class="bg-green-600 text-white p-4 text-lg font-semibold flex items-center justify-between sticky top-0 z-50">
+    <h1 class="text-xl font-bold">Weather App</h1>
+    <a href="#" class="icon-button" onclick="window.history.back();">
+      <span class="material-icons">close</span>
+    </a>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 space-y-4">
+    <div class="bg-white rounded-lg shadow p-4 w-full max-w-md">
+      <h2 class="text-lg font-bold mb-4">Check Weather</h2>
+      <div class="space-y-4">
+        <!-- Location Input -->
+        <div>
+          <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
+          <input type="text" id="location" placeholder="Enter city or zip code" class="w-full p-2 border rounded">
+        </div>
+        <!-- Check Weather Button -->
+        <button onclick="getWeather()" class="bg-green-500 text-white px-4 py-2 rounded w-full">
+          Get Weather
+        </button>
+        <!-- Weather Result -->
+        <div id="weatherResult" class="text-center text-lg font-semibold mt-4"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Ensure user is authenticated
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = 'signin.html';
+      }
+    });
+
+    // Fetch weather data
+    async function getWeather() {
+      const location = document.getElementById('location').value.trim();
+      if (!location) {
+        alert('Please enter a location.');
+        return;
+      }
+
+      const apiKey = '1a3ab373185f5002709a3ac165c2eb40'; // Replace with your OpenWeatherMap API key
+      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apiKey}&units=metric`;
+
+      try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+        if (data.cod === 200) {
+          const weather = data.weather[0].description;
+          const temp = data.main.temp;
+          const humidity = data.main.humidity;
+          const windSpeed = data.wind.speed;
+          document.getElementById('weatherResult').innerHTML = `
+            <p>Weather: ${weather}</p>
+            <p>Temperature: ${temp}°C</p>
+            <p>Humidity: ${humidity}%</p>
+            <p>Wind Speed: ${windSpeed} m/s</p>
+          `;
+        } else {
+          alert('Location not found. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error fetching weather data:', error);
+        alert('Failed to fetch weather data. Please try again later.');
+      }
+    }
+  </script>
+</body>
+</html>
+

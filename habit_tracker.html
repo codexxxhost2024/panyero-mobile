@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - Habit Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen w-full">
+  <!-- Header -->
+  <header style="background-color: #18385e;" class="text-white p-4 text-lg font-semibold flex items-center justify-between sticky top-0 z-50">
+    <h1 class="text-xl font-bold">Habit Tracker</h1>
+    <a href="#" class="icon-button" onclick="window.history.back();">
+      <span class="material-icons">close</span>
+    </a>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 space-y-4">
+    <div class="bg-white rounded-lg shadow p-4 w-full max-w-md">
+      <h2 class="text-lg font-bold mb-2">Your Habits</h2>
+      <input type="text" id="habitName" placeholder="Habit Name" class="w-full p-2 border rounded mb-2">
+      <button onclick="addHabit()" class="text-white px-4 py-2 rounded w-full mb-4" style="background-color: #18385e;">
+        Add Habit
+      </button>
+      <ul id="habitList" class="space-y-2"></ul>
+    </div>
+  </main>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Load habits when the page loads
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = 'signin.html';
+        return;
+      }
+      loadHabits();
+    });
+
+    // Add a new habit
+    async function addHabit() {
+      const habitName = document.getElementById('habitName').value.trim();
+      if (!habitName) return;
+
+      const user = auth.currentUser;
+      await db.collection('habits').add({
+        userId: user.uid,
+        name: habitName,
+        completed: false,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      loadHabits();
+    }
+
+    // Load and display habits
+    async function loadHabits() {
+      const user = auth.currentUser;
+      const habitsSnapshot = await db.collection('habits').where('userId', '==', user.uid).get();
+      const habitList = document.getElementById('habitList');
+      habitList.innerHTML = '';
+
+      habitsSnapshot.forEach(doc => {
+        const data = doc.data();
+        habitList.innerHTML += `
+          <li class="flex justify-between items-center p-2 border-b">
+            <span>${data.name}</span>
+            <button onclick="toggleHabit('${doc.id}', ${data.completed})" class="text-green-500">
+              ${data.completed ? 'Undo' : 'Complete'}
+            </button>
+          </li>
+        `;
+      });
+    }
+
+    // Toggle habit completion
+    async function toggleHabit(habitId, completed) {
+      await db.collection('habits').doc(habitId).update({ completed: !completed });
+      loadHabits();
+    }
+  </script>
+</body>
+</html>
+

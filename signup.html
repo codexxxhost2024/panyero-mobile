@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Panyero - Create Account</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(180deg, #F5F5F5, #FFFFFF);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    .logo img {
+      width: 225px;
+      height: 225px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #2F4F4F;
+      margin-bottom: 10px;
+    }
+    p {
+      font-size: 1rem;
+      color: #666;
+      margin-bottom: 20px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .input-container input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #CCC;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    /* Updated button using the new primary color */
+    button {
+      width: 100%;
+      background-color: #18385e;
+      color: #FFFFFF;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #152f54;
+    }
+    /* New button for "Continue with Phone" styled as an anchor */
+    .phone-btn {
+      display: block;
+      width: 100%;
+      background-color: #18385e;
+      color: #FFFFFF;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-top: 15px;
+    }
+    .phone-btn:hover {
+      background-color: #152f54;
+    }
+    .links {
+      margin-top: 15px;
+      font-size: 0.9rem;
+    }
+    .links a {
+      color: #18385e;
+      text-decoration: none;
+    }
+    .links a:hover {
+      text-decoration: underline;
+    }
+    /* Install Modal Styles */
+    .install-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .install-banner {
+      background-color: white;
+      border-radius: 10px;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      max-width: 300px;
+      margin: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .install-banner img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 10px;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/panyero-WcQ0nHtlRdqQuOnrn8XvD15CAryjxm.png" alt="Panyero Logo">
+    </div>
+    <h1>Create Account</h1>
+    <p>Fill your information below to register</p>
+    <form id="signupForm">
+      <div class="input-container">
+        <input type="text" id="sponsorAccountNumber" placeholder="Sponsor Account (Phone Number)" required>
+      </div>
+      <div class="input-container">
+        <input type="text" id="fullName" placeholder="Full Name" required>
+      </div>
+      <div class="input-container">
+        <input type="email" id="email" placeholder="Email Address" required>
+      </div>
+      <div class="input-container">
+        <input type="text" id="phone" placeholder="Phone Number" required>
+      </div>
+      <div class="input-container">
+        <input type="password" id="password" placeholder="Password" required>
+      </div>
+      <div class="input-container">
+        <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+      </div>
+      <button type="submit">Sign Up</button>
+    </form>
+    <!-- New button added below the sign up form -->
+    <a href="phone-signup.html" class="phone-btn">Continue with Phone</a>
+    <div class="links">
+      <a href="signin.html">Already have an account? Sign In</a>
+    </div>
+  </div>
+
+  <!-- Install App Modal -->
+  <div id="installModal" class="install-modal hidden">
+    <div class="install-banner" onclick="simulateInstall()">
+      <img src="/assets/images/logo/install.png" alt="Install Banner">
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      databaseURL: "https://explore-malaysia-6d28d-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Function to get a cookie value by name
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    // Function to set a cookie
+    function setCookie(name, value, days) {
+      const date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      const expires = "expires=" + date.toUTCString();
+      document.cookie = name + "=" + value + ";" + expires + ";path=/";
+    }
+
+    // Pre-fill sponsor phone from URL or cookie
+    function getParameterByName(name, url) {
+      if (!url) url = window.location.href;
+      name = name.replace(/[]/g, '\\$&');
+      const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+          results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+
+    const sponsorPhoneField = document.getElementById('sponsorAccountNumber');
+    const refCode = getParameterByName('ref');
+
+    if (refCode) {
+      sponsorPhoneField.value = refCode; // Pre-populate the field
+      setCookie('referralCode', refCode, 30); // Set cookie to expire in 30 days
+    } else {
+      const referralCodeCookie = getCookie('referralCode');
+      if (referralCodeCookie) {
+        sponsorPhoneField.value = referralCodeCookie;
+      }
+    }
+
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const sponsorAccountNumber = document.getElementById('sponsorAccountNumber').value;
+      const fullName = document.getElementById('fullName').value;
+      const email = document.getElementById('email').value;
+      const phone = document.getElementById('phone').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const deviceAgent = navigator.userAgent;
+
+      // Validate password match
+      if (password !== confirmPassword) {
+        alert('Passwords do not match.');
+        return;
+      }
+
+      try {
+        // Check if phone number is already used
+        const phoneQuery = await db.collection('users').where('phoneNumber', '==', phone).get();
+        if (!phoneQuery.empty) {
+          alert('Phone number is already in use. Please use a different phone number.');
+          return;
+        }
+
+        // Fetch the sponsor's userId using the sponsor's phone number
+        const sponsorQuery = await db.collection('users').where('phoneNumber', '==', sponsorAccountNumber).get();
+        if (sponsorQuery.empty) {
+          alert('Sponsor account not found. Please check the sponsor phone number.');
+          return;
+        }
+
+        const sponsorDoc = sponsorQuery.docs[0];
+        const sponsorUserId = sponsorDoc.id;
+
+        // Create user with email and password
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+
+        // Pre-create user data in Firestore
+        const userData = {
+          id: user.uid,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          is_subscribe: false,
+          is_verified: false,
+          balance: 0.00,
+          is_pin_created: false,
+          user_type: "user",
+          photo: "https://cdn-icons-png.flaticon.com/256/5600/5600583.png",
+          address: "from the city of oceanic",
+          dob: "01-01-1800",
+          token_balance: 1000.00,
+          total_affiliates: 0,
+          unilevel_income: 0.00,
+          displayName: fullName,
+          email: email,
+          phoneNumber: phone,
+          sponsorAccountNumber: sponsorAccountNumber,
+          sponsorUserId: sponsorUserId,
+          deviceAgent: deviceAgent
+        };
+
+        // Save user data to Firestore
+        await db.collection('users').doc(user.uid).set(userData, { merge: true });
+
+        // Update the sponsor's total affiliates count
+        await db.collection('users').doc(sponsorUserId).update({
+          total_affiliates: firebase.firestore.FieldValue.increment(1)
+        });
+
+        // Create notifications for the new user and sponsor
+        const notificationsRef = db.collection('notifications');
+
+        // Notification for the new user
+        await notificationsRef.add({
+          userId: user.uid,
+          message: `Welcome to Panyero, ${fullName}! Your account has been successfully created.`,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          isRead: false
+        });
+
+        // Notification for the sponsor
+        await notificationsRef.add({
+          userId: sponsorUserId,
+          message: `You have a new affiliate: ${fullName} (${phone}).`,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          isRead: false
+        });
+
+        // Update genealogy for 5-level unilevel affiliate rewards
+        let currentUserId = sponsorUserId;
+        for (let level = 1; level <= 5; level++) {
+          const currentUserDoc = await db.collection('users').doc(currentUserId).get();
+          if (!currentUserDoc.exists) break;
+          await db.collection('users').doc(currentUserId).update({
+            unilevel_income: firebase.firestore.FieldValue.increment(5)
+          });
+          currentUserId = currentUserDoc.data().sponsorUserId;
+          if (!currentUserId) break;
+        }
+
+        alert('Sign Up Successful!');
+        window.location.href = 'signup2.html';
+      } catch (error) {
+        alert(`Error: ${error.message}`);
+      }
+    });
+
+    // Install App Modal Logic
+    let deferredPrompt;
+    const installModal = document.getElementById('installModal');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installModal.classList.remove('hidden');
+    });
+
+    function simulateInstall() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            alert('App Installed');
+          } else {
+            alert('User dismissed installation');
+          }
+          deferredPrompt = null;
+          installModal.classList.add('hidden');
+        });
+      } else {
+        alert('App Installed');
+        installModal.classList.add('hidden');
+      }
+    }
+  </script>
+</body>
+</html>
+

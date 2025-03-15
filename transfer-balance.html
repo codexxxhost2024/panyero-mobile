@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer Balance</title>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <style>
+        /* Basic styling for the form */
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Transfer Balance</h2>
+        <form id="transferForm">
+            <label for="uid">UID:</label>
+            <input type="text" id="uid" name="uid" readonly><br>
+
+            <label for="phone">Phone:</label>
+            <input type="text" id="phone" name="phone" readonly><br>
+
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" name="amount" required><br>
+
+            <button type="submit">Transfer</button>
+        </form>
+    </div>
+
+    <script>
+       const firebaseConfig = {
+            apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+            authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+            projectId: "explore-malaysia-6d28d",
+            storageBucket: "explore-malaysia-6d28d.appspot.com",
+            messagingSenderId: "869053244601",
+            appId: "1:869053244601:web:29ad09ff454b43230be768",
+            measurementId: "G-5XJK1H7KWX"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        window.onload = () => {
+            // Retrieve data from localStorage
+            const scannedUID = localStorage.getItem('scannedUID');
+            const scannedPhone = localStorage.getItem('scannedPhone');
+
+            // Prefill form fields
+            if (scannedUID) {
+                document.getElementById('uid').value = scannedUID;
+            }
+            if (scannedPhone) {
+                document.getElementById('phone').value = scannedPhone;
+            }
+
+            // Clear data from localStorage (optional)
+            localStorage.removeItem('scannedUID');
+            localStorage.removeItem('scannedPhone');
+        };
+
+        // Handle form submission
+        const transferForm = document.getElementById('transferForm');
+        transferForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const senderUser = auth.currentUser;
+            if (!senderUser) {
+                alert("User not logged in.");
+                return;
+            }
+
+            const recipientUID = document.getElementById('uid').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+
+            if (amount <= 0) {
+                alert("Invalid amount.");
+                return;
+            }
+
+            try {
+                // Start a Firestore transaction
+                await db.runTransaction(async (transaction) => {
+                    const senderDocRef = db.collection('users').doc(senderUser.uid);
+                    const recipientDocRef = db.collection('users').doc(recipientUID);
+
+                    // Get both sender and recipient documents within the transaction
+                    const senderDoc = await transaction.get(senderDocRef);
+                    const recipientDoc = await transaction.get(recipientDocRef);
+
+                    // Check if sender has enough balance
+                    if (!senderDoc.exists || senderDoc.data().balance < amount) {
+                        throw new Error("Insufficient balance.");
+                    }
+
+                    // Check if recipient exists
+                    if (!recipientDoc.exists) {
+                        throw new Error("Recipient does not exist.");
+                    }
+
+                    // Update balances
+                    const newSenderBalance = senderDoc.data().balance - amount;
+                    const newRecipientBalance = recipientDoc.data().balance + amount;
+
+                    // Create transaction records
+                    const senderTransaction = {
+                        type: 'debit',
+                        amount: amount,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        otherParty: recipientUID
+                    };
+
+                    const recipientTransaction = {
+                        type: 'credit',
+                        amount: amount,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        otherParty: senderUser.uid
+                    };
+
+                    // Update documents within the transaction
+                    transaction.update(senderDocRef, {
+                        balance: newSenderBalance,
+                        transactions: firebase.firestore.FieldValue.arrayUnion(senderTransaction)
+                    });
+                    transaction.update(recipientDocRef, {
+                        balance: newRecipientBalance,
+                        transactions: firebase.firestore.FieldValue.arrayUnion(recipientTransaction)
+                    });
+                });
+
+                // Transaction completed successfully
+                console.log("Transfer successful!");
+                alert("Transfer successful!");
+
+                // Optionally, redirect to another page or update UI
+                // window.location.href = 'success.html';
+
+            } catch (error) {
+                console.error("Transfer failed:", error);
+                alert("Transfer failed: " + error.message);
+            }
+        });
+    </script>
+</body>
+</html>
+

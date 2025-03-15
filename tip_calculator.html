@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - Tip Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen w-full">
+  <!-- Header -->
+  <header class="bg-green-600 text-white p-4 text-lg font-semibold flex items-center justify-between sticky top-0 z-50">
+    <h1 class="text-xl font-bold">Tip Calculator</h1>
+    <a href="#" class="icon-button" onclick="window.history.back();">
+      <span class="material-icons">close</span>
+    </a>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 space-y-4">
+    <div class="bg-white rounded-lg shadow p-4 w-full max-w-md">
+      <h2 class="text-lg font-bold mb-4">Calculate Tip</h2>
+      <div class="space-y-4">
+        <!-- Bill Amount Input -->
+        <div>
+          <label for="billAmount" class="block text-sm font-medium text-gray-700">Bill Amount</label>
+          <input type="number" id="billAmount" placeholder="Enter bill amount" class="w-full p-2 border rounded">
+        </div>
+        <!-- Tip Percentage Input -->
+        <div>
+          <label for="tipPercentage" class="block text-sm font-medium text-gray-700">Tip Percentage</label>
+          <input type="number" id="tipPercentage" placeholder="Enter tip percentage" class="w-full p-2 border rounded">
+        </div>
+        <!-- Number of People Input -->
+        <div>
+          <label for="numPeople" class="block text-sm font-medium text-gray-700">Number of People</label>
+          <input type="number" id="numPeople" placeholder="Enter number of people" class="w-full p-2 border rounded">
+        </div>
+        <!-- Calculate Button -->
+        <button onclick="calculateTip()" class="bg-green-500 text-white px-4 py-2 rounded w-full">
+          Calculate
+        </button>
+        <!-- Result Display -->
+        <div id="result" class="text-center text-lg font-semibold mt-4"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Ensure user is authenticated
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = 'signin.html';
+      }
+    });
+
+    // Calculate tip
+    function calculateTip() {
+      const billAmount = parseFloat(document.getElementById("billAmount").value);
+      const tipPercentage = parseFloat(document.getElementById("tipPercentage").value);
+      const numPeople = parseInt(document.getElementById("numPeople").value);
+
+      if (isNaN(billAmount) || isNaN(tipPercentage) || isNaN(numPeople)) {
+        alert("Please enter valid numbers.");
+        return;
+      }
+
+      const tipAmount = (billAmount * tipPercentage) / 100;
+      const totalAmount = billAmount + tipAmount;
+      const amountPerPerson = totalAmount / numPeople;
+
+      document.getElementById("result").innerText = `
+        Tip Amount: ₱${tipAmount.toFixed(2)}
+        Total Amount: ₱${totalAmount.toFixed(2)}
+        Amount Per Person: ₱${amountPerPerson.toFixed(2)}
+      `;
+    }
+  </script>
+</body>
+</html>
+

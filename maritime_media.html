@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Maritime Media</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="/manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #18385e;
+        }
+        .bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+        .border-primary {
+            border-color: var(--primary-color) !important;
+        }
+        .hover\:bg-primary-dark:hover {
+            background-color: #122a47 !important;
+        }
+        .maritime-card {
+            transition: transform 0.2s ease-in-out;
+        }
+        .maritime-card:hover {
+            transform: translateY(-5px);
+        }
+        .news-card {
+            transition: transform 0.2s ease-in-out;
+        }
+        .news-card:hover {
+            transform: translateY(-3px);
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+    <!-- Header -->
+    <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center space-x-4 sticky top-0 z-50">
+        <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+        <div class="flex-1 text-center">Maritime Media</div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+        <!-- Search Bar -->
+        <div class="w-full">
+            <div class="relative">
+                <input type="text" placeholder="Search maritime news and resources..." class="w-full p-3 pl-10 pr-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                <span class="material-icons absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">search</span>
+            </div>
+        </div>
+
+        <!-- Maritime Services -->
+        <div class="grid grid-cols-2 gap-4 w-full">
+            <!-- Maritime News -->
+            <div class="maritime-card bg-white rounded-lg p-4 shadow cursor-pointer" onclick="window.location.href='maritime_news.html'">
+                <div class="flex flex-col items-center">
+                    <span class="material-icons text-4xl text-primary mb-2">newspaper</span>
+                    <p class="text-center font-medium">Maritime News</p>
+                </div>
+            </div>
+            
+            <!-- Maritime Weather -->
+            <div class="maritime-card bg-white rounded-lg p-4 shadow cursor-pointer" onclick="window.location.href='maritime_weather.html'">
+                <div class="flex flex-col items-center">
+                    <span class="material-icons text-4xl text-primary mb-2">cloud</span>
+                    <p class="text-center font-medium">Weather</p>
+                </div>
+            </div>
+            
+            <!-- Maritime Maps -->
+            <div class="maritime-card bg-white rounded-lg p-4 shadow cursor-pointer" onclick="window.location.href='maritime_maps.html'">
+                <div class="flex flex-col items-center">
+                    <span class="material-icons text-4xl text-primary mb-2">map</span>
+                    <p class="text-center font-medium">Maps</p>
+                </div>
+            </div>
+            
+            <!-- Maritime Tools -->
+            <div class="maritime-card bg-white rounded-lg p-4 shadow cursor-pointer" onclick="window.location.href='maritime_tools.html'">
+                <div class="flex flex-col items-center">
+                    <span class="material-icons text-4xl text-primary mb-2">build</span>
+                    <p class="text-center font-medium">Tools</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Featured News -->
+        <div class="bg-white rounded-lg p-4 shadow w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold">Featured News</h2>
+                <a href="maritime_news.html" class="text-primary text-sm">View All</a>
+            </div>
+            
+            <!-- Featured News Item -->
+            <div class="news-card bg-blue-50 rounded-lg overflow-hidden mb-4">
+                <img src="/placeholder.svg?height=150&width=400" alt="Maritime News" class="w-full h-40 object-cover">
+                <div class="p-3">
+                    <h3 class="font-semibold text-primary">New Maritime Regulations Coming into Effect</h3>
+                    <p class="text-sm text-gray-600 mt-1">The International Maritime Organization (IMO) has announced new regulations aimed at reducing carbon emissions from shipping vessels.</p>
+                    <div class="flex justify-between items-center mt-2">
+                        <span class="text-xs text-gray-500">June 15, 2023</span>
+                        <a href="#" class="text-primary text-sm">Read More</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- News Item 2 -->
+            <div class="news-card bg-white border border-gray-200 rounded-lg overflow-hidden mb-4">
+                <img src="/placeholder.svg?height=150&width=400" alt="Maritime News" class="w-full h-40 object-cover">
+                <div class="p-3">
+                    <h3 class="font-semibold">Advancements in Maritime Navigation Technology</h3>
+                    <p class="text-sm text-gray-600 mt-1">New navigation systems are being developed to enhance safety and efficiency in maritime operations.</p>
+                    <div class="flex justify-between items-center mt-2">
+                        <span class="text-xs text-gray-500">June 10, 2023</span>
+                        <a href="#" class="text-primary text-sm">Read More</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- News Item 3 -->
+            <div class="news-card bg-white border border-gray-200 rounded-lg overflow-hidden">
+                <img src="/placeholder.svg?height=150&width=400" alt="Maritime News" class="w-full h-40 object-cover">
+                <div class="p-3">
+                    <h3 class="font-semibold">Maritime Industry Embraces Sustainable Practices</h3>
+                    <p class="text-sm text-gray-600 mt-1">Leading shipping companies are investing in eco-friendly technologies to reduce their environmental impact.</p>
+                    <div class="flex justify-between items-center mt-2">
+                        <span class="text-xs text-gray-500">June 5, 2023</span>
+                        <a href="#" class="text-primary text-sm">Read More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Maritime Resources -->
+        <div class="bg-white rounded-lg p-4 shadow w-full">
+            <h2 class="text-lg font-semibold mb-4">Maritime Resources</h2>
+            
+            <div class="space-y-3">
+                <!-- Resource 1 -->
+                <div class="flex items-center p-3 bg-blue-50 rounded-lg">
+                    <span class="material-icons text-primary mr-3">book</span>
+                    <div>
+                        <h3 class="font-medium">Maritime Safety Guidelines</h3>
+                        <p class="text-sm text-gray-600">Comprehensive safety protocols for maritime operations</p>
+                    </div>
+                </div>
+                
+                <!-- Resource 2 -->
+                <div class="flex items-center p-3 bg-blue-50 rounded-lg">
+                    <span class="material-icons text-primary mr-3">school</span>
+                    <div>
+                        <h3 class="font-medium">Maritime Training Courses</h3>
+                        <p class="text-sm text-gray-600">Professional development opportunities for maritime professionals</p>
+                    </div>
+                </div>
+                
+                <!-- Resource 3 -->
+                <div class="flex items-center p-3 bg-blue-50 rounded-lg">
+                    <span class="material-icons text-primary mr-3">description</span>
+                    <div>
+                        <h3 class="font-medium">Maritime Regulations Database</h3>
+                        <p class="text-sm text-gray-600">Access to international maritime laws and regulations</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+            authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+            projectId: "explore-malaysia-6d28d",
+            storageBucket: "explore-malaysia-6d28d.appspot.com",
+            messagingSenderId: "869053244601",
+            appId: "1:869053244601:web:29ad09ff454b43230be768",
+            measurementId: "G-5XJK1H7KWX"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Check authentication state
+        auth.onAuthStateChanged(user => {
+            if (!user) {
+                window.location.href = 'signin.html';
+                return;
+            }
+            
+            // Additional functionality can be added here
+        });
+    </script>
+</body>
+</html>
+

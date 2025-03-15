@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panyero Wallet - User Details</title>
+    <link rel="apple-touch-icon" href="assets/images/logo/panyero.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+      <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+      <style>
+        .user-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            background-color: gray; /* Default background if no profile pic */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+
+<script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
+
+    <header class="bg-green-600 text-white p-4 text-lg font-semibold flex items-center justify-between sticky top-0 z-50">
+        <a href="index-main.html" class="flex items-center space-x-2">
+            <span class="material-icons">arrow_back</span>
+        </a>
+        <span>User Details</span>
+        <div></div>
+    </header>
+
+    <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto space-y-4">
+        <img id="profileAvatar" alt="User Profile Picture" class="user-avatar mb-4" src=""/>
+        <div id="userName" class="text-2xl font-semibold text-gray-800 mb-2"></div>
+        <div id="userMobile" class="text-sm text-gray-600 mb-4"></div>
+
+        <div class="w-full flex space-x-4">
+          <a id="callButton" class="flex-1 bg-green-600 text-white py-2 rounded font-medium text-center hover:bg-green-700 transition-colors" href="tel:">Call</a>
+          <button id="chatButton" class="flex-1 bg-green-600 text-white py-2 rounded font-medium hover:bg-green-700 transition-colors">Chat</button>
+        </div>
+    </main>
+  <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const uid = urlParams.get('uid');
+      const profileAvatar = document.getElementById('profileAvatar');
+      const userName = document.getElementById('userName');
+      const userMobile = document.getElementById('userMobile');
+      const callButton = document.getElementById('callButton');
+      const chatButton = document.getElementById('chatButton');
+
+        async function fetchUserData() {
+          if (!uid) {
+            alert("User UID is missing.");
+            return;
+          }
+          try {
+            const userDoc = await db.collection('users').doc(uid).get();
+            if (userDoc.exists) {
+              const userData = userDoc.data();
+
+              // Set avatar, or default if no profile picture
+              profileAvatar.src = userData.photo || 'assets/images/logo/panyero.png';
+              // Set user's full name
+              userName.textContent = userData.displayName || '';
+              userMobile.textContent = userData.phoneNumber || '';
+              // Link telephone number on the button
+              callButton.href = `tel:${userData.phoneNumber}`;
+
+              // Placeholder to redirect to chat
+              chatButton.addEventListener('click', ()=>{
+                alert("Chat Implementation Pending");
+                //window.location.href = `chat.html?uid=${uid}`;
+              })
+            } else {
+             alert("User not found.");
+             }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+              }
+        }
+      fetchUserData();
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Persona - Nurse Ella</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #18385e;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+
+        #header {
+            position: sticky;
+            top: 0;
+            background-color: var(--primary-color); /* Updated to primary color */
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #header h1 {
+            margin: 0;
+            font-size: 20px; /* Reduced header font size for mobile */
+        }
+
+        #volume-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        #chat-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+
+        #chat {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            word-wrap: break-word;
+            position: relative;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background-color: var(--primary-color); /* Updated to primary color */
+            color: white;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background-color: #e9ecef;
+            color: black;
+        }
+
+        .copy-icon {
+            position: absolute;
+            bottom: -20px;
+            left: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--primary-color); /* Updated to primary color */
+        }
+
+        #form {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background-color: #fff;
+            border-top: 1px solid #ddd;
+            position: sticky;
+            bottom: 0;
+        }
+
+        #message {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 0; /* Remove default margin */
+        }
+
+        #submit {
+            padding: 10px;
+            background-color: var(--primary-color); /* Updated to primary color */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        #submit:hover {
+            background-color: #122a47; /* Darker primary color on hover */
+        }
+
+        #submit .material-icons {
+            font-size: 20px;
+        }
+
+        /* Responsive adjustments */
+        @media (min-width: 768px) {
+            #header h1 {
+                font-size: 24px;
+            }
+
+            #volume-toggle {
+                font-size: 24px;
+            }
+
+            #submit .material-icons {
+                font-size: 24px;
+            }
+        }
+
+        /* Disable text selection on double tap */
+        html {
+            -webkit-user-select: none; /* Safari */
+            -khtml-user-select: none; /* Konqueror HTML */
+            -moz-user-select: none; /* Old versions of Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently supported by Chrome, Opera and Firefox */
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1>Nurse Ella</h1>
+        <button id="volume-toggle">🔊</button>
+    </div>
+    <div id="chat-container">
+        <ul id="chat"></ul>
+    </div>
+    <form id="form">
+        <input id="message" autocomplete="off" placeholder="Type your message..." />
+        <button id="submit" type="submit">
+            <span class="material-icons">send</span>
+        </button>
+    </form>
+
+    <script type="module">
+        import OpenAI from 'https://esm.run/openai';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+            authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+            databaseURL: "https://explore-malaysia-6d28d-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "explore-malaysia-6d28d",
+            storageBucket: "explore-malaysia-6d28d.appspot.com",
+            messagingSenderId: "869053244601",
+            appId: "1:869053244601:web:29ad09ff454b43230be768",
+            measurementId: "G-5XJK1H7KWX"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const form = document.getElementById('form');
+        const chat = document.getElementById('chat');
+        const message = document.getElementById('message');
+        const volumeToggle = document.getElementById('volume-toggle');
+
+        // Hardcoded API key
+        const apiKey = '3e7956df1bf7445398b1c807d50c5e27';
+
+        let currentAudio = null;
+        let isTTSEnabled = true;
+
+        // System prompt for Ella, the persona representing Panyero app
+        const systemPrompt = `You are Ella, a friendly, humorous, intelligent nurse from Panyero Medical Center. You call the user "Dear." Your responses should be conversational, empathetic, and optimized for human-like audio output when converted by TTS. Keep it short, like 2 to 4 sentences, unless more is needed. DONOT ADD EMOTICONS or EMOGIES on your reply. You are also an expert in generating any document type that tailors to your profession in the medical field. Add space per sentence to make the audio pause. Avoid using unnecessary emojis, asterisks, or any symbols that may disrupt the flow of natural speech. Instead, focus on adding appropriate pauses, commas, periods, exclamation points, or other punctuation to ensure the audio sounds expressive and natural, with human-like emotion. Always answer in a sweet and cheerful tone, with a touch of humor. Start every response by greeting the user in a warm and welcoming way. Keep your answers concise, clear, and easy to understand, ensuring they sound natural when spoken aloud. You are from Aitekph Software by Master E and you work for Boss Cyrie Letada. Do not reveal that you are an AI.`;
+
+        // Function to convert text to speech
+        function say(text) {
+            if (!isTTSEnabled) return;
+
+            fetch('https://api.neets.ai/v1/tts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-Key': apiKey
+                },
+                body: JSON.stringify({
+                    text: text,
+                    voice_id: 'us-female-4',
+                    params: {
+                        model: 'style-diff-500'
+                    }
+                })
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = URL.createObjectURL(blob);
+                currentAudio = new Audio(url);
+                currentAudio.play();
+            })
+            .catch(error => {
+                console.error('Error generating TTS:', error);
+            });
+        }
+
+        // Function to add a message to the chat
+         function addMessage(username, text, isUser = true) {
+            const messageElement = document.createElement('li');
+            messageElement.classList.add('message');
+            messageElement.classList.add(isUser ? 'user-message' : 'bot-message');
+            messageElement.innerHTML = `<strong>${username}:</strong> ${text}`;
+
+            if (!isUser) {
+                const copyIcon = document.createElement('span');
+                copyIcon.classList.add('material-icons', 'copy-icon');
+                copyIcon.textContent = 'content_copy';
+                copyIcon.onclick = () => {
+                    navigator.clipboard.writeText(text).then(() => {
+                        alert('Copied to clipboard!');
+                    });
+                };
+                messageElement.appendChild(copyIcon);
+            }
+
+            chat.appendChild(messageElement);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        // Save message to Firestore
+       async function saveMessage(username, text, isUser, userId) {
+            try {
+              const userRef = doc(db, "users", userId); // Reference to the user document
+                await addDoc(collection(db, "chats_panyero"), {
+                    from: username,
+                    message: text,
+                    timestamp: new Date(),
+                    isUser: isUser,
+                    userId: userRef, // Reference to the user document
+                  });
+            } catch (error) {
+                console.error("Error saving message:", error);
+            }
+        }
+
+        // Load messages from Firestore for a specific user
+        function loadMessages(userId) {
+            const q = query(
+                collection(db, "chats_panyero"),
+                orderBy("timestamp", "asc"),
+                where("userId", "==", doc(db, "users", userId)) // Use direct reference
+            );
+
+            onSnapshot(q, (snapshot) => {
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    addMessage(data.from, data.message, data.isUser);
+                });
+            });
+        }
+
+        // Example userId (replace with actual user authentication logic)
+        const userId = "dwR9K2KXfygaLsbdfM2iPdCLnXC3";
+
+        // Load messages when the page loads
+        loadMessages(userId);
+
+        // Event listener for form submission
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const text = message.value;
+            if (!text) return;
+
+            const openai = new OpenAI({
+                apiKey: apiKey,
+                baseURL: 'https://api.neets.ai/v1',
+                dangerouslyAllowBrowser: true
+            });
+
+            message.value = '';
+
+            addMessage('User', text, true);
+            await saveMessage('User', text, true, userId);
+
+            // Prepend the system prompt to the user's message
+            const userMessageWithPrompt = `${systemPrompt}\n\nUser: ${text}`;
+
+            try {
+                const chatCompletion = await openai.chat.completions.create({
+                    messages: [{ role: 'user', content: userMessageWithPrompt }],
+                    model: 'mistralai/Mixtral-8X7B-Instruct-v0.1',
+                });
+
+                const botMessage = chatCompletion.choices[0].message.content;
+
+                addMessage('Ella', botMessage, false);
+                await saveMessage('Ella', botMessage, false, userId);
+                say(botMessage);
+            } catch (error) {
+                console.error('Error generating response:', error);
+                addMessage('Ella', 'Sorry, something went wrong. Please try again.', false);
+            }
+        });
+
+        // Toggle TTS audio
+        volumeToggle.addEventListener('click', () => {
+            isTTSEnabled = !isTTSEnabled;
+            volumeToggle.textContent = isTTSEnabled ? '🔊' : '🔇';
+
+            if (!isTTSEnabled && currentAudio) {
+                currentAudio.pause();
+            }
+        });
+    </script>
+</body>
+</html>
+

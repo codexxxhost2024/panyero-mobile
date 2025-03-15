@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- Mobile-first: disable zooming completely -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Panyero Wallet - Home</title>
+    <link rel="apple-touch-icon" href="assets/images/logo/panyero.png">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="/manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #18385e;
+        }
+
+        .bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+
+        .border-primary {
+            border-color: var(--primary-color) !important;
+        }
+
+        .hover\:bg-primary-dark:hover {
+            background-color: #122a47 !important;
+        }
+    </style>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+    <script>
+        // Prevent pinch-to-zoom on iOS and other devices
+        document.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+        });
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+            authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+            projectId: "explore-malaysia-6d28d",
+            storageBucket: "explore-malaysia-6d28d.appspot.com",
+            messagingSenderId: "869053244601",
+            appId: "1:869053244601:web:29ad09ff454b43230be768",
+            measurementId: "G-5XJK1H7KWX"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
+
+    <!-- Header -->
+    <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center space-x-2">
+            <div class="w-28 h-11 bg-no-repeat bg-center bg-contain" style="background-image: url('assets/images/logo/logo.png'), url('https://via.placeholder.com/112x44?text=Panyero')"></div>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="relative cursor-pointer" onclick="handleNotificationClick()">
+                <span class="material-icons text-2xl">notifications</span>
+                <span id="notificationBadge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 hidden">0</span>
+            </div>
+            <span class="material-icons text-2xl cursor-pointer" id="logoutBtn">logout</span>
+        </div>
+    </header>
+
+    <!-- Top Nav -->
+    <nav class="bg-white flex space-x-8 overflow-x-auto border-b border-gray-300 p-2 text-sm font-semibold h-16">
+        <a href="index.html" class="active text-gray-700 border-b-4 border-primary pb-1">Wallet</a>
+        <a href="subscription.html" class="text-gray-500">Subscribe</a>
+        <a href="credit.html" class="text-gray-500">Credit</a>
+        <a href="loans.html" class="text-gray-500">Loans</a>
+        <a href="cards.html" class="text-gray-500">Cards</a>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+        <!-- Wallet Balance Block -->
+        <div class="bg-white rounded-lg p-4 shadow w-full relative">
+            <div class="flex items-center justify-between mb-3">
+                <div id="userName" class="text-xs font-semibold text-gray-800"></div>
+                <div id="userMobile" class="text-xs text-gray-500"></div>
+            </div>
+
+            <div class="flex items-center justify-between">
+                <div>
+                    <div id="balanceAmount" class="text-2xl font-bold text-black">₱0</div>
+                    <div class="text-sm text-gray-600">Available balance</div>
+                </div>
+                <span class="material-icons text-xl text-gray-500 cursor-pointer" id="toggleBalanceBtn">
+                    visibility
+                </span>
+            </div>
+
+            <div class="flex space-x-4 w-full mt-3">
+                <button onclick="window.location.href='cashin.html'" class="flex-1 bg-primary text-white py-2 rounded font-medium hover:bg-primary-dark transition-colors">
+                    Cash In
+                </button>
+                <button onclick="window.location.href='transfer.html'" class="flex-1 bg-primary text-white py-2 rounded font-medium hover:bg-primary-dark transition-colors">
+                    Transfer
+                </button>
+            </div>
+        </div>
+
+        <!-- 4 New Icons (Persona, Apps, Affiliate, Earn) -->
+        <div class="grid grid-cols-4 gap-3 w-full">
+            <div class="bg-white rounded-lg shadow flex flex-col items-center p-2 cursor-pointer transform hover:scale-110 transition-transform duration-200" onclick="window.location.href='persona.html'">
+                <span class="material-icons bg-gray-200 rounded-md w-8 h-8 flex items-center justify-center text-gray-700 mb-1 text-base" style="font-size: 1.2em">
+                    person
+                </span>
+                <div class="text-[10px] font-semibold text-gray-600">Persona</div>
+            </div>
+            <div class="bg-white rounded-lg shadow flex flex-col items-center p-2 cursor-pointer transform hover:scale-110 transition-transform duration-200" onclick="window.location.href='apps.html'">
+                <span class="material-icons bg-gray-200 rounded-md w-8 h-8 flex items-center justify-center text-gray-700 mb-1 text-base" style="font-size: 1.2em">
+                    apps
+                </span>
+                <div class="text-[10px] font-semibold text-gray-600">Apps</div>
+            </div>
+            <div class="bg-white rounded-lg shadow flex flex-col items-center p-2 cursor-pointer transform hover:scale-110 transition-transform duration-200" onclick="window.location.href='affiliate.html'">
+                <span class="material-icons bg-gray-200 rounded-md w-8 h-8 flex items-center justify-center text-gray-700 mb-1 text-base" style="font-size: 1.2em">
+                    groups
+                </span>
+                <div class="text-[10px] font-semibold text-gray-600">Affiliate</div>
+            </div>
+            <div class="bg-white rounded-lg shadow flex flex-col items-center p-2 cursor-pointer transform hover:scale-110 transition-transform duration-200" onclick="window.location.href='earn.html'">
+                <span class="material-icons bg-gray-200 rounded-md w-8 h-8 flex items-center justify-center text-gray-700 mb-1 text-base" style="font-size: 1.2em">
+                    monetization_on
+                </span>
+                <div class="text-[10px] font-semibold text-gray-600">Earn</div>
+            </div>
+        </div>
+
+        <!-- 8 Existing Icons -->
+        <div class="grid grid-cols-4 gap-3 w-full">
+            <div class="bg-white rounded-lg shadow flex flex-col items-center p-2 cursor-pointer transform hover:scale-110 transition-transform duration-200" onclick="window.location.href='maritime.html'">
+                <span class="material-icons bg-gray-200 rounded-md w-8 h-8 flex items-center justify-center text-gray-700 mb-1 text-base" style="font-size: 1.2em">
+                    anchor
+                </span>
+                <div class="text-[10px] font-semibold text-gray-600">Maritime</div>
+            </div>
+            <div class="bg-white rounded-lg shadow flex flex-col items-center p-2 cursor-pointer transform hover:scale-110 transition-transform duration-200" onclick="window.location.href='account.html'">
+                <span class="material-icons bg-gray-200 rounded-md w-8 h-8 flex items-center justify-center text-gray-700 mb-1 text-base" style="font-size: 1.2em">
+                    business_center
+                </span>
+                <div class="text-[10px] font-semibold text-gray-600">Finance</div>
+            </div>
+            <div class="bg-white rounded-lg shadow flex flex-col items-center p-2 cursor-pointer transform hover:scale-110 transition-transform duration-200" onclick="window.location.href='academy.html'">
+                <span class="material-icons bg-gray-200 rounded-md w-8 h-8 flex items-center justify-center text-gray-700 mb-1 text-base" style="font-size: 1.2em">
+                    school
+                </span>
+                <div class="text-[10px] font-semibold text-gray-600">Academy</div>
+            </div>
+            <div class="bg-white rounded-lg shadow flex flex-col items-center p-2 cursor-pointer transform hover:scale-110 transition-transform duration-200" onclick="window.location.href='media.html'">
+                <span class="material-icons bg-gray-200 rounded-md w-8 h-8 flex items-center justify-center text-gray-700 mb-1 text-base" style="font-size: 1.2em">
+                    movie
+                </span>
+                <div class="text-[10px] font-semibold text-gray-600">Media</div>
+            </div>
+            <div class="bg-white rounded-lg shadow flex flex-col items-center p-2 cursor-pointer transform hover:scale-110 transition-transform duration-200" onclick="window.location.href='shops.html'">
+                <span class="material-icons bg-gray-200 rounded-md w-8 h-8 flex items-center justify-center text-gray-700 mb-1 text-base" style="font-size: 1.2em">
+                    store
+                </span>
+                <div class="text-[10px] font-semibold text-gray-600">Shop</div>
+            </div>
+            <div class="bg-white rounded-lg shadow flex flex-col items-center p-2 cursor-pointer transform hover:scale-110 transition-transform duration-200" onclick="window.location.href='gamehub.html'">
+                <span class="material-icons bg-gray-200 rounded-md w-8 h-8 flex items-center justify-center text-gray-700 mb-1 text-base" style="font-size: 1.2em">
+                    sports_esports
+                </span>
+                <div class="text-[10px] font-semibold text-gray-600">Games</div>
+            </div>
+            <div class="bg-white rounded-lg shadow flex flex-col items-center p-2 cursor-pointer transform hover:scale-110 transition-transform duration-200" onclick="window.location.href='lottery.html'">
+                <span class="material-icons bg-gray-200 rounded-md w-8 h-8 flex items-center justify-center text-gray-700 mb-1 text-base" style="font-size: 1.2em">
+                    confirmation_number
+                </span>
+                <div class="text-[10px] font-semibold text-gray-600">Lottery</div>
+            </div>
+            <div class="bg-white rounded-lg shadow flex flex-col items-center p-2 cursor-pointer transform hover:scale-110 transition-transform duration-200" onclick="window.location.href='more.html'">
+                <span class="material-icons bg-gray-200 rounded-md w-8 h-8 flex items-center justify-center text-gray-700 mb-1 text-base" style="font-size: 1.2em">
+                    more_horiz
+                </span>
+                <div class="text-[10px] font-semibold text-gray-600">More</div>
+            </div>
+        </div>
+
+        <!-- Horizontal List of User Avatars with SVG Placeholders -->
+        <div class="bg-white rounded-lg shadow p-4 w-full mt-4">
+            <h3 class="text-base font-semibold mb-3">Recent Users</h3>
+            <div class="flex space-x-4 overflow-x-auto">
+                <!-- Example User 1 -->
+                <div class="flex flex-col items-center">
+                    <svg width="45" height="45" viewBox="0 0 45 45" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="22.5" cy="22.5" r="22.5" fill="#4F46E5" />
+                        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white" font-size="16" font-family="Arial, sans-serif">JD</text>
+                    </svg>
+                    <div class="text-xs text-gray-600 mt-1">JohnDo</div>
+                </div>
+                <!-- Example User 2 -->
+                <div class="flex flex-col items-center">
+                    <svg width="45" height="45" viewBox="0 0 45 45" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="22.5" cy="22.5" r="22.5" fill="#10B981" />
+                        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white" font-size="16" font-family="Arial, sans-serif">JS</text>
+                    </svg>
+                    <div class="text-xs text-gray-600 mt-1">JaneSm</div>
+                </div>
+                <!-- Example User 3 -->
+                <div class="flex flex-col items-center">
+                    <svg width="45" height="45" viewBox="0 0 45 45" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="22.5" cy="22.5" r="22.5" fill="#EF4444" />
+                        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white" font-size="16" font-family="Arial, sans-serif">AW</text>
+                    </svg>
+                    <div class="text-xs text-gray-600 mt-1">AliceW</div>
+                </div>
+                <!-- Example User 4 -->
+                <div class="flex flex-col items-center">
+                    <svg width="45" height="45" viewBox="0 0 45 45" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="22.5" cy="22.5" r="22.5" fill="#F59E0B" />
+                        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white" font-size="16" font-family="Arial, sans-serif">BJ</text>
+                    </svg>
+                    <div class="text-xs text-gray-600 mt-1">BobJoh</div>
+                </div>
+                <!-- Example User 5 -->
+                <div class="flex flex-col items-center">
+                    <svg width="45" height="45" viewBox="0 0 45 45" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="22.5" cy="22.5" r="22.5" fill="#3B82F6" />
+                        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white" font-size="16" font-family="Arial, sans-serif">EG</text>
+                    </svg>
+                    <div class="text-xs text-gray-600 mt-1">EvaGre</div>
+                </div>
+                <!-- Example User 6 -->
+                <div class="flex flex-col items-center">
+                    <svg width="45" height="45" viewBox="0 0 45 45" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="22.5" cy="22.5" r="22.5" fill="#8B5CF6" />
+                        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white" font-size="16" font-family="Arial, sans-serif">MB</text>
+                    </svg>
+                    <div class="text-xs text-gray-600 mt-1">MikeBr</div>
+                </div>
+                <!-- Example User 7 -->
+                <div class="flex flex-col items-center">
+                    <svg width="45" height="45" viewBox="0 0 45 45" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="22.5" cy="22.5" r="22.5" fill="#F97316" />
+                        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white" font-size="16" font-family="Arial, sans-serif">SL</text>
+                    </svg>
+                    <div class="text-xs text-gray-600 mt-1">SarahL</div>
+                </div>
+                <!-- Example User 8 -->
+                <div class="flex flex-col items-center">
+                    <svg width="45" height="45" viewBox="0 0 45 45" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="22.5" cy="22.5" r="22.5" fill="#EC4899" />
+                        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white" font-size="16" font-family="Arial, sans-serif">CP</text>
+                    </svg>
+                    <div class="text-xs text-gray-600 mt-1">ChrisP</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lighter color banner with an icon or image -->
+        <a href="lottery.html" class="bg-blue-100 rounded-lg shadow p-4 w-full flex items-center space-x-3 hover:bg-blue-200 transition-colors">
+            <img src="assets/images/logo/lotto.png" onerror="this.src='https://via.placeholder.com/40x40?text=Lotto'" alt="Panyero Banner Logo" class="w-10 h-10 object-cover rounded-md">
+            <div class="flex-1 text-gray-700 text-sm font-medium">
+                <strong>₱10.00 Wins ₱6,500.00!</strong><br>
+                Saan aabot ang ₱10.00 mo?
+            </div>
+        </a>
+
+        <!-- Transactions list with empty fallback -->
+        <div class="bg-white rounded-lg shadow p-4 w-full">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-base font-semibold">Recent Transactions</h3>
+                <a href="transactions.html" class="text-primary text-sm hover:underline">See All</a>
+            </div>
+            <ul id="transactionList" class="space-y-2">
+                <!-- If no transactions, fallback displayed -->
+                <li class="text-gray-500 text-sm">No recent transactions</li>
+            </ul>
+        </div>
+    </main>
+
+    <!-- Bottom Nav (icons only, QR bigger + elevated) -->
+    <div class="bg-white border-t border-gray-300 w-full max-w-sm flex justify-around items-center py-2 fixed bottom-0 left-1/2 transform -translate-x-1/2">
+        <div class="nav-item cursor-pointer transform hover:scale-110 transition-transform duration-200" onclick="window.location.href='walletmain.html'">
+            <span class="material-icons text-gray-600 text-xl" style="font-size: 1.5em">anchor</span>
+        </div>
+        <div class="nav-item cursor-pointer transform hover:scale-110 transition-transform duration-200" onclick="window.location.href='account.html'">
+            <span class="material-icons text-gray-600 text-xl" style="font-size: 1.5em">account_balance_wallet</span>
+        </div>
+        <div class="nav-item qr cursor-pointer transform scale-125 -mt-1 relative hover:scale-130 transition-transform duration-200" onclick="window.location.href='qrscan.html'">
+            <span class="material-icons text-white text-xl p-2 shadow-md" style="font-size: 1.5em; background-color: var(--primary-color); border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">qr_code_scanner</span>
+        </div>
+        <div class="nav-item cursor-pointer transform hover:scale-110 transition-transform duration-200" onclick="window.location.href='services.html'">
+            <span class="material-icons text-gray-600 text-xl" style="font-size: 1.5em">dns</span>
+        </div>
+        <div class="nav-item cursor-pointer transform hover:scale-110 transition-transform duration-200" onclick="window.location.href='profile.html'">
+            <span class="material-icons text-gray-600 text-xl" style="font-size: 1.5em">person</span>
+        </div>
+    </div>
+
+    <script>
+        let showBalance = true; // default show/hide state
+        const logoutBtn = document.getElementById('logoutBtn');
+        const balanceAmount = document.getElementById('balanceAmount');
+        const transactionList = document.getElementById('transactionList');
+        const userName = document.getElementById('userName');
+        const userMobile = document.getElementById('userMobile');
+        const toggleBalanceBtn = document.getElementById('toggleBalanceBtn');
+        const notificationBadge = document.getElementById('notificationBadge');
+        let currentBalance = 0;
+
+        // Function to update notification badge
+        function updateNotificationBadge(count) {
+            if (count > 0) {
+                notificationBadge.textContent = count;
+                notificationBadge.classList.remove('hidden');
+            } else {
+                notificationBadge.classList.add('hidden');
+            }
+        }
+
+        // Function to mark all notifications as read
+        async function markNotificationsAsRead(userId) {
+            const notificationsRef = db.collection('notifications')
+                .where('userId', '==', userId)
+                .where('isRead', '==', false);
+            const snapshot = await notificationsRef.get();
+            snapshot.forEach(doc => {
+                db.collection('notifications').doc(doc.id).update({ isRead: true });
+            });
+        }
+
+        // Handle notification icon click
+        async function handleNotificationClick() {
+            const user = auth.currentUser;
+            if (user) {
+                await markNotificationsAsRead(user.uid);
+                updateNotificationBadge(0); // Reset badge count
+                window.location.href = 'notifications.html';
+            }
+        }
+
+        // Fetch and display the latest 4 transactions
+        async function fetchLatestTransactions(userId) {
+            const transactionsRef = db.collection('users').doc(userId)
+                .collection('transactions')
+                .orderBy('timestamp', 'desc')
+                .limit(4);
+            const snapshot = await transactionsRef.get();
+
+            transactionList.innerHTML = ''; // Clear existing content
+
+            if (snapshot.empty) {
+                transactionList.innerHTML = '<li class="text-gray-500 text-sm">No recent transactions</li>';
+                return;
+            }
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const li = document.createElement('li');
+                li.className = "flex justify-between border-b border-gray-200 pb-1.5";
+                li.innerHTML = `
+                    <span>${data.type || 'N/A'}</span>
+                    <span>₱${data.amount || 0}</span>
+                `;
+                transactionList.appendChild(li);
+            });
+        }
+
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                // Not logged in, redirect
+                window.location.href = 'signin.html';
+                return;
+            }
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (userDoc.exists) {
+                const data = userDoc.data();
+                // Use displayName if available, otherwise construct from firstName and lastName
+                const userDisplayName = data.displayName || (data.firstName && data.lastName ? `${data.firstName} ${data.lastName}`.trim() : 'Panyero User');
+                userName.textContent = userDisplayName;
+
+                // Map user's phone number
+                const userMobileNum = data.phoneNumber || '';
+                userMobile.textContent = userMobileNum;
+
+                currentBalance = data.balance || 0;
+                updateBalanceText();
+
+                // Fetch and display the latest 4 transactions
+                fetchLatestTransactions(user.uid);
+
+                // Listen for unread notifications
+                db.collection('notifications')
+                    .where('userId', '==', user.uid)
+                    .where('isRead', '==', false)
+                    .onSnapshot(snapshot => {
+                        updateNotificationBadge(snapshot.size);
+                    });
+            }
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            auth.signOut()
+                .then(() => window.location.href = 'signin.html')
+                .catch(err => console.error('Logout error:', err));
+        });
+
+        // Toggle function for balance display
+        function updateBalanceText() {
+            if (showBalance) {
+                balanceAmount.textContent = `₱${currentBalance}`;
+                toggleBalanceBtn.textContent = 'visibility';
+            } else {
+                let hiddenBal = '****';
+                if (String(currentBalance).length > 4) {
+                    hiddenBal = '****' + String(currentBalance).slice(-2);
+                }
+                balanceAmount.textContent = hiddenBal;
+                toggleBalanceBtn.textContent = 'visibility_off';
+            }
+        }
+
+        toggleBalanceBtn.addEventListener('click', () => {
+            showBalance = !showBalance;
+            updateBalanceText();
+        });
+    </script>
+</body>
+
+</html>
+

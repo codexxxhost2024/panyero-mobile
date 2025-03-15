@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Edit Profile</title>
+    <link rel="apple-touch-icon" href="assets/images/logo/panyero.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <style>
+        :root {
+            --theme-color: #18385e;
+        }
+
+        .edit-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .edit-container h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .edit-container label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: gray;
+        }
+
+        .edit-container input,
+        .edit-container select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        #error-message {
+            color: red;
+            margin-top: 10px;
+        }
+
+        .save-button {
+            background-color: var(--theme-color);
+            color: white;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+            text-align: center;
+            align-self: center;
+        }
+
+        .save-button:hover {
+            background-color: #047857;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            cursor: pointer;
+        }
+
+        .back-button .material-icons {
+            font-size: 2rem;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ddd;
+            margin-bottom: 10px;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            background-color: #34C759;
+            z-index: 100;
+            padding: 10px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header .back-icon-button {
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 5px;
+        }
+
+        .header .back-icon-button .material-icons {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .header .title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .header .close-icon {
+            width: 24px;
+            height: 24px;
+            transition: transform 0.2s;
+        }
+
+        .header .close-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .header .profile-image-container {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 1px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header .profile-image-container img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .header .profile-image-container svg {
+            fill: white;
+            width: 24px;
+            height: 24px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+            authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+            projectId: "explore-malaysia-6d28d",
+            storageBucket: "explore-malaysia-6d28d.appspot.com",
+            messagingSenderId: "869053244601",
+            appId: "1:869053244601:web:29ad09ff454b43230be768",
+            measurementId: "G-5XJK1H7KWX"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+    </script>
+    <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center justify-between sticky top-0 z-50">
+        <h1 class="text-xl font-bold">Edit Profile</h1>
+        <a href="#" class="icon-button" onclick="window.history.back();">
+            <span class="material-icons">close</span>
+        </a>
+    </header>
+    <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+        <div id="editProfileContainer" class="edit-container">
+            <label for="editDisplayName">Full Name</label>
+            <input type="text" id="editDisplayName" placeholder="Enter your full name">
+            <label for="editEmail">Email</label>
+            <input type="email" id="editEmail" placeholder="Enter your email" readonly>
+            <label for="editPhoneNumber">Phone Number</label>
+            <input type="text" id="editPhoneNumber" placeholder="Enter your phone number">
+            <label for="editAddress">Address</label>
+            <input type="text" id="editAddress" placeholder="Enter your address">
+            <label for="editDob">Date of Birth</label>
+            <input type="date" id="editDob" placeholder="Enter your date of birth">
+            <label for="editSponsorAccountNumber">Sponsor Account Number</label>
+            <input type="text" id="editSponsorAccountNumber" placeholder="Enter your sponsor account number" readonly>
+            <button id="saveProfileButton" class="save-button">Save Changes</button>
+        </div>
+        <p id="error-message"></p>
+    </main>
+    <script>
+        const backButtonHeader = document.getElementById('backButtonHeader');
+        const editDisplayNameInput = document.getElementById('editDisplayName');
+        const editEmailInput = document.getElementById('editEmail');
+        const editPhoneNumberInput = document.getElementById('editPhoneNumber');
+        const editAddressInput = document.getElementById('editAddress');
+        const editDobInput = document.getElementById('editDob');
+        const editSponsorAccountNumberInput = document.getElementById('editSponsorAccountNumber');
+        const saveProfileButton = document.getElementById('saveProfileButton');
+        const errorMessage = document.getElementById('error-message');
+
+        let currentUserId = null;
+        let avatarUrl = null;
+
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'signin.html';
+                return;
+            }
+            currentUserId = user.uid;
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists) {
+                    const data = userDoc.data();
+
+                    // Pre-fill form fields with existing data
+                    editDisplayNameInput.value = data.displayName || '';
+                    editEmailInput.value = data.email || '';
+                    editPhoneNumberInput.value = data.phoneNumber || '';
+                    editAddressInput.value = data.address || '';
+                    editDobInput.value = data.dob || '';
+                    editSponsorAccountNumberInput.value = data.sponsorAccountNumber || '';
+                }
+            } catch (error) {
+                console.error("Error fetching user data: ", error);
+                errorMessage.textContent = 'Error loading profile information, please try again.';
+            }
+        });
+
+        saveProfileButton.addEventListener('click', async () => {
+            errorMessage.textContent = '';
+            try {
+                const updatedData = {
+                    displayName: editDisplayNameInput.value,
+                    phoneNumber: editPhoneNumberInput.value,
+                    address: editAddressInput.value,
+                    dob: editDobInput.value,
+                };
+                await db.collection('users').doc(currentUserId).update(updatedData);
+                alert('Profile updated successfully!');
+                window.location.href = 'profile.html';
+            } catch (error) {
+                console.error("Error saving profile changes: ", error);
+                errorMessage.textContent = 'Error saving profile changes, please try again.';
+            }
+        });
+    </script>
+</body>
+</html>
+

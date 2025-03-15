@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Recieve Balance</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    <style>
+         body {
+            margin: 0;
+            font-family: sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .header {
+            position: sticky;
+            top: 0;
+              width: 100%;
+           background-color: #18385e;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+            justify-content: space-between;
+        }
+
+        .header span {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-left: 20px;
+            color: #fff;
+        }
+
+
+        .back-icon {
+            color: #fff;
+            cursor: pointer;
+            font-size: 24px;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 15px;
+             padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+         .sender-info{
+           margin-bottom: 20px;
+              color: #777;
+               font-weight: bold;
+            }
+        .input-card {
+           background-color: #f0f0f0;
+           border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+             width: 100%;
+              display: flex;
+              flex-direction: column;
+
+        }
+          .input-card label{
+            color: #777;
+               display: block;
+             margin-bottom: 5px;
+        }
+           .input-card input{
+             width: calc(100% - 12px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+             box-sizing: border-box;
+            }
+
+        .accept-button {
+            background-color: #18385e;
+            color: white;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            margin-top: 15px;
+        }
+          .accept-button:hover {
+            background-color: #122a47;
+        }
+          .error-message {
+            color: #dc2626;
+            background: #fee2e2;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            text-align: center;
+              width: 100%;
+            max-width: 400px;
+               display: none;
+        }
+        .error-message.active{
+            display: block;
+        }
+            .status-text {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #f26440;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+     <header class="header">
+        <i class="material-icons back-icon" onclick="window.history.back()">arrow_back</i>
+        <span>Recieve Balance</span>
+    </header>
+    <div class="container">
+          <div class="error-message" id="errorMessage"></div>
+           <p class="status-text" id="statusText">Checking Control Number...</p>
+        <div class="sender-info" id="senderName">Recieve Balance from  (Latest sender name for unclaimed balance yet)</div>
+          <div class="input-card">
+              <label for="controlNumber">Enter Control Number</label>
+               <input type="text" id="controlNumber" placeholder="Enter control number"/>
+          </div>
+           <button class="accept-button" id="acceptBalance"  onclick="acceptBalance()">Accept</button>
+    </div>
+      <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+            authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+             databaseURL: "https://explore-malaysia-6d28d-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "explore-malaysia-6d28d",
+            storageBucket: "explore-malaysia-6d28d.appspot.com",
+            messagingSenderId: "869053244601",
+            appId: "1:869053244601:web:29ad09ff454b43230be768",
+            measurementId: "G-5XJK1H7KWX"
+        };
+        firebase.initializeApp(firebaseConfig);
+         const db = firebase.firestore();
+           const auth = firebase.auth();
+    </script>
+   <script>
+      const controlNumberInput = document.getElementById('controlNumber');
+       const errorMessageDiv = document.getElementById('errorMessage');
+       const statusTextEl = document.getElementById('statusText');
+        const senderNameDiv = document.getElementById('senderName');
+         const acceptBalanceButton = document.getElementById('acceptBalance');
+
+
+         async function acceptBalance() {
+             statusTextEl.textContent = "Checking control number..";
+             const controlNumber = controlNumberInput.value;
+            if (!controlNumber) {
+                showError('Please enter a control number.');
+                return;
+            }
+             try{
+                 const transactionRef = db.collection('transactions');
+                     const querySnapshot = await transactionRef.where("controlNumber", "==", controlNumber).get();
+                       if(querySnapshot.empty){
+                          showError("Invalid control number.")
+                           statusTextEl.textContent = "Invalid control number.";
+                           return;
+                       }
+
+                      const transactionDoc = querySnapshot.docs[0];
+                       const transactionData = transactionDoc.data();
+                      if(transactionData.status === 'claimed'){
+                           showError("The balance is already claimed.");
+                            statusTextEl.textContent = "The balance is already claimed.";
+                            return
+                      }
+
+                       if(transactionData.recipientId !== auth.currentUser.uid){
+                             showError("Invalid control number for this account.");
+                              statusTextEl.textContent = "Invalid control number for this account.";
+                              return;
+                       }
+
+                        const senderDoc = await db.collection('users').doc(transactionData.senderId).get();
+                          if(!senderDoc.exists){
+                               showError("Sender not found");
+                                statusTextEl.textContent = "Sender not found.";
+                            return
+                         }
+                       const senderData = senderDoc.data();
+                        senderNameDiv.textContent = `Recieve Balance from ${senderData.name}`;
+                         await  db.runTransaction(async (transaction) =>{
+                             const senderRef = db.collection('users').doc(transactionData.senderId);
+                            const recieverRef = db.collection('users').doc(auth.currentUser.uid)
+                            const senderDoc =  await transaction.get(senderRef)
+                              const recieverDoc =  await transaction.get(recieverRef)
+
+                              if(!senderDoc.exists || !recieverDoc.exists){
+                                      showError("Error fetching user data.");
+                                       statusTextEl.textContent = "Error fetching user data.";
+                                       return;
+                              }
+
+                              const newSenderBalance = senderDoc.data().balance - transactionData.amount;
+                              const newRecieverBalance = (recieverDoc.data().balance || 0) + transactionData.amount
+                               if (newSenderBalance < 0) {
+                                     showError("Insufficient balance from sender.");
+                                       statusTextEl.textContent = "Insufficient balance from sender.";
+                                    return
+                                }
+                              transaction.update(senderRef, {balance : newSenderBalance})
+                                transaction.update(recieverRef, {balance : newRecieverBalance})
+                            });
+
+                           await transactionDoc.ref.update({status: 'claimed'})
+                           statusTextEl.textContent = "Balance Recieved Successfully!";
+                        alert("Balance Recieved Successfully!");
+                   controlNumberInput.value = "";
+             }catch(err){
+                console.error("Error accepting balance", err);
+                 showError('Error accepting balance.')
+                  statusTextEl.textContent = "Error accepting balance.";
+             }
+         }
+
+          function showError(message) {
+            errorMessageDiv.textContent = message;
+             errorMessageDiv.style.display = 'block';
+            setTimeout(() => {
+                 errorMessageDiv.style.display = 'none'
+                errorMessageDiv.classList.remove('active')
+           }, 5000);
+               errorMessageDiv.classList.add('active')
+         }
+    </script>
+</body>
+</html>
+

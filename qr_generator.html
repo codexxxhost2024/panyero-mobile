@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - QR Code Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+        --primary-color: #18385e;
+    }
+    .bg-primary {
+        background-color: var(--primary-color) !important;
+    }
+    .text-primary {
+        color: var(--primary-color) !important;
+    }
+    .hover\:bg-primary-dark:hover {
+        background-color: #122a47 !important;
+    }
+</style>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <!-- QR Code Library -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator/qrcode.min.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen w-full">
+  <!-- Header -->
+  <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center justify-between sticky top-0 z-50">
+    <h1 class="text-xl font-bold">QR Code Generator</h1>
+    <a href="#" class="icon-button" onclick="window.history.back();">
+      <span class="material-icons">close</span>
+    </a>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 space-y-4">
+    <div class="bg-white rounded-lg shadow p-4 w-full max-w-md">
+      <h2 class="text-lg font-bold mb-4">Generate QR Code</h2>
+      <div class="space-y-4">
+        <!-- Text Input -->
+        <div>
+          <label for="qrText" class="block text-sm font-medium text-gray-700">Text or URL</label>
+          <input type="text" id="qrText" placeholder="Enter text or URL" class="w-full p-2 border rounded">
+        </div>
+        <!-- Generate Button -->
+        <button onclick="generateQRCode()" class="bg-primary text-white px-4 py-2 rounded w-full hover:bg-primary-dark">
+          Generate QR Code
+        </button>
+        <!-- QR Code Display -->
+        <div id="qrCodeDisplay" class="flex justify-center mt-4"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Ensure user is authenticated
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = 'signin.html';
+      }
+    });
+
+    // Generate QR Code
+    function generateQRCode() {
+      const text = document.getElementById("qrText").value.trim();
+      if (!text) {
+        alert("Please enter text or URL.");
+        return;
+      }
+
+      const qrCodeDisplay = document.getElementById("qrCodeDisplay");
+      qrCodeDisplay.innerHTML = "";
+
+      const qr = qrcode(0, "M");
+      qr.addData(text);
+      qr.make();
+      qrCodeDisplay.innerHTML = qr.createImgTag(4); // 4 is the size of each module
+    }
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QR Code Scanner</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #18385e;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-icon {
+            font-size: 1.5rem;
+            color: white;
+            cursor: pointer;
+            padding: 0.5rem;
+            background: none;
+            border: none;
+        }
+
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            width: 100%;
+        }
+
+        .scanner-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: 1rem 0;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            background: black;
+        }
+
+        #video {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1;
+            object-fit: cover;
+        }
+
+        .scan-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.2) 50%);
+            background-size: 5px 5px;
+            pointer-events: none;
+        }
+
+        .scan-frame {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            height: 70%;
+            border: 4px solid #fff;
+            border-radius: 16px;
+            box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.7);
+        }
+
+        .status-text {
+            text-align: center;
+            color: #666;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            padding: 0 1rem;
+        }
+
+        .validation-message {
+            text-align: center;
+            margin: 1rem 0;
+            font-weight: bold;
+        }
+
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            width: 100%;
+            max-width: 400px;
+            margin-top: auto;
+            padding: 1rem;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            background: #18385e;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+            background: #122a47;
+        }
+
+        .error-message {
+            color: #dc2626;
+            background: #fee2e2;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: none;
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <button class="header-icon" id="backButton" aria-label="Back">
+            <i class="material-icons">arrow_back</i>
+        </button>
+        <h1 class="header-title">Scan QR Code</h1>
+        <button class="header-icon" id="refreshButton" aria-label="Refresh">
+            <i class="material-icons">refresh</i>
+        </button>
+    </header>
+
+    <div class="container">
+        <div class="error-message" id="errorMessage"></div>
+        <div class="validation-message" id="validationMessage"></div>
+
+        <div class="scanner-container">
+            <video id="video" playsinline autoplay></video>
+            <div class="scan-overlay"></div>
+            <div class="scan-frame"></div>
+        </div>
+
+        <p class="status-text" id="statusText">Initializing scanner...</p>
+
+        <div class="action-buttons">
+            <button class="btn">
+                <i class="material-icons">cloud_upload</i>
+                Upload QR
+            </button>
+            <button class="btn">
+                <i class="material-icons">qr_code</i>
+                Show my QR
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Firebase initialization
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+            authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+            databaseURL: "https://explore-malaysia-6d28d-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "explore-malaysia-6d28d",
+            storageBucket: "explore-malaysia-6d28d.appspot.com",
+            messagingSenderId: "869053244601",
+            appId: "1:869053244601:web:29ad09ff454b43230be768",
+            measurementId: "G-5XJK1H7KWX"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const video = document.getElementById('video');
+        const errorMessageDiv = document.getElementById('errorMessage');
+        const statusTextEl = document.getElementById('statusText');
+        const validationMessageDiv = document.getElementById('validationMessage');
+        const backButton = document.getElementById('backButton');
+        const refreshButton = document.getElementById('refreshButton');
+
+        let canvasElement = document.createElement('canvas');
+        let canvasContext = canvasElement.getContext('2d');
+
+        let isProcessing = false; // To prevent concurrent scanning
+
+        // Back button functionality
+        backButton.addEventListener('click', () => {
+            window.history.back();
+        });
+
+        // Refresh button functionality
+        refreshButton.addEventListener('click', () => {
+             initializeCamera();
+        });
+
+        // Function to validate user on firestore
+        async function validateUser(scannedData) {
+            statusTextEl.textContent = "Validating User...";
+            validationMessageDiv.textContent = ""; // Reset validation message
+            const usersRef = db.collection("users");
+
+            usersRef.where("id", "==", scannedData)
+                .get()
+                .then((querySnapshot) => {
+                    if (!querySnapshot.empty) {
+                        validationMessageDiv.textContent = "User is Valid!";
+                        validationMessageDiv.style.color = 'green';
+                        statusTextEl.textContent = 'Scan complete';
+                    } else {
+                        validationMessageDiv.textContent = "User Not Found!";
+                        validationMessageDiv.style.color = 'red';
+                        statusTextEl.textContent = 'Scan complete';
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error getting document:", error);
+                    showError("Error Validating User");
+                    statusTextEl.textContent = 'Scan complete';
+                })
+                .finally(() => {
+                      isProcessing = false;
+                });
+        }
+
+
+        // Function to process scanned QR code data
+        async function processScannedData(content) {
+              if (isProcessing) {
+                 console.log('Scan already in progress')
+                 return; // Prevent concurrent scanning
+              }
+              isProcessing = true;
+            statusTextEl.textContent = 'QR Code detected, verifying user...';
+             validationMessageDiv.textContent = ''; // Reset validation message
+            console.log('Scanned Content:', content);
+
+            try {
+
+                // Attempt to validate scanned data directly as a user ID
+                validateUser(content);
+            } catch (error) {
+                console.error('Error processing QR code data:', error);
+                showError('Invalid QR code or processing error.');
+                statusTextEl.textContent = 'Scan complete';
+                isProcessing = false;
+            }
+        }
+
+        // Function to scan QR code using jsQR
+         function scanQRCode() {
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                canvasElement.height = video.videoHeight;
+                canvasElement.width = video.videoWidth;
+                canvasContext.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+
+                const imageData = canvasContext.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                     inversionAttempts: "attemptBoth",
+                });
+
+                if (code) {
+                      console.log("jsQR code",code);
+                    processScannedData(code.data);
+                }
+            }
+            requestAnimationFrame(scanQRCode);
+        }
+
+
+        // Initialize camera and scanner
+        async function initializeCamera() {
+             statusTextEl.textContent = 'Initializing scanner...';
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: "environment",
+                         width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                });
+                  console.log('Camera stream acquired');
+
+                video.srcObject = stream;
+                video.setAttribute("playsinline", true);
+                video.play();
+
+                statusTextEl.textContent = 'Scanning...';
+                validationMessageDiv.textContent = ""; // Reset validation message
+                 errorMessageDiv.style.display = 'none'
+                requestAnimationFrame(scanQRCode);
+            } catch (error) {
+                console.error("Camera error:", error);
+                showError('Camera access required. Enable permissions and try again.');
+                statusTextEl.textContent = 'Camera unavailable';
+                isProcessing = false;
+            }
+        }
+
+        // Show error message
+        function showError(message) {
+            errorMessageDiv.textContent = message;
+            errorMessageDiv.style.display = 'block';
+            setTimeout(() => errorMessageDiv.style.display = 'none', 5000);
+        }
+
+        // Handle page load
+        window.addEventListener('DOMContentLoaded', () => {
+            if (!navigator.mediaDevices) {
+                showError('Camera API not supported in this browser');
+                return;
+            }
+            initializeCamera();
+        });
+    </script>
+</body>
+
+</html>
+

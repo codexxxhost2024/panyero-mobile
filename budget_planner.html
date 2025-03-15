@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - Budget Planner</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+  
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
+  
+  <!-- Header -->
+  <header class="bg-green-600 text-white p-4 text-lg font-semibold flex items-center space-x-4 sticky top-0 z-50">
+    <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+    <div class="flex-1 text-center">Budget Planner</div>
+  </header>
+  
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+    <div class="bg-white rounded-lg p-4 shadow w-full">
+      <h2 class="text-xl font-semibold mb-4">Plan Your Budget</h2>
+      <form id="budgetForm" class="space-y-4">
+        <div>
+          <label for="income" class="block text-sm font-medium text-gray-700">Monthly Income (₱)</label>
+          <input type="number" id="income" name="income" required min="0" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500">
+        </div>
+        <div>
+          <label for="expenses" class="block text-sm font-medium text-gray-700">Monthly Expenses (₱)</label>
+          <input type="number" id="expenses" name="expenses" required min="0" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500">
+        </div>
+        <button type="submit" class="w-full bg-green-600 text-white py-2 rounded font-medium">Calculate Budget</button>
+      </form>
+      <div id="budgetResults" class="mt-6">
+        <!-- Budget results will be displayed here -->
+      </div>
+    </div>
+  </main>
+  
+  <script>
+    const budgetForm = document.getElementById('budgetForm');
+    const budgetResults = document.getElementById('budgetResults');
+
+    budgetForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const income = parseFloat(document.getElementById('income').value);
+      const expenses = parseFloat(document.getElementById('expenses').value);
+
+      if (isNaN(income) || isNaN(expenses) || income < 0 || expenses < 0) {
+        alert('Please enter valid income and expense amounts.');
+        return;
+      }
+
+      const savings = income - expenses;
+      let message = '';
+      if (savings > 0) {
+        message = `<p class="text-green-600">You have a surplus of ₱${savings.toFixed(2)} this month. Great job!</p>`;
+      } else if (savings < 0) {
+        message = `<p class="text-red-600">You have a deficit of ₱${Math.abs(savings).toFixed(2)} this month. Please review your expenses.</p>`;
+      } else {
+        message = `<p class="text-gray-600">Your income and expenses are balanced.</p>`;
+      }
+
+      budgetResults.innerHTML = `
+        <h3 class="text-lg font-semibold mb-2">Budget Summary</h3>
+        <p class="text-sm text-gray-700"><strong>Income:</strong> ₱${income.toFixed(2)}</p>
+        <p class="text-sm text-gray-700"><strong>Expenses:</strong> ₱${expenses.toFixed(2)}</p>
+        ${message}
+      `;
+    });
+
+    // Ensure user is authenticated
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = 'signin.html';
+      }
+    });
+  </script>
+</body>
+</html>
+

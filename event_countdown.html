@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - Event Countdown</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <style>
+  :root {
+    --primary-color: #18385e;
+  }
+  .bg-primary {
+    background-color: var(--primary-color);
+  }
+  .text-primary {
+    color: var(--primary-color);
+  }
+  .border-primary {
+    border-color: var(--primary-color);
+  }
+  button.bg-green-500 {
+    background-color: var(--primary-color);
+  }
+  button.bg-green-500:hover {
+    background-color: #122a47;
+  }
+</style>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen w-full">
+  <!-- Header -->
+  <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center justify-between sticky top-0 z-50">
+    <h1 class="text-xl font-bold">Event Countdown</h1>
+    <a href="#" class="icon-button" onclick="window.history.back();">
+      <span class="material-icons">close</span>
+    </a>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 space-y-4">
+    <div class="bg-white rounded-lg shadow p-4 w-full max-w-md">
+      <h2 class="text-lg font-bold mb-4">Countdown to Event</h2>
+      <div class="space-y-4">
+        <!-- Event Name Input -->
+        <div>
+          <label for="eventName" class="block text-sm font-medium text-gray-700">Event Name</label>
+          <input type="text" id="eventName" placeholder="Enter event name" class="w-full p-2 border rounded">
+        </div>
+        <!-- Event Date Input -->
+        <div>
+          <label for="eventDate" class="block text-sm font-medium text-gray-700">Event Date</label>
+          <input type="datetime-local" id="eventDate" class="w-full p-2 border rounded">
+        </div>
+        <!-- Start Countdown Button -->
+        <button onclick="startCountdown()" class="bg-green-500 text-white px-4 py-2 rounded w-full">
+          Start Countdown
+        </button>
+        <!-- Countdown Display -->
+        <div id="countdownDisplay" class="text-center text-4xl font-bold mt-4">00:00:00</div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Ensure user is authenticated
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = 'signin.html';
+      }
+    });
+
+    let countdownInterval;
+
+    // Start the countdown
+    function startCountdown() {
+      const eventName = document.getElementById("eventName").value.trim();
+      const eventDate = new Date(document.getElementById("eventDate").value);
+
+      if (!eventName || !eventDate || isNaN(eventDate)) {
+        alert("Please enter a valid event name and date.");
+        return;
+      }
+
+      clearInterval(countdownInterval);
+      countdownInterval = setInterval(() => updateCountdown(eventDate), 1000);
+    }
+
+    // Update the countdown
+    function updateCountdown(eventDate) {
+      const now = new Date();
+      const timeLeft = eventDate - now;
+
+      if (timeLeft <= 0) {
+        clearInterval(countdownInterval);
+        document.getElementById("countdownDisplay").innerText = "Event has started!";
+        return;
+      }
+
+      const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+      const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+      document.getElementById("countdownDisplay").innerText = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    }
+  </script>
+</body>
+</html>
+

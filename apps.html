@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Panyero Apps</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #18385e;
+    }
+    .bg-primary {
+      background-color: var(--primary-color) !important;
+    }
+    .text-primary {
+      color: var(--primary-color) !important;
+    }
+    .border-primary {
+      border-color: var(--primary-color) !important;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+  <!-- Header -->
+  <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center justify-between sticky top-0 z-50">
+      <!-- Back Icon -->
+      <span class="material-icons text-2xl cursor-pointer" onclick="window.history.back()">arrow_back</span>
+      <!-- Title (Max 6 Characters) -->
+      <div class="flex-1 text-center truncate" title="Practical Apps">
+          Practical Apps
+      </div>
+      <!-- Placeholder for alignment -->
+      <span class="material-icons text-2xl opacity-0">arrow_back</span>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col p-4 w-full overflow-y-auto pb-24">
+      <!-- Vertical List of Apps -->
+      <div class="bg-white rounded-lg shadow">
+          <!-- 3D Generator -->
+          <div class="p-3 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors mb-1.5"
+              onclick="window.location.href='3d_generator.html'">
+              <div class="flex items-center space-x-3">
+                  <span class="material-icons text-gray-700">category</span>
+                  <div>
+                      <div class="text-sm font-semibold text-gray-800">3D Generator</div>
+                      <div class="text-xs text-gray-500">Create 3D models easily.</div>
+                  </div>
+              </div>
+              <span class="material-icons text-gray-500">arrow_forward</span>
+          </div>
+
+          <!-- BMI Calculator -->
+          <div class="p-3 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors mb-1.5"
+              onclick="window.location.href='bmi_calculator.html'">
+              <div class="flex items-center space-x-3">
+                  <span class="material-icons text-gray-700">fitness_center</span>
+                  <div>
+                      <div class="text-sm font-semibold text-gray-800">BMI Calculator</div>
+                      <div class="text-xs text-gray-500">Calculate your Body Mass Index.</div>
+                  </div>
+              </div>
+              <span class="material-icons text-gray-500">arrow_forward</span>
+          </div>
+
+          <!-- Budget Planner -->
+          <div class="p-3 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors mb-1.5"
+              onclick="window.location.href='budget_planner.html'">
+              <div class="flex items-center space-x-3">
+                  <span class="material-icons text-gray-700">attach_money</span>
+                  <div>
+                      <div class="text-sm font-semibold text-gray-800">Budget Planner</div>
+                      <div class="text-xs text-gray-500">Plan and track your expenses.</div>
+                  </div>
+              </div>
+              <span class="material-icons text-gray-500">arrow_forward</span>
+          </div>
+
+          <!-- Daily Journal -->
+          <div class="p-3 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors mb-1.5"
+              onclick="window.location.href='daily_journal.html'">
+              <div class="flex items-center space-x-3">
+                  <span class="material-icons text-gray-700">book</span>
+                  <div>
+                      <div class="text-sm font-semibold text-gray-800">Daily Journal</div>
+                      <div class="text-xs text-gray-500">Write and reflect daily.</div>
+                  </div>
+              </div>
+              <span class="material-icons text-gray-500">arrow_forward</span>
+          </div>
+
+          <!-- Drawing App -->
+          <div class="p-3 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors mb-1.5"
+              onclick="window.location.href='drawing_app.html'">
+              <div class="flex items-center space-x-3">
+                  <span class="material-icons text-gray-700">brush</span>
+                  <div>
+                      <div class="text-sm font-semibold text-gray-800">Drawing App</div>
+                      <div class="text-xs text-gray-500">Sketch and draw digitally.</div>
+                  </div>
+              </div>
+              <span class="material-icons text-gray-500">arrow_forward</span>
+          </div>
+
+          <!-- Event Countdown -->
+          <div class="p-3 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors mb-1.5"
+              onclick="window.location.href='event_countdown.html'">
+              <div class="flex items-center space-x-3">
+                  <span class="material-icons text-gray-700">event</span>
+                  <div>
+                      <div class="text-sm font-semibold text-gray-800">Event Countdown</div>
+                      <div class="text-xs text-gray-500">Countdown to important events.</div>
+                  </div>
+              </div>
+              <span class="material-icons text-gray-500">arrow_forward</span>
+          </div>
+
+          <!-- Expense Tracker -->
+          <div class="p-3 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors mb-1.5"
+              onclick="window.location.href='expense_tracker.html'">
+              <div class="flex items-center space-x-3">
+                  <span class="material-icons text-gray-700">receipt</span>
+                  <div>
+                      <div class="text-sm font-semibold text-gray-800">Expense Tracker</div>
+                      <div class="text-xs text-gray-500">Track your spending habits.</div>
+                  </div>
+              </div>
+              <span class="material-icons text-gray-500">arrow_forward</span>
+          </div>
+
+          <!-- Habit Tracker -->
+          <div class="p-3 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors mb-1.5"
+              onclick="window.location.href='habit_tracker.html'">
+              <div class="flex items-center space-x-3">
+                  <span class="material-icons text-gray-700">checklist</span>
+                  <div>
+                      <div class="text-sm font-semibold text-gray-800">Habit Tracker</div>
+                      <div class="text-xs text-gray-500">Build and track habits.</div>
+                  </div>
+              </div>
+              <span class="material-icons text-gray-500">arrow_forward</span>
+          </div>
+
+          <!-- Image Generator -->
+          <div class="p-3 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors mb-1.5"
+              onclick="window.location.href='image_generator.html'">
+              <div class="flex items-center space-x-3">
+                  <span class="material-icons text-gray-700">image</span>
+                  <div>
+                      <div class="text-sm font-semibold text-gray-800">Image Generator</div>
+                      <div class="text-xs text-gray-500">Generate images with AI.</div>
+                  </div>
+              </div>
+              <span class="material-icons text-gray-500">arrow_forward</span>
+          </div>
+
+          <!-- Language Flashcards -->
+          <div class="p-3 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors mb-1.5"
+              onclick="window.location.href='language_flashcards.html'">
+              <div class="flex items-center space-x-3">
+                  <span class="material-icons text-gray-700">translate</span>
+                  <div>
+                      <div class="text-sm font-semibold text-gray-800">Language Flashcards</div>
+                      <div class="text-xs text-gray-500">Learn new languages.</div>
+                  </div>
+              </div>
+              <span class="material-icons text-gray-500">arrow_forward</span>
+          </div>
+
+          <!-- Loan Calculator -->
+          <div class="p-3 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors mb-1.5"
+              onclick="window.location.href='loan_calculator.html'">
+              <div class="flex items-center space-x-3">
+                  <span class="material-icons text-gray-700">calculate</span>
+                  <div>
+                      <div class="text-sm font-semibold text-gray-800">Loan Calculator</div>
+                      <div class="text-xs text-gray-500">Calculate loan payments.</div>
+                  </div>
+              </div>
+              <span class="material-icons text-gray-500">arrow_forward</span>
+          </div>
+
+          <!-- Pomodoro Timer -->
+          <div class="p-3 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors mb-1.5"
+              onclick="window.location.href='pomodoro_timer.html'">
+              <div class="flex items-center space-x-3">
+                  <span class="material-icons text-gray-700">timer</span>
+                  <div>
+                      <div class="text-sm font-semibold text-gray-800">Pomodoro Timer</div>
+                      <div class="text-xs text-gray-500">Boost productivity with timers.</div>
+                  </div>
+              </div>
+              <span class="material-icons text-gray-500">arrow_forward</span>
+          </div>
+
+          <!-- QR Generator -->
+          <div class="p-3 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors mb-1.5"
+              onclick="window.location.href='qr_generator.html'">
+              <div class="flex items-center space-x-3">
+                  <span class="material-icons text-gray-700">qr_code</span>
+                  <div>
+                      <div class="text-sm font-semibold text-gray-800">QR Generator</div>
+                      <div class="text-xs text-gray-500">Create QR codes instantly.</div>
+                  </div>
+              </div>
+              <span class="material-icons text-gray-500">arrow_forward</span>
+          </div>
+
+          <!-- Quote Generator -->
+          <div class="p-3 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors mb-1.5"
+              onclick="window.location.href='quote_generator.html'">
+              <div class="flex items-center space-x-3">
+                  <span class="material-icons text-gray-700">format_quote</span>
+                  <div>
+                      <div class="text-sm font-semibold text-gray-800">Quote Generator</div>
+                      <div class="text-xs text-gray-500">Get inspired with quotes.</div>
+                  </div>
+              </div>
+              <span class="material-icons text-gray-500">arrow_forward</span>
+          </div>
+
+          <!-- Stopwatch -->
+          <div class="p-3 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors mb-1.5"
+              onclick="window.location.href='stopwatch.html'">
+              <div class="flex items-center space-x-3">
+                  <span class="material-icons text-gray-700">av_timer</span>
+                  <div>
+                      <div class="text-sm font-semibold text-gray-800">Stopwatch</div>
+                      <div class="text-xs text-gray-500">Track time accurately.</div>
+                  </div>
+              </div>
+              <span class="material-icons text-gray-500">arrow_forward</span>
+          </div>
+
+          <!-- Tip Calculator -->
+          <div class="p-3 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors mb-1.5"
+              onclick="window.location.href='tip_calculator.html'">
+              <div class="flex items-center space-x-3">
+                  <span class="material-icons text-gray-700">restaurant</span>
+                  <div>
+                      <div class="text-sm font-semibold text-gray-800">Tip Calculator</div>
+                      <div class="text-xs text-gray-500">Calculate tips easily.</div>
+                  </div>
+              </div>
+              <span class="material-icons text-gray-500">arrow_forward</span>
+          </div>
+
+          <!-- Translator -->
+          <div class="p-3 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors mb-1.5"
+              onclick="window.location.href='translator.html'">
+              <div class="flex items-center space-x-3">
+                  <span class="material-icons text-gray-700">language</span>
+                  <div>
+                      <div class="text-sm font-semibold text-gray-800">Translator</div>
+                      <div class="text-xs text-gray-500">Translate text instantly.</div>
+                  </div>
+              </div>
+              <span class="material-icons text-gray-500">arrow_forward</span>
+          </div>
+
+          <!-- Unit Converter -->
+          <div class="p-3 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors mb-1.5"
+              onclick="window.location.href='unit_converter.html'">
+              <div class="flex items-center space-x-3">
+                  <span class="material-icons text-gray-700">straighten</span>
+                  <div>
+                      <div class="text-sm font-semibold text-gray-800">Unit Converter</div>
+                      <div class="text-xs text-gray-500">Convert units effortlessly.</div>
+                  </div>
+              </div>
+              <span class="material-icons text-gray-500">arrow_forward</span>
+          </div>
+
+          <!-- Weather App -->
+          <div class="p-3 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors mb-1.5"
+              onclick="window.location.href='weather_app.html'">
+              <div class="flex items-center space-x-3">
+                  <span class="material-icons text-gray-700">wb_sunny</span>
+                  <div>
+                      <div class="text-sm font-semibold text-gray-800">Weather App</div>
+                      <div class="text-xs text-gray-500">Check weather forecasts.</div>
+                  </div>
+              </div>
+              <span class="material-icons text-gray-500">arrow_forward</span>
+          </div>
+
+          <!-- Word Counter -->
+          <div class="p-3 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors mb-1.5"
+              onclick="window.location.href='word_counter.html'">
+              <div class="flex items-center space-x-3">
+                  <span class="material-icons text-gray-700">sort_by_alpha</span>
+                  <div>
+                      <div class="text-sm font-semibold text-gray-800">Word Counter</div>
+                      <div class="text-xs text-gray-500">Count words in your text.</div>
+                  </div>
+              </div>
+              <span class="material-icons text-gray-500">arrow_forward</span>
+          </div>
+      </div>
+  </main>
+  </div>
+</body>
+
+</html>
+

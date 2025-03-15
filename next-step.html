@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Panyero - Next Steps</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #18385e;
+    }
+    .bg-primary {
+      background-color: var(--primary-color) !important;
+    }
+    .text-primary {
+      color: var(--primary-color) !important;
+    }
+    .border-primary {
+      border-color: var(--primary-color) !important;
+    }
+    .hover\:bg-primary-dark:hover {
+      background-color: #122a47 !important;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+  <!-- Header -->
+  <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center space-x-4 sticky top-0 z-50">
+    <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+    <div class="flex-1 text-center">Next Steps</div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+    <div class="bg-white rounded-lg p-4 shadow w-full">
+      <h2 class="text-xl font-semibold mb-4">Complete Your Profile</h2>
+      <p class="text-gray-600 mb-4">To fully enjoy all features of Panyero, please complete the following steps:</p>
+      
+      <div class="space-y-4">
+        <div class="flex items-center p-3 border rounded-lg">
+          <span class="material-icons text-primary mr-3">check_circle</span>
+          <div>
+            <h3 class="font-medium">Create Account</h3>
+            <p class="text-sm text-gray-500">Completed</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center p-3 border rounded-lg">
+          <span class="material-icons text-primary mr-3">person</span>
+          <div>
+            <h3 class="font-medium">Complete Profile</h3>
+            <p class="text-sm text-gray-500">Add your personal information</p>
+          </div>
+          <button onclick="window.location.href='edit-profile.html'" class="ml-auto bg-primary text-white px-3 py-1 rounded text-sm hover:bg-primary-dark">Complete</button>
+        </div>
+        
+        <div class="flex items-center p-3 border rounded-lg">
+          <span class="material-icons text-primary mr-3">verified_user</span>
+          <div>
+            <h3 class="font-medium">Verify Identity</h3>
+            <p class="text-sm text-gray-500">Upload your ID for verification</p>
+          </div>
+          <button onclick="window.location.href='upload-id.html'" class="ml-auto bg-primary text-white px-3 py-1 rounded text-sm hover:bg-primary-dark">Verify</button>
+        </div>
+        
+        <div class="flex items-center p-3 border rounded-lg">
+          <span class="material-icons text-primary mr-3">account_balance_wallet</span>
+          <div>
+            <h3 class="font-medium">Add Funds</h3>
+            <p class="text-sm text-gray-500">Add money to your wallet</p>
+          </div>
+          <button onclick="window.location.href='cashin.html'" class="ml-auto bg-primary text-white px-3 py-1 rounded text-sm hover:bg-primary-dark">Add</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white rounded-lg p-4 shadow w-full">
+      <h2 class="text-xl font-semibold mb-4">Explore Features</h2>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-gray-50 p-3 rounded-lg text-center">
+          <span class="material-icons text-primary text-2xl">send</span>
+          <h3 class="font-medium mt-2">Send Money</h3>
+        </div>
+        <div class="bg-gray-50 p-3 rounded-lg text-center">
+          <span class="material-icons text-primary text-2xl">receipt</span>
+          <h3 class="font-medium mt-2">Pay Bills</h3>
+        </div>
+        <div class="bg-gray-50 p-3 rounded-lg text-center">
+          <span class="material-icons text-primary text-2xl">shopping_cart</span>
+          <h3 class="font-medium mt-2">Shop</h3>
+        </div>
+        <div class="bg-gray-50 p-3 rounded-lg text-center">
+          <span class="material-icons text-primary text-2xl">more_horiz</span>
+          <h3 class="font-medium mt-2">More</h3>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Nav -->
+  <div class="bg-white border-t border-gray-300 w-full max-w-sm flex justify-around items-center py-2 fixed bottom-0 left-1/2 transform -translate-x-1/2">
+    <div class="nav-item cursor-pointer" onclick="window.location.href='index.html'">
+      <span class="material-icons text-gray-600">home</span>
+    </div>
+    <div class="nav-item cursor-pointer" onclick="window.location.href='services.html'">
+      <span class="material-icons text-gray-600">grid_view</span>
+    </div>
+    <div class="nav-item qr cursor-pointer transform scale-125 -mt-1 relative" onclick="window.location.href='qrscan.html'">
+      <span class="material-icons text-white p-2 shadow-md" style="background-color: var(--primary-color); border-radius: 50%;">qr_code_scanner</span>
+    </div>
+    <div class="nav-item cursor-pointer" onclick="window.location.href='transactions.html'">
+      <span class="material-icons text-gray-600">receipt_long</span>
+    </div>
+    <div class="nav-item cursor-pointer" onclick="window.location.href='profile.html'">
+      <span class="material-icons text-gray-600">person</span>
+    </div>
+  </div>
+</body>
+</html>
+

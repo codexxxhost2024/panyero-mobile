@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QR Code Scanner</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <style>
+           body {
+            margin: 0;
+            font-family: sans-serif;
+            background-color: #222;
+            color: #fff;
+              min-height: 100vh;
+               display: flex;
+               flex-direction: column;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            background-color: #18385e;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+            justify-content: flex-start;
+            width: 100%; /* Full width */
+        }
+
+          .header span{
+           margin-left: 20px;
+            font-weight: bold;
+              font-size: 1.2rem;
+        }
+
+        .back-icon {
+            color: #fff;
+             cursor: pointer;
+            font-size: 24px;
+        }
+        .main-content {
+            flex: 1;
+             display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px; /* Added padding for spacing */
+        }
+
+
+         .scan-area {
+            width: 250px;
+            height: 250px;
+            margin: 20px auto;
+            border: 4px solid #f26440;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+              background-color: #000;
+        }
+
+        .scan-area video {
+            width: 100%;
+            height: 100%;
+              object-fit: cover;
+        }
+
+        .laser {
+            position: absolute;
+            width: 100%;
+            height: 3px;
+            background-color: red;
+            top: 0;
+            left: 0;
+            animation: scanAnimation 2s linear infinite;
+        }
+
+        @keyframes scanAnimation {
+            0% {
+                top: 0;
+            }
+            50% {
+                top: calc(100% - 3px);
+            }
+            100% {
+                top: 0;
+            }
+        }
+
+        .instructions {
+            font-size: 14px;
+            color: #555;
+             margin-bottom: 20px;
+        }
+
+        .status-text {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #f26440;
+        }
+
+        .icon-row {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+        }
+
+        .icon-row button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #f26440;
+        }
+        .icon-row button span{
+            color: #f26440;
+        }
+
+        .button-group button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .button-group button:last-child {
+            background-color: #18385e;
+            color: #fff;
+        }
+        .error-message {
+            color: #dc2626;
+            background: #fee2e2;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: none;
+            text-align: center;
+            width: 100%;
+              max-width: 400px;
+        }
+         #fileInput {
+             display: none;
+         }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <i class="material-icons back-icon" id="backButton">arrow_back</i>
+         <span>Scan QR code</span>
+    </header>
+  <main class="main-content">
+         <div class="error-message" id="errorMessage"></div>
+        <p class="instructions">Place QR code inside the frame to scan please avoid shake to get results quickly</p>
+
+        <div class="scan-area">
+            <video id="video" playsinline autoplay></video>
+            <div class="laser"></div>
+        </div>
+
+        <p class="status-text" id="statusText">Initializing scanner...</p>
+
+        <div class="icon-row">
+              <input type="file" id="fileInput" accept="image/*">
+            <button id="galleryBtn">
+                <span class="material-icons">photo_library</span>
+            </button>
+            <button id="barcodeBtn">
+                <span class="material-icons">code</span>
+            </button>
+            <button id="flashlightBtn">
+                <span class="material-icons">flash_on</span>
+            </button>
+        </div>
+
+        <div class="button-group">
+            <button id="showMyQRBtn" onclick="location.href='myqrcode.html'">Show My QR</button>
+        </div>
+</main>
+      <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+            authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+            databaseURL: "https://explore-malaysia-6d28d-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "explore-malaysia-6d28d",
+            storageBucket: "explore-malaysia-6d28d.appspot.com",
+            messagingSenderId: "869053244601",
+            appId: "1:869053244601:web:29ad09ff454b43230be768",
+            measurementId: "G-5XJK1H7KWX"
+        };
+        firebase.initializeApp(firebaseConfig);
+         const db = firebase.firestore();
+    </script>
+      <script>
+        const video = document.getElementById('video');
+          const errorMessageDiv = document.getElementById('errorMessage');
+        const scanArea = document.querySelector('.scan-area');
+          const fileInput = document.getElementById('fileInput');
+         const galleryBtn = document.getElementById('galleryBtn');
+        const flashlightBtn = document.getElementById('flashlightBtn');
+          const statusTextEl = document.getElementById('statusText');
+         const backButton = document.getElementById('backButton');
+
+
+        let canvasElement = document.createElement('canvas');
+        let canvasContext = canvasElement.getContext('2d');
+        let isProcessing = false;
+
+
+        // Back button functionality
+         backButton.addEventListener('click', () => {
+            window.history.back();
+        });
+
+
+        // Function to process scanned QR code data
+         function processScannedData(content) {
+              if (isProcessing) {
+                 console.log('Scan already in progress')
+                 return; // Prevent concurrent scanning
+              }
+              isProcessing = true;
+            statusTextEl.textContent = 'QR Code detected';
+            console.log('Scanned Content:', content);
+
+            localStorage.setItem('scannedData', content);
+             window.location.href = 'send-balance.html';
+
+        }
+
+           function scanQRCode() {
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                canvasElement.height = video.videoHeight;
+                canvasElement.width = video.videoWidth;
+                canvasContext.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+
+                const imageData = canvasContext.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                     inversionAttempts: "attemptBoth",
+                });
+
+                if (code) {
+                    processScannedData(code.data);
+                  console.log("jsQR code",code);
+               }
+            }
+            requestAnimationFrame(scanQRCode);
+        }
+         function scanImage(imageFile){
+           const reader = new FileReader();
+           reader.onload = function (e){
+            const img = new Image();
+               img.onload = function() {
+               canvasElement.width = img.width;
+               canvasElement.height = img.height;
+                canvasContext.drawImage(img, 0, 0, img.width, img.height);
+                const imageData = canvasContext.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                  const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: "attemptBoth",
+                  });
+
+                  if (code) {
+                    processScannedData(code.data)
+                }else{
+                    alert('Error scanning image. Please try another image');
+                     statusTextEl.textContent = 'Scan complete';
+                   }
+             };
+            img.src = e.target.result;
+          }
+            reader.readAsDataURL(imageFile)
+          }
+         galleryBtn.addEventListener('click', () => {
+             fileInput.click();
+        });
+           fileInput.addEventListener('change', (event) => {
+                const imageFile = event.target.files[0];
+                if (imageFile) {
+                  scanImage(imageFile);
+               }
+          });
+
+
+          // Initialize camera and scanner
+           async function initializeCamera() {
+            statusTextEl.textContent = 'Initializing scanner...';
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                         facingMode: "environment",
+                          width: { ideal: 1280 },
+                          height: { ideal: 720 }
+                    }
+                });
+                console.log('Camera stream acquired');
+                video.srcObject = stream;
+                video.setAttribute("playsinline", true);
+                  video.play();
+                  statusTextEl.textContent = 'Scanning...';
+                  errorMessageDiv.style.display = 'none'
+                requestAnimationFrame(scanQRCode);
+            } catch (error) {
+                console.error("Camera error:", error);
+                  statusTextEl.textContent = 'Camera unavailable';
+                showError('Camera access required. Enable permissions and try again.');
+                 isProcessing = false;
+            }
+        }
+              function resizeVideo() {
+            video.style.width = scanArea.offsetWidth + 'px';
+            video.style.height = scanArea.offsetHeight + 'px';
+        }
+
+        // Show error message
+        function showError(message) {
+            errorMessageDiv.textContent = message;
+            errorMessageDiv.style.display = 'block';
+            setTimeout(() => errorMessageDiv.style.display = 'none', 5000);
+        }
+
+        // Handle page load
+        window.addEventListener('DOMContentLoaded', () => {
+            if (!navigator.mediaDevices) {
+                showError('Camera API not supported in this browser');
+                 isProcessing = false;
+                return;
+            }
+              initializeCamera();
+              resizeVideo();
+        });
+
+           window.onresize = resizeVideo;
+
+    </script>
+</body>
+</html>
+

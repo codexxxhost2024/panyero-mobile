@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Disable zooming -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Panyero E-Services</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            height: 100%;
+            background-color: #f5f5f5;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            touch-action: manipulation;
+        }
+
+        .splash-container {
+            text-align: center;
+            opacity: 0;
+            animation: fadeInOut 2s ease-in-out forwards;
+            width: 80%;
+            max-width: 300px;
+        }
+
+        .logo {
+            width: 100%;
+            height: auto;
+        }
+
+        @keyframes fadeInOut {
+            0% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            15% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            85% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="splash-container">
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/panyero-WcQ0nHtlRdqQuOnrn8XvD15CAryjxm.png" alt="Panyero E-Services Logo" class="logo">
+    </div>
+
+    <audio id="introAudio" style="display: none;">
+        <source src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/introhorn-oc54WMQ1Yk9fiopEz8oDE6oIvCBBKj.mp3" type="audio/mp3">
+    </audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Prevent default touch behavior
+            document.addEventListener('touchmove', function(e) {
+                e.preventDefault();
+            }, { passive: false });
+            
+            const audio = document.getElementById('introAudio');
+            // Set initial volume to 0 for fade in effect
+            audio.volume = 0;
+            
+            // Function to fade in audio over 2 seconds
+            function fadeInAudio(duration) {
+                const intervalTime = 50; // update every 50ms
+                const step = intervalTime / duration;
+                const fadeInterval = setInterval(() => {
+                    if (audio.volume < 1) {
+                        audio.volume = Math.min(audio.volume + step, 1);
+                    } else {
+                        clearInterval(fadeInterval);
+                    }
+                }, intervalTime);
+            }
+            
+            // Start playing audio on user interaction for mobile
+            document.body.addEventListener('touchstart', function() {
+                audio.play().catch(function(error) {
+                    console.log("Audio autoplay failed:", error);
+                });
+                fadeInAudio(2000);
+            }, { once: true });
+            
+            // Try to play audio automatically
+            audio.play().then(() => {
+                fadeInAudio(2000);
+            }).catch(function(error) {
+                console.log("Audio autoplay failed:", error);
+            });
+
+            // Redirect after 2 seconds
+            setTimeout(function() {
+                window.location.href = 'home.html';
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
+

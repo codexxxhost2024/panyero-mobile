@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - Countdown Timer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <style>
+  :root {
+    --primary-color: #18385e;
+  }
+  .bg-primary {
+    background-color: var(--primary-color);
+  }
+  .text-primary {
+    color: var(--primary-color);
+  }
+  .border-primary {
+    border-color: var(--primary-color);
+  }
+  button.bg-green-500 {
+    background-color: var(--primary-color);
+  }
+  button.bg-green-500:hover {
+    background-color: #122a47;
+  }
+</style>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen w-full">
+  <!-- Header -->
+  <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center justify-between sticky top-0 z-50">
+    <h1 class="text-xl font-bold">Countdown Timer</h1>
+    <a href="#" class="icon-button" onclick="window.history.back();">
+      <span class="material-icons">close</span>
+    </a>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 space-y-4">
+    <div class="bg-white rounded-lg shadow p-4 w-full max-w-md">
+      <h2 class="text-lg font-bold mb-4">Set Countdown</h2>
+      <div class="space-y-4">
+        <!-- Time Input -->
+        <div>
+          <label for="timeInput" class="block text-sm font-medium text-gray-700">Time (in seconds)</label>
+          <input type="number" id="timeInput" placeholder="Enter time in seconds" class="w-full p-2 border rounded">
+        </div>
+        <!-- Start Button -->
+        <button onclick="startTimer()" class="bg-green-500 text-white px-4 py-2 rounded w-full">
+          Start
+        </button>
+        <!-- Timer Display -->
+        <div id="timerDisplay" class="text-center text-4xl font-bold mt-4">00:00</div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Ensure user is authenticated
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = 'signin.html';
+      }
+    });
+
+    let timerInterval;
+
+    // Start the timer
+    function startTimer() {
+      const timeInput = parseInt(document.getElementById("timeInput").value);
+      if (isNaN(timeInput) || timeInput <= 0) {
+        alert("Please enter a valid time.");
+        return;
+      }
+
+      let timeLeft = timeInput;
+      updateTimerDisplay(timeLeft);
+
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay(timeLeft);
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          alert("Time's up!");
+        }
+      }, 1000);
+    }
+
+    // Update the timer display
+    function updateTimerDisplay(timeLeft) {
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      document.getElementById("timerDisplay").innerText = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    }
+  </script>
+</body>
+</html>
+

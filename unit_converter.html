@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - Unit Converter</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen w-full">
+  <!-- Header -->
+  <header class="bg-green-600 text-white p-4 text-lg font-semibold flex items-center justify-between sticky top-0 z-50">
+    <h1 class="text-xl font-bold">Unit Converter</h1>
+    <a href="#" class="icon-button" onclick="window.history.back();">
+      <span class="material-icons">close</span>
+    </a>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 space-y-4">
+    <div class="bg-white rounded-lg shadow p-4 w-full max-w-md">
+      <h2 class="text-lg font-bold mb-4">Convert Units</h2>
+      <div class="space-y-4">
+        <!-- Unit Type Selection -->
+        <div>
+          <label for="unitType" class="block text-sm font-medium text-gray-700">Unit Type</label>
+          <select id="unitType" class="w-full p-2 border rounded" onchange="updateUnits()">
+            <option value="length">Length</option>
+            <option value="weight">Weight</option>
+            <option value="temperature">Temperature</option>
+          </select>
+        </div>
+        <!-- From Unit -->
+        <div>
+          <label for="fromUnit" class="block text-sm font-medium text-gray-700">From</label>
+          <select id="fromUnit" class="w-full p-2 border rounded"></select>
+        </div>
+        <!-- To Unit -->
+        <div>
+          <label for="toUnit" class="block text-sm font-medium text-gray-700">To</label>
+          <select id="toUnit" class="w-full p-2 border rounded"></select>
+        </div>
+        <!-- Amount Input -->
+        <div>
+          <label for="amount" class="block text-sm font-medium text-gray-700">Amount</label>
+          <input type="number" id="amount" placeholder="Enter amount" class="w-full p-2 border rounded">
+        </div>
+        <!-- Convert Button -->
+        <button onclick="convertUnits()" class="bg-green-500 text-white px-4 py-2 rounded w-full">
+          Convert
+        </button>
+        <!-- Result Display -->
+        <div id="result" class="text-center text-lg font-semibold mt-4"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Ensure user is authenticated
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = 'signin.html';
+      }
+    });
+
+    // Unit definitions
+    const units = {
+      length: [
+        { name: "Meters", value: "meters" },
+        { name: "Kilometers", value: "kilometers" },
+        { name: "Centimeters", value: "centimeters" },
+        { name: "Millimeters", value: "millimeters" },
+        { name: "Inches", value: "inches" },
+        { name: "Feet", value: "feet" },
+        { name: "Yards", value: "yards" },
+        { name: "Miles", value: "miles" },
+      ],
+      weight: [
+        { name: "Grams", value: "grams" },
+        { name: "Kilograms", value: "kilograms" },
+        { name: "Milligrams", value: "milligrams" },
+        { name: "Pounds", value: "pounds" },
+        { name: "Ounces", value: "ounces" },
+      ],
+      temperature: [
+        { name: "Celsius", value: "celsius" },
+        { name: "Fahrenheit", value: "fahrenheit" },
+        { name: "Kelvin", value: "kelvin" },
+      ],
+    };
+
+    // Populate unit options based on selected type
+    function updateUnits() {
+      const unitType = document.getElementById("unitType").value;
+      const fromUnit = document.getElementById("fromUnit");
+      const toUnit = document.getElementById("toUnit");
+
+      // Clear existing options
+      fromUnit.innerHTML = "";
+      toUnit.innerHTML = "";
+
+      // Add new options
+      units[unitType].forEach(unit => {
+        const option = document.createElement("option");
+        option.value = unit.value;
+        option.text = unit.name;
+        fromUnit.appendChild(option);
+        toUnit.appendChild(option.cloneNode(true));
+      });
+    }
+
+    // Convert units
+    function convertUnits() {
+      const unitType = document.getElementById("unitType").value;
+      const fromUnit = document.getElementById("fromUnit").value;
+      const toUnit = document.getElementById("toUnit").value;
+      const amount = parseFloat(document.getElementById("amount").value);
+
+      if (isNaN(amount)) {
+        alert("Please enter a valid amount.");
+        return;
+      }
+
+      let result;
+      switch (unitType) {
+        case "length":
+          result = convertLength(amount, fromUnit, toUnit);
+          break;
+        case "weight":
+          result = convertWeight(amount, fromUnit, toUnit);
+          break;
+        case "temperature":
+          result = convertTemperature(amount, fromUnit, toUnit);
+          break;
+        default:
+          result = "Invalid unit type.";
+      }
+
+      document.getElementById("result").innerText = `Result: ${result.toFixed(2)} ${toUnit}`;
+    }
+
+    // Length conversion
+    function convertLength(value, fromUnit, toUnit) {
+      const conversions = {
+        meters: 1,
+        kilometers: 0.001,
+        centimeters: 100,
+        millimeters: 1000,
+        inches: 39.3701,
+        feet: 3.28084,
+        yards: 1.09361,
+        miles: 0.000621371,
+      };
+      return (value / conversions[fromUnit]) * conversions[toUnit];
+    }
+
+    // Weight conversion
+    function convertWeight(value, fromUnit, toUnit) {
+      const conversions = {
+        grams: 1,
+        kilograms: 0.001,
+        milligrams: 1000,
+        pounds: 0.00220462,
+        ounces: 0.035274,
+      };
+      return (value / conversions[fromUnit]) * conversions[toUnit];
+    }
+
+    // Temperature conversion
+    function convertTemperature(value, fromUnit, toUnit) {
+      if (fromUnit === toUnit) return value;
+
+      // Convert to Celsius first
+      let celsius;
+      switch (fromUnit) {
+        case "celsius":
+          celsius = value;
+          break;
+        case "fahrenheit":
+          celsius = (value - 32) * (5 / 9);
+          break;
+        case "kelvin":
+          celsius = value - 273.15;
+          break;
+      }
+
+      // Convert to target unit
+      switch (toUnit) {
+        case "celsius":
+          return celsius;
+        case "fahrenheit":
+          return celsius * (9 / 5) + 32;
+        case "kelvin":
+          return celsius + 273.15;
+      }
+    }
+
+    // Initialize unit options
+    updateUnits();
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Daily Bots by AitekPH</title>
+  
+  <!-- Google Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
+  <style>
+    /* Reset default margins and paddings */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Body Styling */
+    body {
+      font-family: Helvetica, Arial, sans-serif; /* Set Helvetica font */
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+      transition: opacity 0.5s ease; /* Transition for smooth fade-out */
+    }
+
+    /* Style for the header */
+    header {
+      position: fixed;
+      top: -15px; /* Added 15px to overlap the iframe */
+      left: 0;
+      width: 100%;
+      height: 100px; /* Increased height by additional 5px */
+      background-color: #18385e; /* Primary color */
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px; /* Horizontal padding for spacing */
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      z-index: 1000; /* Ensure header is above the iframe */
+    }
+
+    /* Aitek Voice Mode styling */
+    .voice-mode {
+      font-size: 1.2rem;
+      color: white; /* Changed text color to white */
+      font-weight: bold;
+    }
+
+    /* Container for the iframe to make it responsive */
+    .iframe-container {
+      position: fixed; /* Fixed positioning to ensure it stays in place */
+      top: 0; /* Start at the very top */
+      left: 0;
+      width: 100%;
+      height: calc(100vh - 30px); /* Full viewport height minus 30px bottom margin */
+      margin-bottom: 30px; /* Bottom margin of 30px */
+      z-index: 0; /* Ensure iframe is below the header */
+    }
+
+    .iframe-container iframe {
+      width: 100%;
+      height: 110%;
+      border: none;
+    }
+
+    /* Fade-out animation class */
+    .fade-out {
+      opacity: 0;
+    }
+
+    /* Back icon styling */
+    .back-icon {
+      font-size: 30px;
+      color: white; /* Icon color set to white */
+      cursor: pointer;
+      transition: color 0.3s ease; /* Smooth transition for hover effect */
+    }
+
+    .back-icon:hover {
+      color: #ccc; /* Light gray color on hover */
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      header {
+        height: 100px; /* Adjusted height for smaller screens */
+        padding: 0 15px;
+        top: -15px; /* Maintain overlap */
+      }
+
+      .voice-mode {
+        font-size: 1rem;
+      }
+
+      .back-icon {
+        font-size: 25px; /* Adjust icon size for smaller screens */
+      }
+
+      .iframe-container {
+        height: calc(100vh - 30px); /* Maintain the bottom margin */
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Section -->
+  <header>
+    <!-- Back Button -->
+    <span class="material-icons back-icon" id="backButton" aria-label="Go back" role="button" tabindex="0">
+      arrow_back
+    </span>
+
+    <!-- Aitek Voice Mode Text -->
+    <div class="voice-mode">Generate Image</div>
+  </header>
+
+  <!-- Responsive Iframe Container -->
+  <div class="iframe-container">
+    <iframe 
+      src="https://masterdqqq-vepp-image-1-0.hf.space/" 
+      allow="fullscreen; microphone; autoplay" 
+      allowfullscreen
+      sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals"
+      title="Embedded Cerebras"
+    >
+      Your browser does not support iframes.
+    </iframe>
+  </div>
+
+  <!-- JavaScript for Back Functionality -->
+  <script>
+    const backButton = document.getElementById('backButton');
+
+    // Function to handle back action
+    function handleBack() {
+      window.history.back(); // Navigate back in browser history
+    }
+
+    // Event listeners for click and keyboard interaction
+    backButton.addEventListener('click', handleBack);
+    backButton.addEventListener('keypress', function(event) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        handleBack();
+      }
+    });
+  </script>
+
+</body>
+</html>
+

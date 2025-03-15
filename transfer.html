@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - Transfer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+        --primary-color: #18385e;
+    }
+    .bg-primary {
+        background-color: var(--primary-color) !important;
+    }
+    .text-primary {
+        color: var(--primary-color) !important;
+    }
+    .hover\:bg-primary-dark:hover {
+        background-color: #122a47 !important;
+    }
+    .focus\:ring-primary:focus {
+        --tw-ring-color: var(--primary-color) !important;
+    }
+    .focus\:border-primary:focus {
+        border-color: var(--primary-color) !important;
+    }
+</style>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
+
+  <!-- Header -->
+  <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center space-x-4 sticky top-0 z-50">
+    <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+    <div class="flex-1 text-center">Transfer</div>
+  </header>
+
+  <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+    <div class="bg-white rounded-lg p-4 shadow w-full">
+      <h2 class="text-xl font-semibold mb-4">Panyero to Panyero Transfer</h2>
+      <div class="flex flex-col items-center space-y-4">
+        <!-- QR Code Display -->
+        <canvas id="qrCodeCanvas" class="w-32 h-32"></canvas>
+        <button id="refreshQR" class="bg-primary text-white py-2 px-4 rounded hover:bg-primary-dark">Refresh QR Code</button>
+      </div>
+      <form id="transferForm" class="space-y-4 mt-6">
+        <div>
+          <label for="recipientPhone" class="block text-sm font-medium text-gray-700">Recipient's Phone Number</label>
+          <select id="recipientPhone" name="recipientPhone" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+            <option value="" disabled selected>Select a phone number</option>
+          </select>
+        </div>
+        <div>
+          <label for="recipientName" class="block text-sm font-medium text-gray-700">Recipient's Full Name</label>
+          <input type="text" id="recipientName" name="recipientName" readonly class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-gray-100">
+        </div>
+        <div>
+          <label for="recipientUID" class="block text-sm font-medium text-gray-700">Recipient's UID</label>
+          <input type="text" id="recipientUID" name="recipientUID" readonly class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-gray-100">
+        </div>
+        <div>
+          <label for="amount" class="block text-sm font-medium text-gray-700">Amount (₱)</label>
+          <input type="number" id="amount" name="amount" required min="1" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+        </div>
+        <div>
+          <label for="message" class="block text-sm font-medium text-gray-700">Message (Optional)</label>
+          <textarea id="message" name="message" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" placeholder="e.g., Payment for services"></textarea>
+        </div>
+        <button type="submit" class="w-full bg-primary text-white py-2 rounded font-medium hover:bg-primary-dark">Send Transfer</button>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    const qr = new QRious({
+      element: document.getElementById('qrCodeCanvas'),
+      size: 200,
+      value: ''
+    });
+
+    const refreshQR = document.getElementById('refreshQR');
+    const recipientPhoneDropdown = document.getElementById('recipientPhone');
+    const recipientNameInput = document.getElementById('recipientName');
+    const recipientUIDInput = document.getElementById('recipientUID');
+
+    // Fetch users with phone numbers and populate the dropdown
+    async function fetchUsersWithPhoneNumbers() {
+      try {
+        const usersSnapshot = await db.collection('users').where('phoneNumber', '!=', '').get();
+        if (usersSnapshot.empty) {
+          console.log('No users with phone numbers found.');
+          return;
+        }
+
+        usersSnapshot.forEach(doc => {
+          const userData = doc.data();
+          const option = document.createElement('option');
+          option.value = userData.phoneNumber; // Use phone number as the value
+          option.textContent = userData.phoneNumber; // Display phone number in the dropdown
+          recipientPhoneDropdown.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error fetching users with phone numbers:', error);
+      }
+    }
+
+    // Auto-populate recipient's name and UID when a phone number is selected
+    recipientPhoneDropdown.addEventListener('change', async (e) => {
+      const selectedPhone = e.target.value;
+      if (!selectedPhone) return;
+
+      try {
+        const usersSnapshot = await db.collection('users').where('phoneNumber', '==', selectedPhone).get();
+        if (usersSnapshot.empty) {
+          alert('Recipient not found.');
+          return;
+        }
+
+        const recipientDoc = usersSnapshot.docs[0];
+        const recipientData = recipientDoc.data();
+        recipientNameInput.value = `${recipientData.firstName} ${recipientData.lastName}`;
+        recipientUIDInput.value = recipientDoc.id;
+
+        // Update QR code with recipient's details
+        const qrData = JSON.stringify({
+          name: recipientData.firstName + ' ' + recipientData.lastName,
+          id: recipientDoc.id,
+          phone: recipientData.phoneNumber
+        });
+        qr.value = qrData;
+      } catch (error) {
+        console.error('Error fetching recipient details:', error);
+      }
+    });
+
+    function generateQR() {
+      auth.onAuthStateChanged(async user => {
+        if (!user) {
+          window.location.href = 'signin.html';
+          return;
+        }
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+          const data = userDoc.data();
+          const qrData = JSON.stringify({
+            name: data.firstName + ' ' + data.lastName,
+            id: user.uid,
+            phone: data.phoneNumber
+          });
+          qr.value = qrData;
+        }
+      });
+    }
+
+    refreshQR.addEventListener('click', () => {
+      generateQR();
+    });
+
+    // Initial QR Code generation and fetch users
+    generateQR();
+    fetchUsersWithPhoneNumbers();
+
+    const transferForm = document.getElementById('transferForm');
+
+    transferForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const recipientPhone = document.getElementById('recipientPhone').value.trim();
+      const amount = parseFloat(document.getElementById('amount').value);
+      const message = document.getElementById('message').value.trim();
+      const user = auth.currentUser;
+
+      if (!user) {
+        alert('You must be signed in to perform this action.');
+        window.location.href = 'signin.html';
+        return;
+      }
+
+      if (!recipientPhone) {
+        alert('Please select a recipient.');
+        return;
+      }
+
+      if (amount <= 0) {
+        alert('Please enter an amount greater than zero.');
+        return;
+      }
+
+      try {
+        // Fetch recipient user by phone number
+        const recipientsSnapshot = await db.collection('users').where('phoneNumber', '==', recipientPhone).get();
+        if (recipientsSnapshot.empty) {
+          alert('Recipient not found. Please check the phone number and try again.');
+          return;
+        }
+
+        const recipientDoc = recipientsSnapshot.docs[0];
+        const recipientData = recipientDoc.data();
+
+        // Create transfer transaction
+        const transferRef = await db.collection('transfers').add({
+          senderId: user.uid,
+          recipientId: recipientDoc.id,
+          amount: amount,
+          message: message || '',
+          status: 'pending',
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // Create notification for recipient
+        await db.collection('notifications').add({
+          userId: recipientDoc.id,
+          type: 'transfer',
+          message: `You have received a transfer of ₱${amount} from ${user.displayName || user.email}.`,
+          transferId: transferRef.id,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          read: false
+        });
+
+        alert('Transfer request sent successfully and is pending confirmation!');
+        transferForm.reset();
+      } catch (error) {
+        console.error('Error sending transfer:', error);
+        alert('There was an error processing your transfer. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>
+

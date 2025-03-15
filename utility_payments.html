@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Panyero Wallet - Utility Payments</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="/manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #18385e;
+        }
+        .bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+        .border-primary {
+            border-color: var(--primary-color) !important;
+        }
+        .hover\:bg-primary-dark:hover {
+            background-color: #122a47 !important;
+        }
+        .utility-card {
+            transition: transform 0.2s ease-in-out;
+        }
+        .utility-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+    <!-- Header -->
+    <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center space-x-4 sticky top-0 z-50">
+        <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+        <div class="flex-1 text-center">Utility Payments</div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+        <!-- Wallet Balance -->
+        <div class="bg-white rounded-lg p-4 shadow w-full">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-sm text-gray-600">Available Balance</p>
+                    <p id="balanceAmount" class="text-2xl font-bold">₱0.00</p>
+                </div>
+                <button onclick="window.location.href='cashin.html'" class="bg-primary text-white py-2 px-4 rounded hover:bg-primary-dark">
+                    Cash In
+                </button>
+            </div>
+        </div>
+
+        <!-- Utility Categories -->
+        <div class="grid grid-cols-2 gap-4 w-full">
+            <!-- Electricity -->
+            <div class="utility-card bg-white rounded-lg p-4 shadow cursor-pointer" onclick="window.location.href='utility_electricity.html'">
+                <div class="flex flex-col items-center">
+                    <span class="material-icons text-4xl text-primary mb-2">bolt</span>
+                    <p class="text-center font-medium">Electricity</p>
+                </div>
+            </div>
+            
+            <!-- Water -->
+            <div class="utility-card bg-white rounded-lg p-4 shadow cursor-pointer" onclick="window.location.href='utility_water.html'">
+                <div class="flex flex-col items-center">
+                    <span class="material-icons text-4xl text-primary mb-2">water_drop</span>
+                    <p class="text-center font-medium">Water</p>
+                </div>
+            </div>
+            
+            <!-- Internet -->
+            <div class="utility-card bg-white rounded-lg p-4 shadow cursor-pointer" onclick="window.location.href='utility_internet.html'">
+                <div class="flex flex-col items-center">
+                    <span class="material-icons text-4xl text-primary mb-2">wifi</span>
+                    <p class="text-center font-medium">Internet</p>
+                </div>
+            </div>
+            
+            <!-- Gas -->
+            <div class="utility-card bg-white rounded-lg p-4 shadow cursor-pointer" onclick="window.location.href='utility_gas.html'">
+                <div class="flex flex-col items-center">
+                    <span class="material-icons text-4xl text-primary mb-2">local_fire_department</span>
+                    <p class="text-center font-medium">Gas</p>
+                </div>
+            </div>
+            
+            <!-- Mobile Load -->
+            <div class="utility-card bg-white rounded-lg p-4 shadow cursor-pointer" onclick="window.location.href='mobile_topup.html'">
+                <div class="flex flex-col items-center">
+                    <span class="material-icons text-4xl text-primary mb-2">smartphone</span>
+                    <p class="text-center font-medium">Mobile Load</p>
+                </div>
+            </div>
+            
+            <!-- Cable TV -->
+            <div class="utility-card bg-white rounded-lg p-4 shadow cursor-pointer" onclick="window.location.href='utility_cable.html'">
+                <div class="flex flex-col items-center">
+                    <span class="material-icons text-4xl text-primary mb-2">tv</span>
+                    <p class="text-center font-medium">Cable TV</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Payments -->
+        <div class="bg-white rounded-lg p-4 shadow w-full">
+            <h2 class="text-lg font-semibold mb-4">Recent Payments</h2>
+            <div id="recentPayments" class="space-y-3">
+                <!-- Payments will be populated here -->
+                <p class="text-gray-500 text-sm text-center">No recent payments found.</p>
+            </div>
+        </div>
+
+        <!-- Payment Tips -->
+        <div class="bg-white rounded-lg p-4 shadow w-full">
+            <h2 class="text-lg font-semibold mb-2">Payment Tips</h2>
+            <ul class="text-sm text-gray-600 space-y-2 list-disc pl-5">
+                <li>Pay your bills at least 3 days before the due date to avoid late fees.</li>
+                <li>Set up reminders for recurring bills to avoid missing payments.</li>
+                <li>Keep your receipt numbers for reference in case of payment issues.</li>
+                <li>Check your balance before making payments to ensure sufficient funds.</li>
+            </ul>
+        </div>
+    </main>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+            authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+            projectId: "explore-malaysia-6d28d",
+            storageBucket: "explore-malaysia-6d28d.appspot.com",
+            messagingSenderId: "869053244601",
+            appId: "1:869053244601:web:29ad09ff454b43230be768",
+            measurementId: "G-5XJK1H7KWX"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Fetch and display wallet balance
+        function fetchWalletBalance() {
+            const user = auth.currentUser;
+            if (user) {
+                db.collection('users').doc(user.uid).get()
+                    .then(doc => {
+                        if (doc.exists) {
+                            const balance = doc.data().balance || 0;
+                            document.getElementById('balanceAmount').textContent = `₱${balance.toFixed(2)}`;
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error fetching wallet balance:", error);
+                    });
+            }
+        }
+
+        // Fetch and display recent payments
+        function fetchRecentPayments() {
+            const user = auth.currentUser;
+            if (user) {
+                db.collection('utility_payments')
+                    .where('userId', '==', user.uid)
+                    .orderBy('timestamp', 'desc')
+                    .limit(5)
+                    .get()
+                    .then(querySnapshot => {
+                        const recentPaymentsDiv = document.getElementById('recentPayments');
+                        
+                        if (querySnapshot.empty) {
+                            recentPaymentsDiv.innerHTML = '<p class="text-gray-500 text-sm text-center">No recent payments found.</p>';
+                            return;
+                        }
+                        
+                        recentPaymentsDiv.innerHTML = '';
+                        querySnapshot.forEach(doc => {
+                            const payment = doc.data();
+                            const date = payment.timestamp ? new Date(payment.timestamp.seconds * 1000).toLocaleDateString() : 'N/A';
+                            
+                            const paymentItem = document.createElement('div');
+                            paymentItem.className = 'flex justify-between items-center border-b border-gray-200 pb-2';
+                            paymentItem.innerHTML = `
+                                <div>
+                                    <p class="font-medium">${payment.provider || 'Unknown Provider'}</p>
+                                    <p class="text-xs text-gray-500">${payment.accountNumber || 'N/A'} • ${date}</p>
+                                </div>
+                                <p class="font-medium">₱${payment.amount ? payment.amount.toFixed(2) : '0.00'}</p>
+                            `;
+                            
+                            recentPaymentsDiv.appendChild(paymentItem);
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Error fetching recent payments:", error);
+                        document.getElementById('recentPayments').innerHTML = '<p class="text-red-500 text-sm text-center">Error loading recent payments.</p>';
+                    });
+            }
+        }
+
+        // Check authentication state
+        auth.onAuthStateChanged(user => {
+            if (!user) {
+                window.location.href = 'signin.html';
+                return;
+            }
+            
+            fetchWalletBalance();
+            fetchRecentPayments();
+        });
+    </script>
+</body>
+</html>
+

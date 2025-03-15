@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- Mobile-first, disable zoom -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - Home</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <style>
+    :root {
+      --primary-color: #18385e;
+    }
+    .bg-primary {
+      background-color: var(--primary-color) !important;
+    }
+    .text-primary {
+      color: var(--primary-color) !important;
+    }
+    .border-primary {
+      border-color: var(--primary-color) !important;
+    }
+    .hover\:bg-primary-dark:hover {
+      background-color: #122a47 !important;
+    }
+</style>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
+
+  <!-- Header -->
+  <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center space-x-2">
+        <div class="w-28 h-11 bg-no-repeat bg-center bg-contain" style="background-image: url('assets/images/logo/logo.png'), url('https://via.placeholder.com/112x44?text=Panyero')"></div>
+    </div>
+    <div class="flex items-center space-x-4">
+        <span class="material-icons text-2xl cursor-pointer" onclick="window.location.href='notifications.html'">notifications</span>
+        <span class="material-icons text-2xl cursor-pointer" id="logoutBtn">logout</span>
+    </div>
+</header>
+
+  <!-- Top Nav -->
+  <nav class="bg-white flex space-x-8 overflow-x-auto border-b border-gray-300 p-2 text-sm font-semibold">
+    <a href="index.html" class="active text-gray-700 border-b-4 border-primary pb-1">Wallet</a>
+    <a href="savings.html" class="text-gray-500">Savings</a>
+    <a href="credit.html" class="text-gray-500">Credit</a>
+    <a href="loans.html" class="text-gray-500">Loans</a>
+    <a href="cards.html" class="text-gray-500">Cards</a>
+</nav>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+    <!-- Wallet Balance Block -->
+    <div class="bg-white rounded-lg p-4 shadow w-full relative">
+      <div class="flex items-center justify-between mb-3">
+        <div id="userName" class="text-xs font-semibold text-gray-800"></div>
+        <div id="userMobile" class="text-xs text-gray-500"></div>
+      </div>
+
+      <div class="flex items-center justify-between">
+        <div>
+          <div id="balanceAmount" class="text-2xl font-bold text-black">₱0</div>
+          <div class="text-sm text-gray-600">Available balance</div>
+        </div>
+        <span class="material-icons text-xl text-gray-500 cursor-pointer" id="toggleBalanceBtn">
+          visibility
+        </span>
+      </div>
+      
+      <div class="flex space-x-4 w-full mt-3">
+        <button onclick="window.location.href='cashin.html'" class="flex-1 bg-primary text-white py-2 rounded font-medium hover:bg-primary-dark">
+          Cash In
+        </button>
+        <button onclick="window.location.href='transfer.html'" class="flex-1 bg-primary text-white py-2 rounded font-medium hover:bg-primary-dark">
+          Transfer
+        </button>
+      </div>
+    </div>
+
+    <!-- 4 icons per row, smaller icons -->
+    <div class="grid grid-cols-4 gap-3 w-full">
+      <div class="bg-white rounded-lg shadow flex flex-col items-center p-2 cursor-pointer"
+           onclick="window.location.href='maritime.html'">
+        <span class="material-icons bg-gray-200 rounded-md w-8 h-8 flex items-center justify-center text-gray-700 mb-1 text-base">
+          anchor
+        </span>
+        <div class="text-xs font-semibold text-gray-600">Maritime</div>
+      </div>
+      <div class="bg-white rounded-lg shadow flex flex-col items-center p-2 cursor-pointer"
+           onclick="window.location.href='finance.html'">
+        <span class="material-icons bg-gray-200 rounded-md w-8 h-8 flex items-center justify-center text-gray-700 mb-1 text-base">
+          business_center
+        </span>
+        <div class="text-xs font-semibold text-gray-600">Finance</div>
+      </div>
+      <div class="bg-white rounded-lg shadow flex flex-col items-center p-2 cursor-pointer"
+           onclick="window.location.href='academy.html'">
+        <span class="material-icons bg-gray-200 rounded-md w-8 h-8 flex items-center justify-center text-gray-700 mb-1 text-base">
+          school
+        </span>
+        <div class="text-xs font-semibold text-gray-600">Academy</div>
+      </div>
+      <div class="bg-white rounded-lg shadow flex flex-col items-center p-2 cursor-pointer"
+           onclick="window.location.href='media.html'">
+        <span class="material-icons bg-gray-200 rounded-md w-8 h-8 flex items-center justify-center text-gray-700 mb-1 text-base">
+          movie
+        </span>
+        <div class="text-xs font-semibold text-gray-600">Media</div>
+      </div>
+      <div class="bg-white rounded-lg shadow flex flex-col items-center p-2 cursor-pointer"
+           onclick="window.location.href='shops.html'">
+        <span class="material-icons bg-gray-200 rounded-md w-8 h-8 flex items-center justify-center text-gray-700 mb-1 text-base">
+          store
+        </span>
+        <div class="text-xs font-semibold text-gray-600">Shop</div>
+      </div>
+      <div class="bg-white rounded-lg shadow flex flex-col items-center p-2 cursor-pointer"
+           onclick="window.location.href='gamehub.html'">
+        <span class="material-icons bg-gray-200 rounded-md w-8 h-8 flex items-center justify-center text-gray-700 mb-1 text-base">
+          sports_esports
+        </span>
+        <div class="text-xs font-semibold text-gray-600">Games</div>
+      </div>
+      <div class="bg-white rounded-lg shadow flex flex-col items-center p-2 cursor-pointer"
+           onclick="window.location.href='lottery.html'">
+        <span class="material-icons bg-gray-200 rounded-md w-8 h-8 flex items-center justify-center text-gray-700 mb-1 text-base">
+          confirmation_number
+        </span>
+        <div class="text-xs font-semibold text-gray-600">Lottery</div>
+      </div>
+      <div class="bg-white rounded-lg shadow flex flex-col items-center p-2 cursor-pointer"
+           onclick="window.location.href='services.html'">
+        <span class="material-icons bg-gray-200 rounded-md w-8 h-8 flex items-center justify-center text-gray-700 mb-1 text-base">
+          more_horiz
+        </span>
+        <div class="text-xs font-semibold text-gray-600">More</div>
+      </div>
+    </div>
+
+    <!-- Lighter color banner with an icon or image -->
+    <div class="bg-green-100 rounded-lg shadow p-4 w-full flex items-center space-x-3">
+      <img src="assets/images/logo/panyero.png" alt="Panyero Banner Logo" class="w-10 h-10 object-cover rounded-md">
+      <div class="flex-1 text-gray-700 text-sm font-medium">
+        <strong>Panyero Banner</strong><br>
+        Exclusive offers and updates here.
+      </div>
+    </div>
+
+    <!-- Transactions list with empty fallback -->
+    <div class="bg-white rounded-lg shadow p-4 w-full">
+      <h3 class="text-base font-semibold mb-2">Recent Transactions</h3>
+      <ul id="transactionList" class="space-y-2">
+        <!-- If no transactions, fallback displayed -->
+      </ul>
+    </div>
+  </main>
+
+  <!-- Bottom Nav (icons only, QR bigger + elevated) -->
+  <div class="bg-white border-t border-gray-300 w-full max-w-sm flex justify-around items-center py-2 fixed bottom-0 left-1/2 transform -translate-x-1/2">
+    <div class="nav-item cursor-pointer">
+      <span class="material-icons text-gray-600 text-xl">anchor</span>
+    </div>
+    <div class="nav-item cursor-pointer">
+      <span class="material-icons text-gray-600 text-xl">account_balance_wallet</span>
+    </div>
+    <div class="nav-item qr cursor-pointer">
+      <span class="material-icons text-gray-600 text-xl transform scale-125 -mt-1">qr_code_scanner</span>
+    </div>
+    <div class="nav-item cursor-pointer">
+      <span class="material-icons text-gray-600 text-xl">dns</span>
+    </div>
+    <div class="nav-item cursor-pointer">
+      <span class="material-icons text-gray-600 text-xl">person</span>
+    </div>
+  </div>
+
+  <script>
+    let showBalance = true; // default show/hide state
+    const logoutBtn = document.getElementById('logoutBtn');
+    const balanceAmount = document.getElementById('balanceAmount');
+    const transactionList = document.getElementById('transactionList');
+    const userName = document.getElementById('userName');
+    const userMobile = document.getElementById('userMobile');
+    const toggleBalanceBtn = document.getElementById('toggleBalanceBtn');
+    let currentBalance = 0;
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        // Not logged in, redirect
+        window.location.href = 'signin.html';
+        return;
+      }
+      const userDoc = await db.collection('users').doc(user.uid).get();
+      if (userDoc.exists) {
+        const data = userDoc.data();
+        const fName = data.firstName || '';
+        const lName = data.lastName || '';
+        const userDisplayName = `${fName} ${lName}`.trim();
+        userName.textContent = userDisplayName || 'Panyero User';
+
+        const userMobileNum = data.mobile || '';
+        userMobile.textContent = userMobileNum; // ex. '09171234567'
+
+        currentBalance = data.balance || 0;
+        updateBalanceText();
+
+        transactionList.innerHTML = '';
+        if (Array.isArray(data.transactions) && data.transactions.length) {
+          data.transactions.forEach(tx => {
+            const li = document.createElement('li');
+            li.className = "flex justify-between border-b border-gray-200 pb-1.5";
+            li.innerHTML = `
+              <span>${tx.type || 'N/A'}</span>
+              <span>₱${tx.amount || 0}</span>
+            `;
+            transactionList.appendChild(li);
+          });
+        } else {
+          const li = document.createElement('li');
+          li.textContent = 'No recent transactions';
+          transactionList.appendChild(li);
+        }
+      }
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      auth.signOut()
+        .then(() => window.location.href = 'signin.html')
+        .catch(err => console.error('Logout error:', err));
+    });
+
+    // Toggle function
+    function updateBalanceText() {
+      if (showBalance) {
+        balanceAmount.textContent = `₱${currentBalance}`;
+        toggleBalanceBtn.textContent = 'visibility';
+      } else {
+        // Hide it
+        let hiddenBal = '****';
+        if (String(currentBalance).length > 4) {
+          hiddenBal = '****' + String(currentBalance).slice(-2);
+        }
+        balanceAmount.textContent = hiddenBal;
+        toggleBalanceBtn.textContent = 'visibility_off';
+      }
+    }
+
+    toggleBalanceBtn.addEventListener('click', () => {
+      showBalance = !showBalance;
+      updateBalanceText();
+    });
+  </script>
+</body>
+</html>
+

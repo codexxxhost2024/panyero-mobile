@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - Cash In</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+  </script>
+
+  <!-- Header -->
+  <header class="bg-green-600 text-white p-4 text-lg font-semibold flex items-center space-x-4 sticky top-0 z-50">
+    <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+    <div class="flex-1 text-center">Cash In</div>
+  </header>
+
+  <!-- Navigation Bar (Optional: You can remove if not needed) -->
+  <nav class="bg-white flex space-x-8 overflow-x-auto border-b border-gray-300 p-2 text-sm font-semibold">
+    <a href="index.html" class="text-gray-500">Wallet</a>
+    <a href="savings.html" class="text-gray-500">Savings</a>
+    <a href="credit.html" class="text-gray-500">Credit</a>
+    <a href="loans.html" class="text-gray-500">Loans</a>
+    <a href="cards.html" class="text-gray-500">Cards</a>
+  </nav>
+
+  <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+    <div class="bg-white rounded-lg p-4 shadow w-full">
+      <h2 class="text-xl font-semibold mb-4">Cash In</h2>
+      <form id="cashInForm" class="space-y-4">
+        <div>
+          <label for="recipientType" class="block text-sm font-medium text-gray-700">Cash In To</label>
+          <select id="recipientType" name="recipientType" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500">
+            <option value="">Select Recipient</option>
+            <option value="admin">Admin</option>
+            <option value="merchant">Merchant</option>
+            <option value="depot">Other Users (Depot)</option>
+          </select>
+        </div>
+
+        <div id="recipientOptions" class="space-y-4 hidden">
+          <div>
+            <label for="recipient" class="block text-sm font-medium text-gray-700">Select Recipient</label>
+            <select id="recipient" name="recipient" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500">
+              <!-- Hardcoded Maya and GCash accounts -->
+              <option value="maya">MAYA Account - 09211514034</option>
+              <option value="gcash">GCash Account - 09211514034</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Receiving Account</label>
+            <div id="receivingAccount" class="mt-1 p-2 border border-gray-300 rounded-md">
+              <!-- This will be populated with the receiver's username and account details -->
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label for="amount" class="block text-sm font-medium text-gray-700">Amount</label>
+          <input type="number" id="amount" name="amount" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500" min="1">
+        </div>
+
+        <div>
+          <label for="paymentMethod" class="block text-sm font-medium text-gray-700">Payment Method</label>
+          <select id="paymentMethod" name="paymentMethod" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500">
+            <option value="">Select Method</option>
+            <!-- Hardcoded payment methods -->
+            <option value="maya">MAYA</option>
+            <option value="gcash">GCash</option>
+          </select>
+        </div>
+
+        <!-- Payment Method Specific Options -->
+        <div id="paymentDetails" class="space-y-4 hidden">
+          <!-- Maya Options -->
+          <div id="mayaOptions" class="hidden">
+            <div>
+              <label for="mayaAccount" class="block text-sm font-medium text-gray-700">MAYA Account Number</label>
+              <input type="text" id="mayaAccount" name="mayaAccount" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500" value="09211514034" readonly>
+            </div>
+            <div>
+              <label for="mayaAccountName" class="block text-sm font-medium text-gray-700">MAYA Account Name</label>
+              <input type="text" id="mayaAccountName" name="mayaAccountName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500" value="Cyrie Letada" readonly>
+            </div>
+          </div>
+
+          <!-- GCash Options -->
+          <div id="gcashOptions" class="hidden">
+            <div>
+              <label for="gcashNumber" class="block text-sm font-medium text-gray-700">GCash Number</label>
+              <input type="text" id="gcashNumber" name="gcashNumber" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500" value="09211514034" readonly>
+            </div>
+            <div>
+              <label for="gcashAccountName" class="block text-sm font-medium text-gray-700">GCash Account Name</label>
+              <input type="text" id="gcashAccountName" name="gcashAccountName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500" value="Cyrie Letada" readonly>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label for="proof" class="block text-sm font-medium text-gray-700">Upload Proof of Payment</label>
+          <input type="file" id="proof" name="proof" accept="image/*" required class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-green-600 file:text-white hover:file:bg-green-700">
+        </div>
+
+        <button type="submit" class="w-full bg-green-600 text-white py-2 rounded font-medium">Submit</button>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    const cashInForm = document.getElementById('cashInForm');
+    const recipientType = document.getElementById('recipientType');
+    const recipientOptions = document.getElementById('recipientOptions');
+    const recipientSelect = document.getElementById('recipient');
+    const receivingAccount = document.getElementById('receivingAccount');
+    const paymentMethod = document.getElementById('paymentMethod');
+    const paymentDetails = document.getElementById('paymentDetails');
+    const mayaOptions = document.getElementById('mayaOptions');
+    const gcashOptions = document.getElementById('gcashOptions');
+
+    // Show recipient options when recipient type is selected
+    recipientType.addEventListener('change', () => {
+      const type = recipientType.value;
+      if (type === 'admin') {
+        recipientOptions.classList.remove('hidden');
+      } else {
+        recipientOptions.classList.add('hidden');
+      }
+    });
+
+    // Show payment method specific fields
+    paymentMethod.addEventListener('change', () => {
+      const method = paymentMethod.value;
+      paymentDetails.classList.remove('hidden');
+      mayaOptions.classList.add('hidden');
+      gcashOptions.classList.add('hidden');
+
+      if (method === 'maya') {
+        mayaOptions.classList.remove('hidden');
+        receivingAccount.innerHTML = `
+          <p class="text-sm text-gray-700"><strong>Account Name:</strong> Cyrie Letada</p>
+          <p class="text-sm text-gray-700"><strong>Account Number:</strong> 090512345678</p>
+        `;
+      } else if (method === 'gcash') {
+        gcashOptions.classList.remove('hidden');
+        receivingAccount.innerHTML = `
+          <p class="text-sm text-gray-700"><strong>Account Name:</strong> Cyrie Letada</p>
+          <p class="text-sm text-gray-700"><strong>Account Number:</strong> 091712345678</p>
+        `;
+      }
+    });
+
+    // Handle form submission
+    cashInForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const type = recipientType.value;
+      const recipientId = recipientSelect.value;
+      const amount = parseFloat(document.getElementById('amount').value);
+      const method = paymentMethod.value;
+      const proofFile = document.getElementById('proof').files[0];
+      const user = auth.currentUser;
+
+      if (!user) {
+        alert('You must be signed in to perform this action.');
+        window.location.href = 'signin.html';
+        return;
+      }
+
+      if (!(type && recipientId && amount > 0 && method && proofFile)) {
+        alert('Please fill out all required fields.');
+        return;
+      }
+
+      try {
+        // Upload proof to Firebase Storage
+        const storageRef = storage.ref();
+        const proofRef = storageRef.child(`proofs/${user.uid}/${Date.now()}_${proofFile.name}`);
+        const snapshot = await proofRef.put(proofFile);
+        const proofURL = await snapshot.ref.getDownloadURL();
+
+        // Create transaction for the user
+        const userTransactionRef = await db.collection('users').doc(user.uid).collection('transactions').add({
+          type: 'cash_in',
+          recipientType: type,
+          recipientId: recipientId,
+          amount: amount,
+          paymentMethod: method,
+          proofURL: proofURL,
+          status: 'pending', // Set status to pending
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // Create transaction for the admin
+        const adminTransactionRef = await db.collection('admin_transactions').add({
+          userId: user.uid,
+          userEmail: user.email,
+          userTransactionId: userTransactionRef.id, // Link to the user's transaction
+          type: 'cash_in',
+          amount: amount,
+          paymentMethod: method,
+          proofURL: proofURL,
+          status: 'pending',
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // Create notifications for both user and admin
+        await db.collection('notifications').add({
+          userId: user.uid,
+          type: 'cash_in',
+          message: `Your cash-in request of ₱${amount} is pending.`,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          read: false
+        });
+
+        // Notify all admins
+        const adminsSnapshot = await db.collection('users').where('is_admin', '==', true).get();
+        adminsSnapshot.forEach(async (doc) => {
+          await db.collection('notifications').add({
+            userId: doc.id,
+            type: 'cash_in',
+            message: `User ${user.email} has requested a cash-in of ₱${amount}.`,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            read: false
+          });
+        });
+
+        alert('Cash In request submitted successfully and is pending confirmation!');
+        cashInForm.reset();
+        recipientOptions.classList.add('hidden');
+        receivingAccount.innerHTML = '';
+        paymentMethod.innerHTML = '<option value="">Select Method</option>';
+        paymentDetails.classList.add('hidden');
+        mayaOptions.classList.add('hidden');
+        gcashOptions.classList.add('hidden');
+      } catch (error) {
+        console.error('Error submitting cash in request:', error);
+        alert('There was an error submitting your request. Please try again.');
+      }
+    });
+
+    // Ensure user is authenticated
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = 'signin.html';
+      }
+    });
+  </script>
+</body>
+</html>
+

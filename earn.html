@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - Earn</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #18385e;
+    }
+    .bg-primary {
+      background-color: var(--primary-color) !important;
+    }
+    .text-primary {
+      color: var(--primary-color) !important;
+    }
+    .border-primary {
+      border-color: var(--primary-color) !important;
+    }
+    .hover\:bg-primary-dark:hover {
+      background-color: #122a47 !important;
+    }
+    .earn-card {
+      transition: transform 0.2s ease-in-out;
+    }
+    .earn-card:hover {
+      transform: translateY(-5px);
+    }
+  </style>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
+
+  <!-- Header -->
+  <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center space-x-4 sticky top-0 z-50">
+    <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+    <div class="flex-1 text-center">Earn</div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+    <!-- Earnings Overview -->
+    <div class="bg-white rounded-lg p-4 shadow w-full">
+      <h2 class="text-lg font-semibold mb-2">Earnings Overview</h2>
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <p class="text-sm text-gray-600">Total Earnings</p>
+          <p id="totalEarnings" class="text-2xl font-bold">₱0.00</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">This Month</p>
+          <p id="monthlyEarnings" class="text-2xl font-bold">₱0.00</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Earning Opportunities -->
+    <div class="bg-white rounded-lg p-4 shadow w-full">
+      <h2 class="text-lg font-semibold mb-4">Earning Opportunities</h2>
+      <div class="grid grid-cols-2 gap-4">
+        <!-- Referrals -->
+        <div class="earn-card bg-blue-50 p-4 rounded-lg shadow cursor-pointer" onclick="window.location.href='affiliate.html'">
+          <div class="flex flex-col items-center">
+            <span class="material-icons text-4xl text-primary mb-2">people</span>
+            <p class="text-center font-medium">Referrals</p>
+            <p class="text-xs text-center text-gray-600">Earn by inviting friends</p>
+          </div>
+        </div>
+        
+        <!-- Tasks -->
+        <div class="earn-card bg-green-50 p-4 rounded-lg shadow cursor-pointer" onclick="window.location.href='tasks.html'">
+          <div class="flex flex-col items-center">
+            <span class="material-icons text-4xl text-green-600 mb-2">assignment</span>
+            <p class="text-center font-medium">Tasks</p>
+            <p class="text-xs text-center text-gray-600">Complete tasks to earn</p>
+          </div>
+        </div>
+        
+        <!-- Surveys -->
+        <div class="earn-card bg-purple-50 p-4 rounded-lg shadow cursor-pointer" onclick="window.location.href='surveys.html'">
+          <div class="flex flex-col items-center">
+            <span class="material-icons text-4xl text-purple-600 mb-2">poll</span>
+            <p class="text-center font-medium">Surveys</p>
+            <p class="text-xs text-center text-gray-600">Share your opinion</p>
+          </div>
+        </div>
+        
+        <!-- Games -->
+        <div class="earn-card bg-yellow-50 p-4 rounded-lg shadow cursor-pointer" onclick="window.location.href='games.html'">
+          <div class="flex flex-col items-center">
+            <span class="material-icons text-4xl text-yellow-600 mb-2">sports_esports</span>
+            <p class="text-center font-medium">Games</p>
+            <p class="text-xs text-center text-gray-600">Play and earn rewards</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Earnings -->
+    <div class="bg-white rounded-lg p-4 shadow w-full">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-semibold">Recent Earnings</h2>
+        <a href="#" class="text-primary text-sm">View All</a>
+      </div>
+      <div id="recentEarnings" class="space-y-3">
+        <!-- Placeholder for no earnings -->
+        <p class="text-gray-500 text-sm text-center">No recent earnings found.</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Ensure user is authenticated
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = 'signin.html';
+        return;
+      }
+      
+      // Fetch user earnings data (placeholder for now)
+      document.getElementById('totalEarnings').textContent = '₱0.00';
+      document.getElementById('monthlyEarnings').textContent = '₱0.00';
+      
+      // In a real app, you would fetch actual earnings data from Firestore
+      // For example:
+      /*
+      db.collection('users').doc(user.uid).get()
+        .then(doc => {
+          if (doc.exists) {
+            const data = doc.data();
+            document.getElementById('totalEarnings').textContent = `₱${(data.totalEarnings || 0).toFixed(2)}`;
+            document.getElementById('monthlyEarnings').textContent = `₱${(data.monthlyEarnings || 0).toFixed(2)}`;
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching earnings data:", error);
+        });
+      */
+    });
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Panyero Chat & Voice</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/2.1.3/marked.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #18385e;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #ffffff; /* White background */
+        }
+
+        @keyframes breathing {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .breathing {
+            animation: breathing 1.5s infinite;
+        }
+
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: var(--primary-color); /* Updated to primary color */
+            padding: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        /* Title styling */
+        .sticky-header h1 {
+            font-size: 1.25rem; /* Reduced font size */
+            font-weight: 700;
+            color: #e5e7eb; /* Light gray */
+        }
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .main-content-padded {
+          padding: 1rem 1rem; /* 16px padding on left and right */
+        }
+      
+        .header-content-padded {
+          padding: 1rem 20px; /* 20px padding on left and right */
+          margin-left: auto;
+          margin-right: auto;
+          width: 100%;
+        }
+
+        #chat::-webkit-scrollbar {
+            width: 0;
+        }
+
+        /* Dropdown styling */
+        #persona {
+            background-color: #ffffff; /* white background */
+            color: #333333; /* dark text color */
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #4b5563;
+            width: 100%; /* Full width */
+            margin-left: 0px; /* 20px space on the left */
+            margin-right: 0px; /* 20px space on the right */
+        }
+
+        /* Bottom Sheet for Email */
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #374151;
+            padding: 1rem;
+            border-top-left-radius: 0.5rem;
+            border-top-right-radius: 0.5rem;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+            z-index: 1000; /* Ensure it's above other content */
+        }
+
+        .bottom-sheet.active {
+            transform: translateY(0);
+        }
+        /* Dynamic Intro */
+        #intro {
+            margin-bottom: 1rem; /* Add spacing below intro */
+            text-align: center;
+            color: #333333; /* Dark text color */
+        }
+
+        /* Chat area */
+        #chat {
+            background-color: #f0f0f0; /* Slightly lighter than white */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-y: auto;
+            flex-grow: 1;
+            margin-bottom: 1rem;
+        }
+
+        /* Sticky Input Area */
+        .sticky-bottom {
+            position: sticky;
+            bottom: 0;
+            width: 100%;
+            background-color: #f0f0f0; /* Match body or header color */
+            z-index: 500;
+        }
+
+        /* Input field */
+        #message {
+            flex-grow: 1;
+            background-color: #ffffff; /* white */
+            color: #333333; /* dark */
+        }
+
+        /* Placeholder text */
+        #message::placeholder {
+            color: #9ca3af; /* Lighter gray placeholder */
+        }
+              /* Button styling */
+        .button-container button {
+            background-color: var(--primary-color); /* Updated to primary color */
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .button-container button:hover {
+            background-color: #122a47; /* Darker primary color on hover */
+        }
+
+        .button-container button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5); /* Focus ring */
+        }
+
+        /* Mic button */
+        #voiceButton {
+            background-color: #4b5563; /* Gray */
+        }
+
+        #voiceButton:hover {
+            background-color: #6b7280; /* Darker gray on hover */
+        }
+    </style>
+</head>
+<body class="text-black">
+    <!-- Sticky Header with Dropdown -->
+    <header class="sticky-header">
+      <div class="header-content-padded">
+        <div class="flex justify-between items-center">
+            <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+            <h1 class="text-xl font-bold"></h1>
+            <div class="flex items-center space-x-2 w-full">
+                <select id="persona" class=" p-2 rounded-md">
+<option value="Deck Officer">Deck Officer</option>
+<option value="Nurse">Nurse</option>
+<option value="Notary Public">Notary Public</option>
+<option value="Receptionist">Receptionist</option>
+<option value="Administrative Assistant">Administrative Assistant</option>
+<option value="Data Entry Clerk">Data Entry Clerk</option>
+<option value="Medical Secretary">Medical Secretary</option>
+<option value="Legal Secretary">Legal Secretary</option>
+<option value="Office Manager">Office Manager</option>
+<option value="Customer Service Representative">Customer Service Representative</option>
+<option value="Bookkeeper">Bookkeeper</option>
+<option value="Human Resources Assistant">Human Resources Assistant</option>
+<option value="Executive Assistant">Executive Assistant</option>
+<option value="Billing Clerk">Billing Clerk</option>
+<option value="Payroll Clerk">Payroll Clerk</option>
+<option value="Inventory Clerk">Inventory Clerk</option>
+<option value="Shipping and Receiving Clerk">Shipping and Receiving Clerk</option>
+<option value="Medical Records Clerk">Medical Records Clerk</option>
+<option value="Library Assistant">Library Assistant</option>
+<option value="Court Clerk">Court Clerk</option>
+<option value="Insurance Clerk">Insurance Clerk</option>
+<option value="Accounting Clerk">Accounting Clerk</option>
+<option value="File Clerk">File Clerk</option>
+<option value="Office Clerk">Office Clerk</option>
+<option value="Clerical Supervisor">Clerical Supervisor</option>
+<option value="Administrative Coordinator">Administrative Coordinator</option>
+<option value="Personal Assistant">Personal Assistant</option>
+<option value="Operations Coordinator">Operations Coordinator</option>
+<option value="Records Management Specialist">Records Management Specialist</option>
+<option value="Customer Support Specialist">Customer Support Specialist</option>
+<option value="Front Desk Coordinator">Front Desk Coordinator</option>
+<option value="Claims Processor">Claims Processor</Claims Processor>
+<option value="Scheduling Coordinator">Scheduling Coordinator</option>
+<option value="Office Support Specialist">Office Support Specialist</option>
+<option value="Registration Clerk">Registration Clerk</option>
+<option value="Compliance Clerk">Compliance Clerk</option>
+<option value="Purchasing Clerk">Purchasing Clerk</option>
+<option value="Mailroom Clerk">Mailroom Clerk</option>
+<option value="Switchboard Operator">Switchboard Operator</option>
+<option value="Travel Coordinator">Travel Coordinator</option>
+<option value="Data Processing Clerk">Data Processing Clerk</option>
+<option value="Medical Billing Specialist">Medical Billing Specialist</option>
+<option value="Document Control Specialist">Document Control Specialist</option>
+<option value="Clerical Assistant">Clerical Assistant</option>
+<option value="Auditing Clerk">Auditing Clerk</option>
+<option value="Tax Clerk">Tax Clerk</option>
+<option value="Front Desk Receptionist">Front Desk Receptionist</option>
+<option value="Office Administrator">Office Administrator</option>
+<option value="Records Clerk">Records Clerk</option>
+<option value="Help Desk Clerk">Help Desk Clerk</option>
+<option value="Information Desk Attendant">Information Desk Attendant</Information Desk Attendant>
+<option value="Travel Agent">Travel Agent</option>
+<option value="Loan Processing Clerk">Loan Processing Clerk</option>
+<option value="Order Entry Clerk">Order Entry Clerk</option>
+<option value="Data Management Specialist">Data Management Specialist</option>
+<option value="Technical Support Representative">Technical Support Representative</option>
+<option value="Timekeeping Clerk">Timekeeping Clerk</option>
+<option value="Quality Control Clerk">Quality Control Clerk</option>
+<option value="Facilities Coordinator">Facilities Coordinator</option>
+<option value="Membership Coordinator">Membership Coordinator</option>
+<option value="Claims Analyst">Claims Analyst</option>
+<option value="Community Outreach Coordinator">Community Outreach Coordinator</option>
+<option value="Virtual Assistant">Virtual Assistant</option>
+<option value="Research Assistant">Research Assistant</option>
+<option value="Litigation Support Specialist">Litigation Support Specialist</option>
+<option value="Training Coordinator">Training Coordinator</Training Coordinator>
+<option value="Translation Specialist">Translation Specialist</option>
+<option value="Archivist Assistant">Archivist Assistant</option>
+<option value="Compliance Coordinator">Compliance Coordinator</option>
+<option value="Document Specialist">Document Specialist</option>
+<option value="Forms Processor">Forms Processor</option>
+<option value="Supply Chain Assistant">Supply Chain Assistant</option>
+<option value="Legal Transcriptionist">Legal Transcriptionist</option>
+<option value="Medical Transcriptionist">Medical Transcriptionist</option>
+<option value="Students">Students</option>
+
+                </select>
+            </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content main-content-padded">
+        <!-- Dynamic Intro -->
+        <div id="intro" class="text-sm text-center mb-4">
+            Hello, I can generate any <span id="selectedPersona">Deck Officer</span> documents.
+        </div>
+
+        <!-- Chat Area -->
+        <div id="chat" class="bg-gray-700 p-3 rounded-lg overflow-y-auto flex-grow mb-4"></div>
+    </main>
+
+    <!-- Input Area -->
+    <div class="sticky-bottom">
+      <form id="form" class="flex p-4">
+          <div class="flex-grow flex items-center border rounded-md overflow-hidden border-gray-600 bg-gray-700">
+              <input id="message" autocomplete="off" type="text" placeholder="Type your message..." class="flex-grow p-3 bg-gray-700 focus:outline-none text-white placeholder-gray-400" />
+          </div>
+          <div class="flex ml-2 space-x-2">
+              <button id="submit" type="submit" class="bg-green-600 hover:bg-green-700 font-bold text-white rounded-md p-3 focus:outline-none">
+                  <span class="material-icons text-white">send</span>
+              </button>
+              <button id="voiceButton" type="button" class="bg-gray-600 hover:bg-gray-500 rounded-md p-3 focus:outline-none text-white">
+                  <span id="micIcon" class="material-icons text-white">mic</span>
+              </button>
+          </div>
+      </form>
+    </div>
+
+    <!-- Bottom Sheet for Email -->
+    <div id="emailSheet" class="bottom-sheet">
+        <h2 class="text-lg font-bold mb-4 text-white">Send Document via Email</h2>
+        <form id="emailForm" class="space-y-4">
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-300">Email Address</label>
+                <input type="email" id="email" name="email" required class="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500">
+            </div>
+            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                Send Email
+            </button>
+        </form>
+    </div>
+
+    <script type="module">
+        import OpenAI from "https://esm.sh/openai";
+
+        const form = document.getElementById("form");
+        const chat = document.getElementById("chat");
+        const message = document.getElementById("message");
+        const voiceButton = document.getElementById("voiceButton");
+        const micIcon = document.getElementById("micIcon");
+        const personaDropdown = document.getElementById("persona");
+        const introText = document.getElementById("intro");
+        const selectedPersonaSpan = document.getElementById("selectedPersona");
+        const emailSheet = document.getElementById("emailSheet");
+        const emailForm = document.getElementById("emailForm");
+
+        const apiKey = "c0d9aeeef6f14e98ad46c8d23e24535b";
+        let systemPrompt = `You are an exceptionally intelligent and versatile assistant capable of creating any type of document for any profession or purpose. Your expertise covers all industries, disciplines, and formats. You possess an unparalleled ability to adapt to specific needs, tones, and styles required for each task. Whether it's legal contracts, medical reports, technical manuals, academic papers, business proposals, or creative writing, you deliver flawless, accurate, and professional results.
+
+You meticulously research to ensure all information is up-to-date, relevant, and tailored to the user's requirements. You excel at understanding complex instructions, interpreting nuances, and producing documents that are clear, concise, and impactful. Your creativity, attention to detail, and ability to anticipate needs make you an indispensable tool for professionals across all fields.
+
+When creating documents, you prioritize clarity, precision, and professionalism while maintaining the appropriate tone—be it formal, technical, persuasive, or casual. You are adept at formatting documents to meet industry standards, ensuring they are visually appealing and easy to navigate. Your goal is to empower users by providing them with high-quality, ready-to-use documents that exceed their expectations.
+
+**For Users in the Philippines:** You are well-versed in local laws, regulations, and standards, utilizing authoritative websites and resources to ensure compliance and currency with Philippine requirements:
+
+- **Government and Legal Resources:** 
+  - Official Gazette of the Philippines
+  - Supreme Court of the Philippines E-Library
+  - Philippine Statistics Authority (PSA)
+  - Bureau of Internal Revenue (BIR)
+  - Securities and Exchange Commission (SEC)
+  - Department of Foreign Affairs (DFA)
+  - Social Security System (SSS)
+  - Philippine Health Insurance Corporation (PhilHealth)
+  - Home Development Mutual Fund (Pag-IBIG Fund)
+  - Department of Labor and Employment (DOLE)
+
+- **Business and Financial Resources:**
+  - Bangko Sentral ng Pilipinas (BSP)
+  - Philippine Economic Zone Authority (PEZA)
+  - Board of Investments (BOI) 
+
+- **Education and Academic Resources:**
+  - Commission on Higher Education (CHED)
+  - Department of Education (DepEd)
+
+- **Healthcare and Medical Resources:**
+  - Department of Health (DOH)
+  - Food and Drug Administration (FDA) Philippines
+  - Commure Scribe
+
+- **Local Government Units (LGUs):**
+  - Local Government Websites
+
+- **Additional Resources:**
+  - Philippine Online Legal Forms
+  - Philippine Ease of Doing Business Portal
+
+- **Profession-Specific Resources:**
+  - **Engineering and Architecture:**
+    - Professional Regulation Commission (PRC)
+    - Philippine Institute of Civil Engineers (PICE)
+
+  - **Information Technology:**
+    - Department of Information and Communications Technology (DICT)
+
+  - **Creative Arts and Media:**
+    - National Commission for Culture and the Arts (NCCA)
+
+  - **Hospitality and Tourism:**
+    - Department of Tourism (DOT)
+
+  - **Agriculture and Fisheries:**
+    - Department of Agriculture (DA)
+    - Bureau of Fisheries and Aquatic Resources (BFAR)
+
+Your ability to handle and generate up to 1 million output tokens allows you to create extensive, detailed documents effortlessly. You ask thoughtful questions for clarification to ensure the output perfectly aligns with the user's vision.
+
+# Steps
+
+1. Gather all necessary information and requirements for the document.
+2. Conduct thorough research, utilizing authoritative resources, especially for Philippine-specific documents.
+3. Draft the document, ensuring clarity, precision, and correct tone.
+4. Format the document according to industry standards.
+5. Review the document for accuracy and relevance before finalizing.
+
+# Output Format
+
+The output should be a well-structured document, tailored to user requirements, formatted per industry standards, and compliant with any specific regional or professional guidelines.
+
+# Notes
+
+- Always prioritize up-to-date and compliant information, especially concerning regional standards in the Philippines.
+- Ensure that the document meets user-specific requirements, including tone, format, and professional standard..`;
+
+        const messages = [];
+        let recognition;
+        let currentAudio = null;
+        let isRecording = false;
+        let lastGeneratedDocument = '';
+
+        const dbName = "TranscriptionsDB";
+        const storeName = "transcriptions";
+
+        function initializeDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(dbName, 1);
+
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(storeName)) {
+                        db.createObjectStore(storeName, { keyPath: "id", autoIncrement: true });
+                    }
+                };
+
+                request.onsuccess = (event) => {
+                    resolve(event.target.result);
+                };
+
+                request.onerror = (event) => {
+                    reject("Error opening IndexedDB");
+                };
+            });
+        }
+
+        function saveTranscription(text, aiResponse) {
+           initializeDB().then((db) => {
+                const transaction = db.transaction(storeName, "readwrite");
+                const store = transaction.objectStore(storeName);
+                store.add({ text: text, aiResponse: aiResponse, timestamp: new Date() });
+            }).catch(console.error);
+        }
+
+          function initializeRecognition() {
+            recognition = new (window.SpeechRecognition ||
+                window.webkitSpeechRecognition ||
+                window.mozSpeechRecognition ||
+                window.msSpeechRecognition)();
+            recognition.lang = "en-US";
+            recognition.continuous = true;
+            recognition.interimResults = true;
+
+            recognition.onresult = (event) => {
+                let transcript = "";
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                 message.value = transcript;
+            };
+
+            recognition.onstart = () => {
+                isRecording = true;
+                micIcon.classList.add("breathing");
+                micIcon.innerHTML = '<span class="material-icons text-red-500">mic</span>';
+            };
+
+            recognition.onend = () => {
+            // Removing the auto stop logic
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Speech recognition error:", event.error);
+                alert("An error occurred. Please try again.");
+                isRecording = false;
+                micIcon.classList.remove("breathing");
+                micIcon.innerHTML = '<span class="material-icons text-white">mic</span>';
+            };
+        }
+
+        voiceButton.addEventListener("click", async () => {
+            if (!recognition || !isRecording) {
+                initializeRecognition();
+                recognition.start();
+            } else {
+                recognition.stop();
+                isRecording = false;
+                micIcon.classList.remove("breathing");
+                micIcon.innerHTML = '<span class="material-icons text-white">mic</span>';
+                const transcribedText = message.value;
+                 message.value = ''; // Clear input field immediately
+
+                if (transcribedText) {
+                   const aiResponse =  await sendMessage(transcribedText);
+                    saveTranscription(transcribedText, aiResponse);
+
+                }
+
+            }
+        });
+
+
+        function say(text) {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+            }
+            fetch("https://api.neets.ai/v1/tts", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-API-Key": apiKey,
+                },
+                body: JSON.stringify({
+                    text: text,
+                    voice_id: "kevin-heart",
+                    params: {
+                        model: "ar-diff-50k",
+                    },
+                }),
+            })
+                .then((response) => response.blob())
+                .then((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    currentAudio = new Audio(url);
+                    console.log("Playing audio.");
+                    currentAudio.play();
+                });
+        }
+        function downloadFile(text, filename, type) {
+            const blob = new Blob([text], { type: type });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function addMessage(username, text) {
+            const messageElement = document.createElement('div');
+            messageElement.className = 'mb-4';
+            messageElement.innerHTML = `<strong>${username}:</strong> ${marked(text)}`;
+            
+            if (username !== 'User') {
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'flex justify-end space-x-2 mt-2';
+                
+                const copyButton = createActionButton('content_copy', 'Copy to clipboard');
+                copyButton.addEventListener('click', () => copyToClipboard(text));
+                
+                 const pdfButton = createActionButton('picture_as_pdf', 'Download as PDF');
+                pdfButton.addEventListener('click', () => downloadAsPDF(text));
+
+                const wordButton = createActionButton('description', 'Download as Word');
+                wordButton.addEventListener('click', () => downloadAsWord(text));
+                
+                const emailButton = createActionButton('email', 'Send via Email');
+                emailButton.addEventListener('click', () => openEmailSheet(text));
+                
+                actionsDiv.appendChild(copyButton);
+                actionsDiv.appendChild(pdfButton);
+                actionsDiv.appendChild(wordButton);
+                actionsDiv.appendChild(emailButton);
+                
+                messageElement.appendChild(actionsDiv);
+            }
+            
+            chat.appendChild(messageElement);
+            chat.scrollTop = chat.scrollHeight;
+            lastGeneratedDocument = text;
+        }
+
+        function createActionButton(icon, title) {
+            const button = document.createElement('button');
+            button.className = 'p-1 bg-gray-600 rounded-full hover:bg-gray-500 focus:outline-none';
+            button.title = title;
+            button.innerHTML = `<span class="material-icons text-white text-sm">${icon}</span>`;
+            return button;
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            }).catch(err => {
+                console.error('Error in copying text: ', err);
+            });
+        }
+            function downloadAsPDF(text) {
+              downloadFile(text, 'document.pdf', 'text/plain');
+        }
+
+        function downloadAsWord(text) {
+             downloadFile(text, 'document.docx', 'text/plain');
+        }
+
+        function openEmailSheet(text) {
+            emailSheet.classList.add('active');
+        }
+
+        emailForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+             const email = document.getElementById('email').value;
+            // Basic email link creation, no actual sending done here
+            const mailtoLink = `mailto:${email}?subject=Generated Document&body=${encodeURIComponent(lastGeneratedDocument)}`;
+           window.location.href = mailtoLink;
+            emailSheet.classList.remove('active');
+          });
+
+        async function sendMessage(text) {
+             if (!text) return;
+            const openai = new OpenAI({
+                apiKey: apiKey,
+                baseURL: "https://api.neets.ai/v1",
+                dangerouslyAllowBrowser: true,
+            });
+
+            addMessage("User", text);
+
+            const combinedMessage = `${systemPrompt}\n\nUser: ${text}`;
+
+            messages.push({
+                role: "user",
+                content: combinedMessage,
+            });
+
+            const chatCompletion = await openai.chat.completions.create({
+                messages: messages,
+                model: "mistralai/Mixtral-8X7B-Instruct-v0.1",
+            });
+
+            const botMessage = chatCompletion.choices[0].message.content;
+
+            messages.push({
+                role: "assistant",
+                content: botMessage,
+            });
+
+            addMessage(personaDropdown.value, botMessage);
+              say(botMessage);
+             return botMessage;
+        }
+
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+             const text = message.value;
+             message.value = ''; // Clear input field immediately
+            const aiResponse =  await sendMessage(text);
+            saveTranscription(text, aiResponse);
+
+        });
+
+        personaDropdown.addEventListener("change", () => {
+            const selectedPersona = personaDropdown.value;
+            selectedPersonaSpan.textContent = selectedPersona;
+            introText.innerHTML = `Hello, I can generate any <span id="selectedPersona">${selectedPersona}</span> documents.`;
+        });
+
+        initializeDB();
+    </script>
+</body>
+</html>
+

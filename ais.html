@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AIS Simulation</title>
+  <style>
+      :root {
+          --primary-color: #18385e;
+      }
+      body { margin: 0; font-family: sans-serif; }
+      #ais-container { width: 100vw; height: 100vh; background-color: #f0f0f0; padding: 20px; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }
+      .highlight { background-color: #f5f5dc; /* Highlight color */ }
+      .target-row:hover { background-color: #e0e0e0; cursor: pointer; }
+      
+      /* Add consistent header styling */
+      .header {
+          background-color: var(--primary-color);
+          color: white;
+          padding: 10px 20px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          position: sticky;
+          top: 0;
+          z-index: 1000;
+      }
+  </style>
+</head>
+<body>
+  <div class="header">
+      <span onclick="window.history.back()" style="cursor: pointer;">← Back</span>
+      <h2 style="margin: 0;">AIS Simulation</h2>
+      <span></span>
+  </div>
+  <div id="ais-container">
+      <h2>AIS Target List</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>MMSI</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Course</th>
+                    <th>Speed</th>
+                    <th>Distance</th>
+                </tr>
+            </thead>
+            <tbody id="ais-table-body">
+                <!-- AIS data will be loaded here -->
+            </tbody>
+        </table>
+    </div>
+    <script>
+        const aisData = [
+            { mmsi: "123456789", name: "MV Atlantic Star", type: "Cargo", course: "120°", speed: "15 knots", distance: "5 nm" },
+            { mmsi: "987654321", name: "SS Pacific Voyager", type: "Tanker", course: "270°", speed: "12 knots", distance: "8 nm" },
+            { mmsi: "456789123", name: "MS Northern Light", type: "Passenger", course: "45°", speed: "20 knots", distance: "3 nm" },
+            { mmsi: "789123456", name: "MV Southern Cross", type: "Cargo", course: "180°", speed: "10 knots", distance: "12 nm" }
+        ];
+
+        const aisTableBody = document.getElementById('ais-table-body');
+        let selectedRow = null; // Keep track of the selected row
+
+        function populateAisTable() {
+            aisTableBody.innerHTML = ''; // Clear existing data
+            aisData.forEach(target => {
+                const row = document.createElement('tr');
+                row.classList.add('target-row'); // Add a class for styling
+                row.innerHTML = `
+                    <td>${target.mmsi}</td>
+                    <td>${target.name}</td>
+                    <td>${target.type}</td>
+                    <td>${target.course}</td>
+                    <td>${target.speed}</td>
+                    <td>${target.distance}</td>
+                `;
+
+                // Add click event listener to highlight the row
+                row.addEventListener('click', () => {
+                    if (selectedRow) {
+                        selectedRow.classList.remove('highlight');
+                    }
+                    row.classList.add('highlight');
+                    selectedRow = row;
+                });
+
+                aisTableBody.appendChild(row);
+            });
+        }
+
+        populateAisTable();
+
+        // Simulate data updates (remove in actual implementation)
+        setInterval(() => {
+            // Modify data here to simulate updates
+            aisData[0].distance = (parseFloat(aisData[0].distance) - 0.1).toFixed(1) + " nm";
+            aisData[2].speed = (parseFloat(aisData[2].speed) + 0.2).toFixed(1) + " knots";
+            populateAisTable();
+        }, 5000); // Update every 5 seconds
+    </script>
+</body>
+</html>
+

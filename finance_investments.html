@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Finance - Investments - Panyero</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #18385e;
+    }
+    .bg-primary {
+      background-color: var(--primary-color) !important;
+    }
+    .text-primary {
+      color: var(--primary-color) !important;
+    }
+    .border-primary {
+      border-color: var(--primary-color) !important;
+    }
+    .hover\:bg-primary-dark:hover {
+      background-color: #122a47 !important;
+    }
+  </style>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+    authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+    projectId: "explore-malaysia-6d28d",
+    storageBucket: "explore-malaysia-6d28d.appspot.com",
+    messagingSenderId: "869053244601",
+    appId: "1:869053244601:web:29ad09ff454b43230be768",
+    measurementId: "G-5XJK1H7KWX"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
+
+<!-- Header -->
+<header class="bg-primary text-white p-4 text-lg font-semibold flex items-center space-x-4 sticky top-0 z-50">
+  <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+  <div class="flex-1 text-center">Finance - Investments</div>
+</header>
+
+<!-- Main Content -->
+<main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+  <!-- Investment Overview -->
+  <div class="bg-white rounded-lg p-4 shadow w-full">
+    <h2 class="text-xl font-semibold mb-4">Investment Overview</h2>
+    <div class="grid grid-cols-2 gap-4">
+      <div class="bg-blue-50 p-3 rounded-lg">
+        <p class="text-sm text-gray-600">Total Invested</p>
+        <p class="text-xl font-bold text-primary" id="totalInvested">₱0.00</p>
+      </div>
+      <div class="bg-green-50 p-3 rounded-lg">
+        <p class="text-sm text-gray-600">Current Value</p>
+        <p class="text-xl font-bold text-green-600" id="currentValue">₱0.00</p>
+      </div>
+      <div class="bg-purple-50 p-3 rounded-lg">
+        <p class="text-sm text-gray-600">Total Return</p>
+        <p class="text-xl font-bold text-purple-600" id="totalReturn">₱0.00</p>
+      </div>
+      <div class="bg-yellow-50 p-3 rounded-lg">
+        <p class="text-sm text-gray-600">Return Rate</p>
+        <p class="text-xl font-bold text-yellow-600" id="returnRate">0.00%</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Investment Opportunities -->
+  <div class="bg-white rounded-lg p-4 shadow w-full">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-semibold">Investment Opportunities</h2>
+      <a href="investment_calculator.html" class="text-primary text-sm">Calculator</a>
+    </div>
+    <div class="space-y-4" id="investmentOpportunitiesList">
+      <!-- Investment opportunities will be populated here -->
+      <div class="p-3 border border-gray-200 rounded-lg">
+        <h3 class="font-semibold text-lg">Fixed Deposit</h3>
+        <p class="text-sm text-gray-600 mt-1">Secure investment with guaranteed returns over a fixed period.</p>
+        <div class="mt-2 flex justify-between items-center">
+          <div>
+            <span class="text-xs text-gray-500">Expected Return:</span>
+            <span class="text-sm font-medium">5% p.a.</span>
+          </div>
+          <button class="bg-primary text-white px-3 py-1 rounded text-sm hover:bg-primary-dark" onclick="invest('fixed_deposit')">Invest Now</button>
+        </div>
+      </div>
+      
+      <div class="p-3 border border-gray-200 rounded-lg">
+        <h3 class="font-semibold text-lg">Mutual Fund</h3>
+        <p class="text-sm text-gray-600 mt-1">Diversified investment managed by professional fund managers.</p>
+        <div class="mt-2 flex justify-between items-center">
+          <div>
+            <span class="text-xs text-gray-500">Expected Return:</span>
+            <span class="text-sm font-medium">8-12% p.a.</span>
+          </div>
+          <button class="bg-primary text-white px-3 py-1 rounded text-sm hover:bg-primary-dark" onclick="invest('mutual_fund')">Invest Now</button>
+        </div>
+      </div>
+      
+      <div class="p-3 border border-gray-200 rounded-lg">
+        <h3 class="font-semibold text-lg">Stock Market</h3>
+        <p class="text-sm text-gray-600 mt-1">Direct investment in company stocks for potential high returns.</p>
+        <div class="mt-2 flex justify-between items-center">
+          <div>
+            <span class="text-xs text-gray-500">Expected Return:</span>
+            <span class="text-sm font-medium">10-15% p.a.</span>
+          </div>
+          <button class="bg-primary text-white px-3 py-1 rounded text-sm hover:bg-primary-dark" onclick="invest('stock_market')">Invest Now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Your Investments -->
+  <div class="bg-white rounded-lg p-4 shadow w-full">
+    <h2 class="text-xl font-semibold mb-4">Your Investments</h2>
+    <div id="userInvestmentsList" class="space-y-3">
+      <!-- User investments will be populated here -->
+      <p class="text-gray-500">You don't have any active investments.</p>
+    </div>
+  </div>
+  
+  <!-- Investment Tips -->
+  <div class="bg-white rounded-lg p-4 shadow w-full">
+    <h2 class="text-xl font-semibold mb-4">Investment Tips</h2>
+    <div class="space-y-3">
+      <div class="flex items-start space-x-3">
+        <span class="material-icons text-primary">lightbulb</span>
+        <p class="text-sm text-gray-700">Diversify your investments across different asset classes to reduce risk.</p>
+      </div>
+      <div class="flex items-start space-x-3">
+        <span class="material-icons text-primary">lightbulb</span>
+        <p class="text-sm text-gray-700">Start investing early to take advantage of compound interest over time.</p>
+      </div>
+      <div class="flex items-start space-x-3">
+        <span class="material-icons text-primary">lightbulb</span>
+        <p class="text-sm text-gray-700">Regularly review and rebalance your investment portfolio to maintain your desired risk level.</p>
+      </div>
+      <div class="flex items-start space-x-3">
+        <span class="material-icons text-primary">lightbulb</span>
+        <p class="text-sm text-gray-700">Consider your investment time horizon when choosing investment products.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  // Check authentication
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      window.location.href = 'signin.html';
+      return;
+    }
+    
+    // Load user's investments and update overview
+    loadUserInvestments(user.uid);
+  });
+  
+  // Load user's investments
+  async function loadUserInvestments(userId) {
+    const userInvestmentsList = document.getElementById('userInvestmentsList');
+    
+    try {
+      const userDoc = await db.collection('users').doc(userId).get();
+      if (!userDoc.exists) {
+        console.error('User document not found');
+        return;
+      }
+      
+      const userData = userDoc.data();
+      const investments = userData.investments || [];
+      
+      if (investments.length === 0) {
+        userInvestmentsList.innerHTML = '<p class="text-gray-500">You don\'t have any active investments.</p>';
+        updateInvestmentOverview(0, 0, 0, 0);
+        return;
+      }
+      
+      userInvestmentsList.innerHTML = '';
+      
+      let totalInvested = 0;
+      let currentValue = 0;
+      
+      investments.forEach(investment => {
+        // Calculate current value based on investment date and expected return
+        const investedAt = investment.investedAt ? investment.investedAt.toDate() : new Date();
+        const monthsInvested = Math.max(1, Math.floor((new Date() - investedAt) / (30 * 24 * 60 * 60 * 1000)));
+        const monthlyRate = investment.expectedReturn / 100 / 12;
+        const estimatedValue = investment.amount * Math.pow(1 + monthlyRate, monthsInvested);
+        
+        totalInvested += investment.amount;
+        currentValue += estimatedValue;
+        
+        const investmentItem = `
+          <div class="p-3 border border-gray-200 rounded-lg">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-semibold">${investment.name}</h3>
+                <p class="text-sm text-gray-600">Amount: ₱${investment.amount.toLocaleString()}</p>
+                <p class="text-sm text-gray-600">Expected Return: ${investment.expectedReturn}% p.a.</p>
+              </div>
+              <span class="px-2 py-1 text-xs rounded ${investment.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">${investment.status.charAt(0).toUpperCase() + investment.status.slice(1)}</span>
+            </div>
+            <div class="mt-2">
+              <p class="text-xs text-gray-500">Invested On: ${investedAt.toLocaleDateString()}</p>
+              <p class="text-xs text-gray-500">Current Value: ₱${estimatedValue.toFixed(2)}</p>
+              <div class="mt-1 w-full bg-gray-200 rounded-full h-1.5">
+                <div class="bg-primary h-1.5 rounded-full" style="width: ${Math.min(100, (estimatedValue / investment.amount) * 100)}%"></div>
+              </div>
+            </div>
+          </div>
+        `;
+        userInvestmentsList.innerHTML += investmentItem;
+      });
+      
+      // Update investment overview
+      const totalReturn = currentValue - totalInvested;
+      const returnRate = totalInvested > 0 ? (totalReturn / totalInvested) * 100 : 0;
+      
+      updateInvestmentOverview(totalInvested, currentValue, totalReturn, returnRate);
+    } catch (error) {
+      console.error('Error loading investments:', error);
+      userInvestmentsList.innerHTML = '<p class="text-red-500">Failed to load your investments. Please try again later.</p>';
+    }
+  }
+  
+  // Update investment overview
+  function updateInvestmentOverview(totalInvested, currentValue, totalReturn, returnRate) {
+    document.getElementById('totalInvested').textContent = `₱${totalInvested.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    document.getElementById('currentValue').textContent = `₱${currentValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    document.getElementById('totalReturn').textContent = `₱${totalReturn.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    document.getElementById('returnRate').textContent = `${returnRate.toFixed(2)}%`;
+    
+    // Change color based on return
+    if (totalReturn > 0) {
+      document.getElementById('totalReturn').className = 'text-xl font-bold text-green-600';
+      document.getElementById('returnRate').className = 'text-xl font-bold text-green-600';
+    } else if (totalReturn < 0) {
+      document.getElementById('totalReturn').className = 'text-xl font-bold text-red-600';
+      document.getElementById('returnRate').className = 'text-xl font-bold text-red-600';
+    }
+  }
+  
+  // Invest in a product
+  async function invest(investmentType) {
+    const user = auth.currentUser;
+    if (!user) {
+      alert('You must be signed in to invest.');
+      window.location.href = 'signin.html';
+      return;
+    }
+    
+    // Get investment details based on type
+    let name, expectedReturn, minInvestment;
+    switch (investmentType) {
+      case 'fixed_deposit':
+        name = 'Fixed Deposit';
+        expectedReturn = 5;
+        minInvestment = 5000;
+        break;
+      case 'mutual_fund':
+        name = 'Mutual Fund';
+        expectedReturn = 10;
+        minInvestment = 10000;
+        break;
+      case 'stock_market':
+        name = 'Stock Market';
+        expectedReturn = 12;
+        minInvestment = 15000;
+        break;
+      default:
+        name = 'Investment';
+        expectedReturn = 8;
+        minInvestment = 5000;
+    }
+    
+    // Get investment amount from user
+    const amount = prompt(`Enter the amount you want to invest in ${name} (Minimum: ₱${minInvestment}):`);
+    if (!amount || isNaN(amount) || parseFloat(amount) < minInvestment) {
+      alert(`Please enter a valid investment amount of at least ₱${minInvestment}.`);
+      return;
+    }
+    
+    try {
+      // Get user document
+      const userDoc = await db.collection('users').doc(user.uid).get();
+      if (!userDoc.exists) {
+        alert('User profile not found. Please try again later.');
+        return;
+      }
+      
+      const userData = userDoc.data();
+      const balance = userData.balance || 0;
+      
+      // Check if user has sufficient balance
+      if (balance < parseFloat(amount)) {
+        alert('Insufficient balance for this investment.');
+        return;
+      }
+      
+      // Update user's balance
+      await db.collection('users').doc(user.uid).update({
+        balance: firebase.firestore.FieldValue.increment(-parseFloat(amount))
+      });
+      
+      // Add investment to user's investments array
+      const newInvestment = {
+        type: investmentType,
+        name: name,
+        amount: parseFloat(amount),
+        expectedReturn: expectedReturn,
+        investedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        status: 'active'
+      };
+      
+      await db.collection('users').doc(user.uid).update({
+        investments: firebase.firestore.FieldValue.arrayUnion(newInvestment)
+      });
+      
+      // Create notification for admin
+      await db.collection('notifications').add({
+        userId: 'admin',
+        type: 'investment',
+        message: `User ${userData.displayName || user.email} has invested ₱${parseFloat(amount).toLocaleString()} in ${name}.`,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        read: false
+      });
+      
+      alert(`Your investment of ₱${parseFloat(amount).toLocaleString()} in ${name} has been successfully processed.`);
+      
+      // Reload user's investments
+      loadUserInvestments(user.uid);
+    } catch (error) {
+      console.error('Error processing investment:', error);
+      alert('Failed to process your investment. Please try again later.');
+    }
+  }
+</script>
+</body>
+</html>
+

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - Add Card</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+        --primary-color: #18385e;
+    }
+    .bg-primary {
+        background-color: var(--primary-color) !important;
+    }
+    .text-primary {
+        color: var(--primary-color) !important;
+    }
+    .hover\:bg-primary-dark:hover {
+        background-color: #122a47 !important;
+    }
+    .focus\:ring-primary:focus {
+        --tw-ring-color: var(--primary-color) !important;
+    }
+    .focus\:border-primary:focus {
+        border-color: var(--primary-color) !important;
+    }
+</style>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
+
+  <!-- Header -->
+  <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center space-x-4 sticky top-0 z-50">
+    <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+    <div class="flex-1 text-center">Add New Card</div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+    <div class="bg-white rounded-lg p-4 shadow w-full">
+      <h2 class="text-xl font-semibold mb-4">Add a New Card</h2>
+      <form id="addCardForm" class="space-y-4">
+        <div>
+          <label for="cardType" class="block text-sm font-medium text-gray-700">Card Type</label>
+          <select id="cardType" name="cardType" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+            <option value="">Select Card Type</option>
+            <option value="debit">Debit</option>
+            <option value="credit">Credit</option>
+          </select>
+        </div>
+        <div>
+          <label for="cardNumber" class="block text-sm font-medium text-gray-700">Card Number</label>
+          <input type="text" id="cardNumber" name="cardNumber" required pattern="^\d{16}$" title="Enter a valid 16-digit card number" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" maxlength="16">
+        </div>
+        <div>
+          <label for="expiryDate" class="block text-sm font-medium text-gray-700">Expiry Date</label>
+          <input type="month" id="expiryDate" name="expiryDate" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+        </div>
+        <div>
+          <label for="cvv" class="block text-sm font-medium text-gray-700">CVV</label>
+          <input type="password" id="cvv" name="cvv" required pattern="^\d{3,4}$" title="Enter a valid 3 or 4-digit CVV" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" maxlength="4">
+        </div>
+        <button type="submit" class="w-full bg-primary text-white py-2 rounded font-medium hover:bg-primary-dark">Add Card</button>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    const addCardForm = document.getElementById('addCardForm');
+
+    addCardForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const cardType = document.getElementById('cardType').value;
+      const cardNumber = document.getElementById('cardNumber').value.trim();
+      const expiryDate = document.getElementById('expiryDate').value;
+      const cvv = document.getElementById('cvv').value.trim();
+      const user = auth.currentUser;
+
+      if (!user) {
+        alert('You must be signed in to perform this action.');
+        window.location.href = 'signin.html';
+        return;
+      }
+
+      if (!(cardType && cardNumber.match(/^\d{16}$/) && expiryDate && cvv.match(/^\d{3,4}$/))) {
+        alert('Please fill out all fields with valid data.');
+        return;
+      }
+
+      try {
+        // Add card to Firestore
+        await db.collection('cards').add({
+          userId: user.uid,
+          cardType: cardType,
+          cardNumber: cardNumber,
+          expiryDate: expiryDate,
+          cvv: cvv,
+          addedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert('Card added successfully!');
+        addCardForm.reset();
+      } catch (error) {
+        console.error('Error adding card:', error);
+        alert('There was an error adding your card. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>
+

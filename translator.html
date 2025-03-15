@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <title>Panyero - Translator</title>
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="css/styles.css"/>
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+  <!-- Optional: Translation APIs can be commented out here -->
+  <!-- <script src="https://translation.googleapis.com/language/translate/v2?key=YOUR_TRANSLATION_API_KEY"></script> -->
+</head>
+<body>
+  <!-- Firebase Configuration -->
+  <script src="firebase-config.js"></script>
+
+  <!-- Install Panyero Modal -->
+  <?php include 'install-modal.html'; ?>
+
+  <!-- Header -->
+  <header class="sticky-header">
+    <span class="material-icons back-icon" onclick="window.history.back()">arrow_back</span>
+    <h1 class="page-title">Translator</h1>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="card">
+      <h2 class="text-base font-semibold mb-2">Translate Text</h2>
+      <form id="translateForm">
+        <div class="mb-4">
+          <label for="sourceText" class="block text-sm font-medium text-gray-700">Source Text</label>
+          <textarea id="sourceText" name="sourceText" rows="3" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></textarea>
+        </div>
+        <div class="mb-4">
+          <label for="targetLanguage" class="block text-sm font-medium text-gray-700">Target Language</label>
+          <select id="targetLanguage" name="targetLanguage" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+            <option value="">Select Language</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <!-- Add more languages as needed -->
+          </select>
+        </div>
+        <button type="submit" class="w-full bg-green-600 text-white py-2 rounded font-medium">Translate</button>
+      </form>
+      <!-- Translation Result -->
+      <div id="translationResult" class="hidden mt-4">
+        <h3 class="text-sm font-semibold">Translated Text:</h3>
+        <p id="translatedText" class="mt-2 text-gray-700"></p>
+      </div>
+      <!-- Error Message -->
+      <div id="translationError" class="hidden mt-4 text-red-600">Error translating text. Please try again.</div>
+    </div>
+  </main>
+
+  <!-- Install Panyero Modal Script -->
+  <script>
+    // Install Modal Scripts are already included globally
+  </script>
+
+  <script>
+    const translateForm = document.getElementById('translateForm');
+    const translationResult = document.getElementById('translationResult');
+    const translatedText = document.getElementById('translatedText');
+    const translationError = document.getElementById('translationError');
+
+    translateForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const sourceText = document.getElementById('sourceText').value.trim();
+      const targetLanguage = document.getElementById('targetLanguage').value;
+
+      if (!sourceText || !targetLanguage) {
+        translationError.textContent = 'Please enter text and select a language.';
+        translationError.classList.remove('hidden');
+        translationResult.classList.add('hidden');
+        return;
+      }
+
+      try {
+        // Example: Integrate Translation API here
+        // For demonstration, we'll mock the translation
+        // Replace this section with actual API call
+        const mockTranslation = `Translated (${targetLanguage}): ${sourceText}`;
+        
+        // Display the result
+        translatedText.textContent = mockTranslation;
+        translationResult.classList.remove('hidden');
+        translationError.classList.add('hidden');
+
+        // Save translation history to Firestore
+        const user = auth.currentUser;
+        if (user) {
+          await db.collection('translator').doc(user.uid).update({
+            translations: firebase.firestore.FieldValue.arrayUnion({
+              sourceText: sourceText,
+              translatedText: mockTranslation,
+              targetLanguage: targetLanguage,
+              date: new Date().toISOString().split('T')[0]
+            })
+          });
+        }
+      } catch (error) {
+        console.error('Translation error:', error);
+        translationError.textContent = 'Failed to translate text.';
+        translationError.classList.remove('hidden');
+        translationResult.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Panyero - Medical Services</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #18385e;
+    }
+    .bg-primary {
+      background-color: var(--primary-color) !important;
+    }
+    .text-primary {
+      color: var(--primary-color) !important;
+    }
+    .border-primary {
+      border-color: var(--primary-color) !important;
+    }
+    .hover\:bg-primary-dark:hover {
+      background-color: #122a47 !important;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+  <!-- Header -->
+  <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center space-x-4 sticky top-0 z-50">
+    <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+    <div class="flex-1 text-center">Medical Services</div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+    <!-- Emergency Section -->
+    <div class="bg-red-100 rounded-lg p-4 shadow w-full">
+      <h2 class="text-xl font-semibold text-red-700 mb-2">Emergency</h2>
+      <p class="text-sm text-red-700 mb-3">For immediate medical assistance, please contact:</p>
+      <div class="grid grid-cols-2 gap-3">
+        <a href="tel:911" class="bg-red-500 text-white p-3 rounded-lg flex items-center justify-center">
+          <span class="material-icons mr-2">local_hospital</span>
+          <span>Emergency: 911</span>
+        </a>
+        <a href="tel:+1234567890" class="bg-red-500 text-white p-3 rounded-lg flex items-center justify-center">
+          <span class="material-icons mr-2">local_pharmacy</span>
+          <span>Poison Control</span>
+        </a>
+      </div>
+    </div>
+    
+    <!-- Medical Services -->
+    <div class="bg-white rounded-lg p-4 shadow w-full">
+      <h2 class="text-xl font-semibold mb-4">Medical Services</h2>
+      <div class="space-y-3">
+        <a href="#" class="block bg-gray-50 p-3 rounded-lg flex items-center hover:bg-gray-100">
+          <span class="material-icons text-primary mr-3">medical_services</span>
+          <div class="flex-1">
+            <h3 class="font-medium">Find a Doctor</h3>
+            <p class="text-xs text-gray-500">Search for doctors near you</p>
+          </div>
+          <span class="material-icons text-gray-400">chevron_right</span>
+        </a>
+        <a href="#" class="block bg-gray-50 p-3 rounded-lg flex items-center hover:bg-gray-100">
+          <span class="material-icons text-primary mr-3">event_available</span>
+          <div class="flex-1">
+            <h3 class="font-medium">Book Appointment</h3>
+            <p class="text-xs text-gray-500">Schedule a medical appointment</p>
+          </div>
+          <span class="material-icons text-gray-400">chevron_right</span>
+        </a>
+        <a href="#" class="block bg-gray-50 p-3 rounded-lg flex items-center hover:bg-gray-100">
+          <span class="material-icons text-primary mr-3">medication</span>
+          <div class="flex-1">
+            <h3 class="font-medium">Medication Reminder</h3>
+            <p class="text-xs text-gray-500">Set reminders for your medications</p>
+          </div>
+          <span class="material-icons text-gray-400">chevron_right</span>
+        </a>
+        <a href="#" class="block bg-gray-50 p-3 rounded-lg flex items-center hover:bg-gray-100">
+          <span class="material-icons text-primary mr-3">science</span>
+          <div class="flex-1">
+            <h3 class="font-medium">Lab Results</h3>
+            <p class="text-xs text-gray-500">View your lab test results</p>
+          </div>
+          <span class="material-icons text-gray-400">chevron_right</span>
+        </a>
+      </div>
+    </div>
+    
+    <!-- Health Records -->
+    <div class="bg-white rounded-lg p-4 shadow w-full">
+      <h2 class="text-xl font-semibold mb-4">Health Records</h2>
+      <div class="space-y-3">
+        <a href="#" class="block bg-gray-50 p-3 rounded-lg flex items-center hover:bg-gray-100">
+          <span class="material-icons text-primary mr-3">description</span>
+          <div class="flex-1">
+            <h3 class="font-medium">Medical History</h3>
+            <p class="text-xs text-gray-500">View your medical history</p>
+          </div>
+          <span class="material-icons text-gray-400">chevron_right</span>
+        </a>
+        <a href="#" class="block bg-gray-50 p-3 rounded-lg flex items-center hover:bg-gray-100">
+          <span class="material-icons text-primary mr-3">vaccines</span>
+          <div class="flex-1">
+            <h3 class="font-medium">Vaccination Records</h3>
+            <p class="text-xs text-gray-500">Track your vaccinations</p>
+          </div>
+          <span class="material-icons text-gray-400">chevron_right</span>
+        </a>
+        <a href="#" class="block bg-gray-50 p-3 rounded-lg flex items-center hover:bg-gray-100">
+          <span class="material-icons text-primary mr-3">receipt_long</span>
+          <div class="flex-1">
+            <h3 class="font-medium">Prescriptions</h3>
+            <p class="text-xs text-gray-500">View and manage prescriptions</p>
+          </div>
+          <span class="material-icons text-gray-400">chevron_right</span>
+        </a>
+      </div>
+    </div>
+    
+    <!-- Health Insurance -->
+    <div class="bg-white rounded-lg p-4 shadow w-full">
+      <h2 class="text-xl font-semibold mb-4">Health Insurance</h2>
+      <div class="space-y-3">
+        <a href="#" class="block bg-gray-50 p-3 rounded-lg flex items-center hover:bg-gray-100">
+          <span class="material-icons text-primary mr-3">health_and_safety</span>
+          <div class="flex-1">
+            <h3 class="font-medium">Insurance Plans</h3>
+            <p class="text-xs text-gray-500">View available health insurance plans</p>
+          </div>
+          <span class="material-icons text-gray-400">chevron_right</span>
+        </a>
+        <a href="#" class="block bg-gray-50 p-3 rounded-lg flex items-center hover:bg-gray-100">
+          <span class="material-icons text-primary mr-3">payments</span>
+          <div class="flex-1">
+            <h3 class="font-medium">Claims & Billing</h3>
+            <p class="text-xs text-gray-500">Manage insurance claims and billing</p>
+          </div>
+          <span class="material-icons text-gray-400">chevron_right</span>
+        </a>
+      </div>
+    </div>
+    
+    <!-- Health Tips -->
+    <div class="bg-white rounded-lg p-4 shadow w-full">
+      <h2 class="text-xl font-semibold mb-4">Health Tips</h2>
+      <div class="space-y-3">
+        <div class="bg-gray-50 p-3 rounded-lg">
+          <h3 class="font-medium text-primary">Stay Hydrated</h3>
+          <p class="text-sm text-gray-600 mt-1">Drink at least 8 glasses of water daily to maintain good health.</p>
+        </div>
+        <div class="bg-gray-50 p-3 rounded-lg">
+          <h3 class="font-medium text-primary">Regular Exercise</h3>
+          <p class="text-sm text-gray-600 mt-1">Aim for at least 30 minutes of moderate exercise daily.</p>
+        </div>
+        <div class="bg-gray-50 p-3 rounded-lg">
+          <h3 class="font-medium text-primary">Balanced Diet</h3>
+          <p class="text-sm text-gray-600 mt-1">Include fruits, vegetables, whole grains, and lean proteins in your diet.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Nav -->
+  <div class="bg-white border-t border-gray-300 w-full max-w-sm flex justify-around items-center py-2 fixed bottom-0 left-1/2 transform -translate-x-1/2">
+    <div class="nav-item cursor-pointer" onclick="window.location.href='index.html'">
+      <span class="material-icons text-gray-600">home</span>
+    </div>
+    <div class="nav-item cursor-pointer" onclick="window.location.href='services.html'">
+      <span class="material-icons text-gray-600">grid_view</span>
+    </div>
+    <div class="nav-item qr cursor-pointer transform scale-125 -mt-1 relative" onclick="window.location.href='qrscan.html'">
+      <span class="material-icons text-white p-2 shadow-md" style="background-color: var(--primary-color); border-radius: 50%;">qr_code_scanner</span>
+    </div>
+    <div class="nav-item cursor-pointer" onclick="window.location.href='transactions.html'">
+      <span class="material-icons text-gray-600">receipt_long</span>
+    </div>
+    <div class="nav-item cursor-pointer" onclick="window.location.href='profile.html'">
+      <span class="material-icons text-gray-600">person</span>
+    </div>
+  </div>
+</body>
+</html>
+

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - Mobile Top-Up</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+  
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
+  
+  <!-- Header -->
+  <header class="bg-green-600 text-white p-4 text-lg font-semibold flex items-center space-x-4 sticky top-0 z-50">
+    <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+    <div class="flex-1 text-center">Mobile Top-Up</div>
+  </header>
+  
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+    <div class="bg-white rounded-lg p-4 shadow w-full">
+      <h2 class="text-xl font-semibold mb-4">Top-Up Your Mobile</h2>
+      <form id="topupForm" class="space-y-4">
+        <div>
+          <label for="carrier" class="block text-sm font-medium text-gray-700">Mobile Carrier</label>
+          <select id="carrier" name="carrier" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500">
+            <option value="">Select Carrier</option>
+            <option value="globe">Globe</option>
+            <option value="smart">Smart</option>
+            <option value="sun">Sun Cellular</option>
+            <!-- Add more carriers as needed -->
+          </select>
+        </div>
+        <div>
+          <label for="phoneNumber" class="block text-sm font-medium text-gray-700">Phone Number</label>
+          <input type="text" id="phoneNumber" name="phoneNumber" required pattern="^09\d{9}$" title="Enter a valid Philippine phone number starting with 09" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500" maxlength="11">
+        </div>
+        <div>
+          <label for="topupAmount" class="block text-sm font-medium text-gray-700">Top-Up Amount (₱)</label>
+          <input type="number" id="topupAmount" name="topupAmount" required min="50" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500">
+        </div>
+        <button type="submit" class="w-full bg-green-600 text-white py-2 rounded font-medium">Top-Up Now</button>
+      </form>
+      <div class="mt-6">
+        <h3 class="text-lg font-semibold mb-2">Your Top-Up History</h3>
+        <ul id="topupHistoryList" class="space-y-2">
+          <!-- Top-up history will be populated here -->
+        </ul>
+      </div>
+    </div>
+  </main>
+  
+  <script>
+    const topupForm = document.getElementById('topupForm');
+    const topupHistoryList = document.getElementById('topupHistoryList');
+
+    auth.onAuthStateChanged(async user => {
+      if (!user) {
+        window.location.href = 'signin.html';
+        return;
+      }
+
+      // Listen for real-time updates to top-up history
+      db.collection('mobileTopUps')
+        .where('userId', '==', user.uid)
+        .orderBy('timestamp', 'desc')
+        .onSnapshot(snapshot => {
+          topupHistoryList.innerHTML = '';
+          if (snapshot.empty) {
+            topupHistoryList.innerHTML = '<p class="text-gray-600">No top-up history found.</p>';
+            return;
+          }
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            const date = data.timestamp ? data.timestamp.toDate().toLocaleString() : '';
+            const topupItem = `
+              <li class="p-2 border border-gray-200 rounded-md">
+                <p class="text-sm text-gray-800"><strong>Carrier:</strong> ${data.carrier}</p>
+                <p class="text-sm text-gray-600"><strong>Amount:</strong> ₱${data.amount}</p>
+                <p class="text-sm text-gray-600"><strong>Status:</strong> ${data.status}</p>
+                <p class="text-xs text-gray-500">${date}</p>
+              </li>
+            `;
+            topupHistoryList.innerHTML += topupItem;
+          });
+        });
+    });
+
+    topupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const carrier = document.getElementById('carrier').value;
+      const phoneNumber = document.getElementById('phoneNumber').value.trim();
+      const topupAmount = parseFloat(document.getElementById('topupAmount').value);
+      const user = auth.currentUser;
+
+      if (!user) {
+        alert('You must be signed in to perform this action.');
+        window.location.href = 'signin.html';
+        return;
+      }
+
+      if (!(carrier && phoneNumber.match(/^09\d{9}$/) && topupAmount >= 50)) {
+        alert('Please fill out all required fields with valid data.');
+        return;
+      }
+
+      try {
+        // Create mobile top-up request
+        await db.collection('mobileTopUps').add({
+          userId: user.uid,
+          carrier: carrier,
+          phoneNumber: phoneNumber,
+          amount: topupAmount,
+          status: 'pending',
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // Create notification for Admin
+        await db.collection('notifications').add({
+          userId: 'admin', // Assuming 'admin' is the UID for Admin
+          type: 'mobileTopUp',
+          message: `User ${user.displayName || user.email} has requested a mobile top-up of ₱${topupAmount} for ${phoneNumber}.`,
+          topUpId: '',
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          read: false
+        });
+
+        alert('Mobile top-up request submitted successfully and is pending confirmation!');
+        topupForm.reset();
+      } catch (error) {
+        console.error('Error submitting mobile top-up:', error);
+        alert('There was an error processing your top-up. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>
+

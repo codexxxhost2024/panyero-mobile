@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Panyero - Music</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #18385e;
+    }
+    .bg-primary {
+      background-color: var(--primary-color) !important;
+    }
+    .text-primary {
+      color: var(--primary-color) !important;
+    }
+    .border-primary {
+      border-color: var(--primary-color) !important;
+    }
+    .hover\:bg-primary-dark:hover {
+      background-color: #122a47 !important;
+    }
+    
+    /* Audio player styling */
+    .audio-player {
+      border-radius: 0.5rem;
+      padding: 1rem;
+      background-color: #f9f9f9;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background-color: #e0e0e0;
+      border-radius: 3px;
+      cursor: pointer;
+      position: relative;
+    }
+    
+    .progress {
+      height: 100%;
+      background-color: var(--primary-color);
+      border-radius: 3px;
+      width: 0%;
+    }
+    
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+    }
+    
+    .control-button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--primary-color);
+    }
+    
+    .control-button:disabled {
+      color: #ccc;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+  <!-- Header -->
+  <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center space-x-4 sticky top-0 z-50">
+    <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+    <div class="flex-1 text-center">Music</div>
+    <span class="material-icons cursor-pointer" onclick="toggleSearch()">search</span>
+  </header>
+
+  <!-- Search Bar (Hidden by default) -->
+  <div id="search-bar" class="bg-white p-2 hidden">
+    <div class="flex items-center border rounded-lg px-2">
+      <span class="material-icons text-gray-400">search</span>
+      <input type="text" placeholder="Search music..." class="flex-1 p-2 outline-none" onkeyup="searchMusic(this.value)">
+      <span class="material-icons text-gray-400 cursor-pointer" onclick="clearSearch()">close</span>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+    <!-- Now Playing -->
+    <div class="bg-white rounded-lg p-4 shadow w-full">
+      <h2 class="text-xl font-semibold mb-4">Now Playing</h2>
+      <div class="flex items-center space-x-4">
+        <img id="current-album-art" src="https://via.placeholder.com/80" alt="Album Art" class="w-20 h-20 rounded-lg">
+        <div class="flex-1">
+          <h3 id="current-song-title" class="font-medium">No song selected</h3>
+          <p id="current-artist" class="text-sm text-gray-500">Select a song to play</p>
+          
+          <div class="audio-player mt-2">
+            <div class="progress-bar" id="progress-bar">
+              <div class="progress" id="progress"></div>
+            </div>
+            <div class="controls">
+              <button class="control-button" id="prev-button" disabled>
+                <span class="material-icons">skip_previous</span>
+              </button>
+              <button class="control-button" id="play-button">
+                <span class="material-icons">play_arrow</span>
+              </button>
+              <button class="control-button" id="next-button" disabled>
+                <span class="material-icons">skip_next</span>
+              </button>
+              <span id="time-display" class="text-xs text-gray-500">0:00 / 0:00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Popular Playlists -->
+    <div class="bg-white rounded-lg p-4 shadow w-full">
+      <h2 class="text-xl font-semibold mb-4">Popular Playlists</h2>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="playlist-item cursor-pointer" onclick="loadPlaylist('workout')">
+          <img src="https://via.placeholder.com/150?text=Workout" alt="Workout Playlist" class="w-full h-32 object-cover rounded-lg">
+          <h3 class="font-medium mt-2">Workout Mix</h3>
+          <p class="text-xs text-gray-500">20 songs</p>
+        </div>
+        <div class="playlist-item cursor-pointer" onclick="loadPlaylist('relax')">
+          <img src="https://via.placeholder.com/150?text=Relax" alt="Relax Playlist" class="w-full h-32 object-cover rounded-lg">
+          <h3 class="font-medium mt-2">Relaxation</h3>
+          <p class="text-xs text-gray-500">15 songs</p>
+        </div>
+        <div class="playlist-item cursor-pointer" onclick="loadPlaylist('focus')">
+          <img src="https://via.placeholder.com/150?text=Focus" alt="Focus Playlist" class="w-full h-32 object-cover rounded-lg">
+          <h3 class="font-medium mt-2">Focus Mode</h3>
+          <p class="text-xs text-gray-500">18 songs</p>
+        </div>
+        <div class="playlist-item cursor-pointer" onclick="loadPlaylist('party')">
+          <img src="https://via.placeholder.com/150?text=Party" alt="Party Playlist" class="w-full h-32 object-cover rounded-lg">
+          <h3 class="font-medium mt-2">Party Time</h3>
+          <p class="text-xs text-gray-500">25 songs</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Recent Songs -->
+    <div class="bg-white rounded-lg p-4 shadow w-full">
+      <h2 class="text-xl font-semibold mb-4">Recent Songs</h2>
+      <ul id="song-list" class="space-y-2">
+        <!-- Songs will be populated here -->
+      </ul>
+    </div>
+  </main>
+
+  <script>
+    // Sample song data
+    const songs = [
+      { id: 1, title: "Upbeat Rhythm", artist: "DJ Groove", duration: 180, albumArt: "https://via.placeholder.com/80?text=UR" },
+      { id: 2, title: "Mellow Sunset", artist: "Chill Vibes", duration: 240, albumArt: "https://via.placeholder.com/80?text=MS" },
+      { id: 3, title: "Electric Dreams", artist: "Synth Wave", duration: 210, albumArt: "https://via.placeholder.com/80?text=ED" },
+      { id: 4, title: "Acoustic Journey", artist: "Guitar Master", duration: 195, albumArt: "https://via.placeholder.com/80?text=AJ" },
+      { id: 5, title: "Deep Focus", artist: "Concentration", duration: 300, albumArt: "https://via.placeholder.com/80?text=DF" }
+    ];
+    
+    // Audio player elements
+    const playButton = document.getElementById('play-button');
+    const prevButton = document.getElementById('prev-button');
+    const nextButton = document.getElementById('next-button');
+    const progressBar = document.getElementById('progress-bar');
+    const progress = document.getElementById('progress');
+    const timeDisplay = document.getElementById('time-display');
+    const currentSongTitle = document.getElementById('current-song-title');
+    const currentArtist = document.getElementById('current-artist');
+    const currentAlbumArt = document.getElementById('current-album-art');
+    
+    // Audio object
+    const audio = new Audio();
+    let currentSongIndex = -1;
+    let isPlaying = false;
+    
+    // Initialize song list
+    function initSongList() {
+      const songList = document.getElementById('song-list');
+      songList.innerHTML = '';
+      
+      songs.forEach((song, index) => {
+        const li = document.createElement('li');
+        li.className = 'flex items-center space-x-3 p-2 hover:bg-gray-50 rounded cursor-pointer';
+        li.onclick = () => playSong(index);
+        
+        li.innerHTML = `
+          <img src="${song.albumArt}" alt="${song.title}" class="w-12 h-12 rounded">
+          <div class="flex-1">
+            <h3 class="font-medium">${song.title}</h3>
+            <p class="text-xs text-gray-500">${song.artist}</p>
+          </div>
+          <span class="text-xs text-gray-500">${formatTime(song.duration)}</span>
+        `;
+        
+        songList.appendChild(li);
+      });
+    }
+    
+    // Format time in seconds to MM:SS
+    function formatTime(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = Math.floor(seconds % 60);
+      return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+    
+    // Play a song by index
+    function playSong(index) {
+      if (index < 0 || index >= songs.length) return;
+      
+      currentSongIndex = index;
+      const song = songs[index];
+      
+      // Update UI
+      currentSongTitle.textContent = song.title;
+      currentArtist.textContent = song.artist;
+      currentAlbumArt.src = song.albumArt;
+      
+      // Set audio source (in a real app, this would be the actual audio file)
+      // For this demo, we'll simulate playing
+      audio.src = `https://example.com/songs/${song.id}.mp3`;
+      audio.currentTime = 0;
+      
+      // Enable/disable prev/next buttons
+      prevButton.disabled = index === 0;
+      nextButton.disabled = index === songs.length - 1;
+      
+      // Start playing
+      playAudio();
+    }
+    
+    // Play/pause audio
+    function playAudio() {
+      if (currentSongIndex === -1) return;
+      
+      if (isPlaying) {
+        audio.pause();
+        playButton.innerHTML = '<span class="material-icons">play_arrow</span>';
+      } else {
+        audio.play();
+        playButton.innerHTML = '<span class="material-icons">pause</span>';
+        
+        // For demo purposes, simulate progress
+        simulatePlayback();
+      }
+      
+      isPlaying = !isPlaying;
+    }
+    
+    // Simulate audio playback
+    function simulatePlayback() {
+      if (currentSongIndex === -1) return;
+      
+      const song = songs[currentSongIndex];
+      let currentTime = 0;
+      const duration = song.duration;
+      
+      // Clear any existing interval
+      if (window.playbackInterval) clearInterval(window.playbackInterval);
+      
+      // Update progress every second
+      window.playbackInterval = setInterval(() => {
+        if (!isPlaying) {
+          clearInterval(window.playbackInterval);
+          return;
+        }
+        
+        currentTime += 1;
+        const progressPercent = (currentTime / duration) * 100;
+        progress.style.width = `${progressPercent}%`;
+        timeDisplay.textContent = `${formatTime(currentTime)} / ${formatTime(duration)}`;
+        
+        if (currentTime >= duration) {
+          clearInterval(window.playbackInterval);
+          isPlaying = false;
+          playButton.innerHTML = '<span class="material-icons">play_arrow</span>';
+          
+          // Auto play next song if available
+          if (currentSongIndex < songs.length - 1) {
+            setTimeout(() => playSong(currentSongIndex + 1), 1000);
+          }
+        }
+      }, 1000);
+    }
+    
+    // Toggle search bar
+    function toggleSearch() {
+      const searchBar = document.getElementById('search-bar');
+      searchBar.classList.toggle('hidden');
+      if (!searchBar.classList.contains('hidden')) {
+        searchBar.querySelector('input').focus();
+      }
+    }
+    
+    // Clear search
+    function clearSearch() {
+      document.querySelector('#search-bar input').value = '';
+      initSongList();
+      toggleSearch();
+    }
+    
+    // Search music
+    function searchMusic(query) {
+      if (!query) {
+        initSongList();
+        return;
+      }
+      
+      const filteredSongs = songs.filter(song => 
+        song.title.toLowerCase().includes(query.toLowerCase()) || 
+        song.artist.toLowerCase().includes(query.toLowerCase())
+      );
+      
+      const songList = document.getElementById('song-list');
+      songList.innerHTML = '';
+      
+      if (filteredSongs.length === 0) {
+        songList.innerHTML = '<li class="text-center p-4 text-gray-500">No songs found</li>';
+        return;
+      }
+      
+      filteredSongs.forEach((song) => {
+        const index = songs.findIndex(s => s.id === song.id);
+        const li = document.createElement('li');
+        li.className = 'flex items-center space-x-3 p-2 hover:bg-gray-50 rounded cursor-pointer';
+        li.onclick = () => playSong(index);
+        
+        li.innerHTML = `
+          <img src="${song.albumArt}" alt="${song.title}" class="w-12 h-12 rounded">
+          <div class="flex-1">
+            <h3 class="font-medium">${song.title}</h3>
+            <p class="text-xs text-gray-500">${song.artist}</p>
+          </div>
+          <span class="text-xs text-gray-500">${formatTime(song.duration)}</span>
+        `;
+        
+        songList.appendChild(li);
+      });
+    }
+    
+    // Load playlist
+    function loadPlaylist(playlistId) {
+      alert(`Loading ${playlistId} playlist. This feature is coming soon!`);
+    }
+    
+    // Event listeners
+    playButton.addEventListener('click', playAudio);
+    prevButton.addEventListener('click', () => playSong(currentSongIndex - 1));
+    nextButton.addEventListener('click', () => playSong(currentSongIndex + 1));
+    
+    // Progress bar click
+    progressBar.addEventListener('click', (e) => {
+      if (currentSongIndex === -1) return;
+      
+      const song = songs[currentSongIndex];
+      const rect = progressBar.getBoundingClientRect();
+      const percent = (e.clientX - rect.left) / rect.width;
+      const newTime = song.duration * percent;
+      
+      // Clear existing interval
+      if (window.playbackInterval) clearInterval(window.playbackInterval);
+      
+      // Update UI
+      progress.style.width = `${percent * 100}%`;
+      timeDisplay.textContent = `${formatTime(newTime)} / ${formatTime(song.duration)}`;
+      
+      // Restart simulation from new time
+      if (isPlaying) {
+        simulatePlayback();
+      }
+    });
+    
+    // Initialize
+    initSongList();
+  </script>
+</body>
+</html>
+

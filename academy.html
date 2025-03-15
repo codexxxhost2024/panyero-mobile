@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - Academy</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+        --primary-color: #18385e;
+    }
+    .bg-primary {
+        background-color: var(--primary-color) !important;
+    }
+    .text-primary {
+        color: var(--primary-color) !important;
+    }
+    .header {
+        background-color: var(--primary-color) !important;
+    }
+    .topic-card .test-ability {
+        background-color: var(--primary-color);
+    }
+    .topic-card .test-ability:hover {
+        background-color: #122a47;
+    }
+  </style>
+  <style>
+    /* Custom Styles for Modal Animations */
+    .modal-enter {
+      transition: opacity 0.25s ease;
+      opacity: 0;
+    }
+    .modal-enter-active {
+      opacity: 1;
+    }
+    .modal-exit {
+      transition: opacity 0.25s ease;
+      opacity: 1;
+    }
+    .modal-exit-active {
+      opacity: 0;
+    }
+
+    /* Custom Styles to Match the Image */
+    .topic-card {
+      border-radius: 16px; /* Adjust as needed */
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      background-color: #fff;
+    }
+    .topic-card img {
+      height: 140px; /* Adjust as needed */
+      object-fit: cover;
+    }
+    .topic-card .content {
+      padding: 16px; /* Adjust as needed */
+    }
+    .topic-card .title {
+      font-size: 1.125rem; /* Adjust as needed */
+      font-weight: 600;
+      color: #1a202c; /* Adjust as needed */
+      margin-bottom: 8px;
+    }
+    .topic-card .intro {
+      font-size: 0.875rem; /* Adjust as needed */
+      color: #4a5568; /* Adjust as needed */
+      margin-bottom: 12px;
+    }
+    .topic-card .author {
+      font-size: 0.875rem; /* Adjust as needed */
+      color: #718096; /* Adjust as needed */
+      margin-bottom: 4px;
+    }
+    .topic-card .rating {
+      display: flex;
+      align-items: center;
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 4px 8px;
+      border-radius: 8px;
+    }
+    .topic-card .rating .material-icons {
+      font-size: 1rem;
+      color: #ecc94b;
+      margin-right: 4px;
+    }
+    .topic-card .rating span {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #1a202c;
+    }
+    .topic-card .audio-icon {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 6px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .topic-card .audio-icon .material-icons {
+      font-size: 1.25rem;
+      color: #4a5568; /* Adjust as needed */
+    }
+    .topic-card .test-ability {
+    background-color: var(--primary-color);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 12px;
+    width: 100%;
+    transition: background-color 0.2s ease;
+}
+.topic-card .test-ability:hover {
+    background-color: #122a47;
+}
+  </style>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center space-x-4 sticky top-0 z-50">
+    <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+    <div class="flex-1 text-center">Academy</div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-6 w-full overflow-y-auto space-y-6">
+    <!-- Search Bar -->
+    <div class="w-full max-w-4xl">
+      <div class="flex items-center bg-white rounded-lg p-2 shadow-md">
+        <span class="material-icons text-gray-500 mx-2">search</span>
+        <input id="searchInput" type="text" placeholder="Search for topics..." class="flex-1 focus:outline-none">
+        <button class="text-gray-500 hover:text-gray-700" onclick="clearSearch()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      <p id="searchMessage" class="text-gray-700 text-center text-sm mt-2 hidden"></p>
+    </div>
+
+    <!-- Filter and Sort Buttons -->
+    <div class="w-full max-w-4xl flex justify-between">
+      <button id="filterButton" class="bg-white text-gray-700 py-2 px-4 rounded-lg shadow-md flex items-center space-x-2">
+        <span class="material-icons">filter_list</span>
+        <span>Filter</span>
+      </button>
+      <button id="sortButton" class="bg-white text-gray-700 py-2 px-4 rounded-lg shadow-md flex items-center space-x-2">
+        <span class="material-icons">sort</span>
+        <span>Sort</span>
+      </button>
+    </div>
+
+    <!-- Introduction Paragraph -->
+    <div class="w-full max-w-4xl">
+      <p class="text-gray-700 text-center text-lg">
+        Welcome to the Deck Officer Board Exam Review Center! Here, you will find a curated list of essential topics designed to help you prepare comprehensively for your upcoming exams. Dive deep into each subject, listen to detailed audio explanations, and access additional resources to enhance your understanding and mastery.
+      </p>
+    </div>
+
+    <!-- Topics List -->
+    <div id="topicsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-4xl">
+      <!-- Topics will be dynamically populated here -->
+    </div>
+  </main>
+
+  <!-- Modal for Detailed Topic Information -->
+  <div id="topicModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
+    <div class="bg-white rounded-lg w-11/12 md:max-w-lg p-6 relative">
+      <span class="material-icons absolute top-3 right-3 cursor-pointer text-gray-500 hover:text-gray-700" onclick="toggleModal()">close</span>
+      <h3 id="modalTitle" class="text-2xl font-semibold mb-4"></h3>
+      <img id="modalImage" src="/placeholder.svg" alt="Topic Banner" class="w-full h-48 object-cover rounded-md mb-4">
+      <p id="modalContent" class="text-gray-700 mb-4"></p>
+    </div>
+  </div>
+
+  <script>
+    // Topics Data
+    const topics = [
+      { 
+        id: 1, 
+        title: "Comprehensive Voyage Planning and Passage Management",
+        img: "assets/images/topic1.webp",
+        audio: "assets/audio/topic1.mp3",
+        intro: "Master the art of planning voyages efficiently, ensuring safety and compliance throughout the journey.",
+        rating: 4.8
+      },
+      { 
+        id: 2, 
+        title: "SOLAS Regulations and Safety Drills",
+        img: "assets/images/topic2.webp",
+        audio: "assets/audio/topic2.mp3",
+        intro: "Understand the SOLAS conventions and conduct effective safety drills to maintain ship safety standards.",
+        rating: 4.8
+      },
+      { 
+        id: 3, 
+        title: "Maritime Weather Analysis",
+        img: "assets/images/topic3.webp",
+        audio: "assets/audio/topic3.mp3",
+        intro: "Analyze and interpret maritime weather patterns to make informed navigational decisions.",
+        rating: 4.8
+      },
+      { 
+        id: 4, 
+        title: "Route Planning and Navigation",
+        img: "assets/images/topic4.webp",
+        audio: "assets/audio/topic4.mp3",
+        intro: "Plan optimal routes and navigate effectively using both traditional and electronic systems.",
+        rating: 4.8
+      },
+      { 
+        id: 5, 
+        title: "Risk Assessment and Emergency Preparedness",
+        img: "assets/images/topic5.webp",
+        audio: "assets/audio/topic5.mp3",
+        intro: "Conduct thorough risk assessments and prepare for emergencies to ensure crew and vessel safety.",
+        rating: 4.8
+      },
+      { 
+        id: 6, 
+        title: "Pre-Departure Equipment Checks",
+        img: "assets/images/topic6.webp",
+        audio: "assets/audio/topic6.mp3",
+        intro: "Perform detailed equipment inspections before departure to guarantee operational readiness.",
+        rating: 4.8
+      },
+      { 
+        id: 7, 
+        title: "Effective Communication and Coordination",
+        img: "assets/images/topic7.webp",
+        audio: "assets/audio/topic7.mp3",
+        intro: "Enhance communication and coordination among crew members for smooth ship operations.",
+        rating: 4.8
+      },
+      { 
+        id: 8, 
+        title: "Voyage Contingency Planning",
+        img: "assets/images/topic8.webp",
+        audio: "assets/audio/topic8.mp3",
+        intro: "Develop contingency plans to address unforeseen circumstances during voyages.",
+        rating: 4.8
+      },
+      { 
+        id: 9, 
+        title: "Fuel Planning and Efficiency",
+        img: "assets/images/topic9.webp",
+        audio: "assets/audio/topic9.mp3",
+        intro: "Optimize fuel usage and plan refueling stops to enhance voyage efficiency and reduce costs.",
+        rating: 4.8
+      },
+      { 
+        id: 10, 
+        title: "Safety Inspection Reports",
+        img: "assets/images/topic10.webp",
+        audio: "assets/audio/topic10.mp3",
+        intro: "Compile comprehensive safety inspection reports to uphold maritime safety standards.",
+        rating: 4.8
+      }
+    ];
+
+    const topicsList = document.getElementById('topicsList');
+    const topicModal = document.getElementById('topicModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalImage = document.getElementById('modalImage');
+    const modalContent = document.getElementById('modalContent');
+
+    // Search, Filter, Sort Functionality
+    const searchInput = document.getElementById('searchInput');
+    const searchMessage = document.getElementById('searchMessage');
+    const filterButton = document.getElementById('filterButton');
+    const sortButton = document.getElementById('sortButton');
+
+    let filteredTopics = [...topics]; // Start with all topics
+
+    function filterTopics(searchTerm, filterOption, sortOption) {
+      searchTerm = searchTerm.toLowerCase();
+
+      filteredTopics = topics.filter(topic => {
+        const titleMatch = topic.title.toLowerCase().includes(searchTerm);
+        const introMatch = topic.intro.toLowerCase().includes(searchTerm);
+
+        // Add filtering based on filterOption (e.g., by rating, label)
+        let filterMatch = true;
+        if (filterOption === 'rating') {
+          filterMatch = topic.rating >= 4; // Example: filter topics with rating 4 or above
+        } else if (filterOption === 'label') {
+          // Add logic to filter by label if you have labels
+        }
+
+        return (titleMatch || introMatch) && filterMatch;
+      });
+
+      if (sortOption === 'title') {
+        filteredTopics.sort((a, b) => a.title.localeCompare(b.title));
+      } else if (sortOption === 'rating') {
+        filteredTopics.sort((a, b) => b.rating - a.rating);
+      }
+
+      populateTopics();
+      updateSearchMessage(searchTerm);
+    }
+
+    function updateSearchMessage(searchTerm) {
+      if (searchTerm) {
+        searchMessage.textContent = `Showing results for "${searchTerm}"`;
+        searchMessage.classList.remove('hidden');
+      } else {
+        searchMessage.classList.add('hidden');
+      }
+    }
+
+    function clearSearch() {
+      searchInput.value = '';
+      filterTopics('', '', '');
+    }
+
+    searchInput.addEventListener('input', () => {
+      const searchTerm = searchInput.value;
+      const filterOption = ''; // Get filter option from filter UI (e.g., a dropdown)
+      const sortOption = ''; // Get sort option from sort UI (e.g., a dropdown)
+      filterTopics(searchTerm, filterOption, sortOption);
+    });
+
+    filterButton.addEventListener('click', () => {
+      // Implement your filter logic here (e.g., open a filter modal)
+      // For now, let's just log a message to the console
+      console.log('Filter button clicked');
+    });
+
+    sortButton.addEventListener('click', () => {
+      // Implement your sort logic here (e.g., open a sort modal)
+      // For now, let's just log a message to the console
+      console.log('Sort button clicked');
+    });
+
+    // Function to toggle modal visibility
+    function toggleModal() {
+      topicModal.classList.toggle('hidden');
+    }
+
+    // Function to populate topics
+    function populateTopics() {
+      topicsList.innerHTML = ''; // Clear existing topics
+
+      if (filteredTopics.length === 0) {
+        // Display a "No results" message
+        const noResultsMessage = document.createElement('p');
+        noResultsMessage.className = 'text-gray-700 text-center';
+        noResultsMessage.textContent = 'No results found.';
+        topicsList.appendChild(noResultsMessage);
+        return;
+      }
+
+      filteredTopics.forEach(topic => {
+        // Create Topic Container
+        const topicContainer = document.createElement('div');
+        topicContainer.className = 'topic-card relative';
+
+        // Banner Image
+        const img = document.createElement('img');
+        img.src = topic.img;
+        img.alt = topic.title;
+        img.className = 'w-full';
+        img.onerror = function() {
+            this.src = 'https://via.placeholder.com/400x200?text=Topic+Image';
+        };
+
+        // Rating
+        const ratingDiv = document.createElement('div');
+        ratingDiv.className = 'rating';
+        ratingDiv.innerHTML = `
+          <span class="material-icons">star</span>
+          <span>${topic.rating}</span>
+        `;
+
+        // Audio Icon
+        const audioIcon = document.createElement('div');
+        audioIcon.className = 'audio-icon';
+        audioIcon.innerHTML = `<span class="material-icons">volume_up</span>`;
+        audioIcon.onclick = () => {
+          const audio = document.getElementById(`audio-${topic.id}`);
+          if (audio.paused) {
+            audio.play();
+            audioIcon.innerHTML = `<span class="material-icons">volume_off</span>`;
+          } else {
+            audio.pause();
+            audioIcon.innerHTML = `<span class="material-icons">volume_up</span>`;
+          }
+        };
+
+        // Audio Element
+        const audio = document.createElement('audio');
+        audio.src = topic.audio;
+        audio.id = `audio-${topic.id}`;
+        audio.style.display = 'none'; // Hide audio element
+
+        // Content Container
+        const content = document.createElement('div');
+        content.className = 'content';
+
+        // Title
+        const title = document.createElement('h4');
+        title.className = 'title';
+        title.textContent = topic.title;
+
+        // "Test My Ability" Button
+        const testAbility = document.createElement('button');
+        testAbility.className = 'test-ability';
+        testAbility.textContent = 'Test Me Now';
+        testAbility.addEventListener('click', () => {
+          window.location.href = `test-me.html?topicId=${topic.id}`;
+        });
+
+        // Append Elements
+        content.appendChild(title);
+        content.appendChild(testAbility);
+
+        topicContainer.appendChild(img);
+        topicContainer.appendChild(ratingDiv);
+        topicContainer.appendChild(audioIcon);
+        topicContainer.appendChild(audio);
+        topicContainer.appendChild(content);
+
+        topicsList.appendChild(topicContainer);
+      });
+    }
+
+    // Function to open modal with detailed topic info
+    function openTopicModal(topicId) {
+      const topic = topics.find(t => t.id === topicId);
+      if (topic) {
+        modalTitle.textContent = topic.title;
+        modalImage.src = topic.img;
+        modalImage.onerror = function() {
+            this.src = 'https://via.placeholder.com/400x200?text=Topic+Image';
+        };
+        modalContent.textContent = topic.intro;
+        toggleModal();
+      }
+    }
+
+    // Initialize Topics on Page Load
+    document.addEventListener('DOMContentLoaded', () => {
+      populateTopics();
+    });
+
+    // Optional: Close modal when clicking outside the modal content
+    window.onclick = function(event) {
+      if (event.target == topicModal) {
+        toggleModal();
+      }
+    }
+  </script>
+
+</body>
+</html>
+

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - Expense Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <style>
+  :root {
+    --primary-color: #18385e;
+  }
+  .bg-primary {
+    background-color: var(--primary-color);
+  }
+  .text-primary {
+    color: var(--primary-color);
+  }
+  .border-primary {
+    border-color: var(--primary-color);
+  }
+  button.bg-green-500 {
+    background-color: var(--primary-color);
+  }
+  button.bg-green-500:hover {
+    background-color: #122a47;
+  }
+</style>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen w-full">
+  <!-- Header -->
+  <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center justify-between sticky top-0 z-50">
+    <h1 class="text-xl font-bold">Expense Tracker</h1>
+    <a href="#" class="icon-button" onclick="window.history.back();">
+      <span class="material-icons">close</span>
+    </a>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 space-y-4">
+    <div class="bg-white rounded-lg shadow p-4 w-full max-w-md">
+      <h2 class="text-lg font-bold mb-2">Your Expenses</h2>
+      <input type="text" id="expenseName" placeholder="Expense Name" class="w-full p-2 border rounded mb-2">
+      <input type="number" id="expenseAmount" placeholder="Amount" class="w-full p-2 border rounded mb-2">
+      <button onclick="addExpense()" class="bg-green-500 text-white px-4 py-2 rounded w-full mb-4">
+        Add Expense
+      </button>
+      <ul id="expenseList" class="space-y-2"></ul>
+    </div>
+  </main>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Load expenses when the page loads
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = 'signin.html';
+        return;
+      }
+      loadExpenses();
+    });
+
+    // Add a new expense
+    async function addExpense() {
+      const expenseName = document.getElementById('expenseName').value.trim();
+      const expenseAmount = document.getElementById('expenseAmount').value.trim();
+      if (!expenseName || !expenseAmount) return;
+
+      const user = auth.currentUser;
+      await db.collection('expenses').add({
+        userId: user.uid,
+        name: expenseName,
+        amount: parseFloat(expenseAmount),
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      loadExpenses();
+    }
+
+    // Load and display expenses
+    async function loadExpenses() {
+      const user = auth.currentUser;
+      const expensesSnapshot = await db.collection('expenses').where('userId', '==', user.uid).get();
+      const expenseList = document.getElementById('expenseList');
+      expenseList.innerHTML = '';
+
+      expensesSnapshot.forEach(doc => {
+        const data = doc.data();
+        expenseList.innerHTML += `
+          <li class="flex justify-between items-center p-2 border-b">
+            <span>${data.name}</span>
+            <span>₱${data.amount.toFixed(2)}</span>
+          </li>
+        `;
+      });
+    }
+  </script>
+</body>
+</html>
+

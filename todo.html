@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - To-Do List</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen w-full">
+  <!-- Header -->
+  <header class="bg-green-600 text-white p-4 text-lg font-semibold flex items-center justify-between sticky top-0 z-50">
+    <h1 class="text-xl font-bold">To-Do List</h1>
+    <a href="#" class="icon-button" onclick="window.history.back();">
+      <span class="material-icons">close</span>
+    </a>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 space-y-4">
+    <div class="bg-white rounded-lg shadow p-4 w-full max-w-md">
+      <h2 class="text-lg font-bold mb-2">Your Tasks</h2>
+      <input type="text" id="taskInput" placeholder="Add a new task" class="w-full p-2 border rounded mb-2">
+      <button onclick="addTask()" class="bg-green-500 text-white px-4 py-2 rounded w-full mb-4">
+        Add Task
+      </button>
+      <ul id="taskList" class="space-y-2"></ul>
+    </div>
+  </main>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Load tasks when the page loads
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = 'signin.html';
+        return;
+      }
+      loadTasks();
+    });
+
+    // Add a new task
+    async function addTask() {
+      const taskInput = document.getElementById('taskInput');
+      const task = taskInput.value.trim();
+      if (!task) return;
+
+      const user = auth.currentUser;
+      await db.collection('todos').add({
+        userId: user.uid,
+        task: task,
+        completed: false,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      taskInput.value = '';
+      loadTasks();
+    }
+
+    // Load and display tasks
+    async function loadTasks() {
+      const user = auth.currentUser;
+      const tasksSnapshot = await db.collection('todos').where('userId', '==', user.uid).get();
+      const taskList = document.getElementById('taskList');
+      taskList.innerHTML = '';
+
+      tasksSnapshot.forEach(doc => {
+        const data = doc.data();
+        taskList.innerHTML += `
+          <li class="flex justify-between items-center p-2 border-b">
+            <span>${data.task}</span>
+            <button onclick="deleteTask('${doc.id}')" class="text-red-500">Delete</button>
+          </li>
+        `;
+      });
+    }
+
+    // Delete a task
+    async function deleteTask(taskId) {
+      await db.collection('todos').doc(taskId).delete();
+      loadTasks();
+    }
+  </script>
+</body>
+</html>
+

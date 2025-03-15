@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Panyero - Sample Page</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="/css/panyero-styles.css">
+  <style>
+    .feature-card {
+      transition: transform 0.2s ease-in-out;
+    }
+    .feature-card:hover {
+      transform: translateY(-5px);
+    }
+  </style>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+    authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+    projectId: "explore-malaysia-6d28d",
+    storageBucket: "explore-malaysia-6d28d.appspot.com",
+    messagingSenderId: "869053244601",
+    appId: "1:869053244601:web:29ad09ff454b43230be768",
+    measurementId: "G-5XJK1H7KWX"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  
+  // Check authentication
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      window.location.href = 'signin.html';
+      return;
+    }
+    
+    // Initialize page data
+    initializePage(user);
+  });
+  
+  function initializePage(user) {
+    // Get user profile data
+    db.collection('users').doc(user.uid).get()
+      .then(doc => {
+        if (doc.exists) {
+          const userData = doc.data();
+          document.getElementById('userName').textContent = userData.displayName || 'Panyero User';
+          document.getElementById('userBalance').textContent = formatCurrency(userData.balance || 0);
+        }
+      })
+      .catch(error => {
+        console.error('Error getting user data:', error);
+        showToast('Failed to load user data', 'error');
+      });
+      
+    // Load feature data
+    loadFeatures();
+  }
+  
+  function loadFeatures() {
+    const featuresContainer = document.getElementById('featuresContainer');
+    
+    // Sample features data
+    const features = [
+      {
+        icon: 'savings',
+        title: 'Budget Planner',
+        description: 'Plan and track your monthly budget',
+        link: 'budget_planner.html'
+      },
+      {
+        icon: 'calculate',
+        title: 'Loan Calculator',
+        description: 'Calculate loan payments and interest',
+        link: 'loan_calculator.html'
+      },
+      {
+        icon: 'trending_up',
+        title: 'Investment Tracker',
+        description: 'Track your investment performance',
+        link: 'investment.html'
+      },
+      {
+        icon: 'receipt_long',
+        title: 'Expense Tracker',
+        description: 'Record and categorize your expenses',
+        link: 'expense_tracker.html'
+      }
+    ];
+    
+    // Clear container
+    featuresContainer.innerHTML = '';
+    
+    // Add features to container
+    features.forEach(feature => {
+      const featureCard = document.createElement('div');
+      featureCard.className = 'feature-card bg-white p-4 rounded-lg shadow flex flex-col items-center text-center';
+      featureCard.innerHTML = `
+        <span class="material-icons text-primary text-3xl mb-2">${feature.icon}</span>
+        <h3 class="font-semibold mb-1">${feature.title}</h3>
+        <p class="text-sm text-gray-600 mb-3">${feature.description}</p>
+        <button class="btn btn-primary text-sm py-1 px-3" onclick="window.location.href='${feature.link}'">Open</button>
+      `;
+      featuresContainer.appendChild(featureCard);
+    });
+  }
+  
+  // Format currency helper function
+  function formatCurrency(amount, currency = '₱') {
+    return `${currency}${parseFloat(amount).toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}`;
+  }
+  
+  // Show toast notification
+  function showToast(message, type = 'info', duration = 3000) {
+    // Create toast container if it doesn't exist
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+      toastContainer = document.createElement('div');
+      toastContainer.id = 'toast-container';
+      toastContainer.style.position = 'fixed';
+      toastContainer.style.bottom = '20px';
+      toastContainer.style.left = '50%';
+      toastContainer.style.transform = 'translateX(-50%)';
+      toastContainer.style.zIndex = '9999';
+      toastContainer.style.width = '90%';
+      toastContainer.style.maxWidth = '300px';
+      document.body.appendChild(toastContainer);
+    }
+    
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.style.backgroundColor = type === 'success' ? '#4caf50' : 
+                                 type === 'error' ? '#f44336' : 
+                                 type === 'warning' ? '#ff9800' : '#2196f3';
+    toast.style.color = 'white';
+    toast.style.padding = '12px 16px';
+    toast.style.borderRadius = '4px';
+    toast.style.marginBottom = '10px';
+    toast.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity 0.3s ease-in-out';
+    toast.textContent = message;
+    
+    // Add toast to container
+    toastContainer.appendChild(toast);
+    
+    // Show toast
+    setTimeout(() => {
+      toast.style.opacity = '1';
+    }, 10);
+    
+    // Hide and remove toast after duration
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      setTimeout(() => {
+        toastContainer.removeChild(toast);
+      }, 300);
+    }, duration);
+  }
+</script>
+
+<!-- Header -->
+<header class="bg-primary text-white p-4 text-lg font-semibold flex items-center space-x-4 sticky top-0 z-50">
+  <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+  <div class="flex-1 text-center">Sample Page</div>
+</header>
+
+<!-- Main Content -->
+<main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+  <!-- User Info Card -->
+  <div class="bg-white rounded-lg p-4 shadow w-full">
+    <div class="flex justify-between items-center">
+      <div>
+        <h2 class="text-xl font-semibold" id="userName">Panyero User</h2>
+        <p class="text-sm text-gray-600">Welcome back!</p>
+      </div>
+      <div class="text-right">
+        <p class="text-sm text-gray-600">Available Balance</p>
+        <p class="text-lg font-bold text-primary" id="userBalance">₱0.00</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Features Grid -->
+  <div class="w-full">
+    <h2 class="text-xl font-semibold mb-4">Financial Tools</h2>
+    <div id="featuresContainer" class="grid grid-cols-2 gap-4">
+      <!-- Features will be populated here -->
+    </div>
+  </div>
+  
+  <!-- Recent Activity -->
+  <div class="bg-white rounded-lg p-4 shadow w-full">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-semibold">Recent Activity</h2>
+      <a href="#" class="text-primary text-sm">View All</a>
+    </div>
+    <div class="space-y-3">
+      <div class="flex justify-between items-center p-2 border-b border-gray-100">
+        <div class="flex items-center">
+          <span class="material-icons text-primary mr-3">arrow_upward</span>
+          <div>
+            <p class="font-medium">Transfer to John</p>
+            <p class="text-xs text-gray-500">Today, 2:30 PM</p>
+          </div>
+        </div>
+        <p class="text-red-500">-₱500.00</p>
+      </div>
+      <div class="flex justify-between items-center p-2 border-b border-gray-100">
+        <div class="flex items-center">
+          <span class="material-icons text-primary mr-3">arrow_downward</span>
+          <div>
+            <p class="font-medium">Received from Maria</p>
+            <p class="text-xs text-gray-500">Yesterday, 10:15 AM</p>
+          </div>
+        </div>
+        <p class="text-green-500">+₱1,200.00</p>
+      </div>
+      <div class="flex justify-between items-center p-2 border-b border-gray-100">
+        <div class="flex items-center">
+          <span class="material-icons text-primary mr-3">shopping_cart</span>
+          <div>
+            <p class="font-medium">Purchase</p>
+            <p class="text-xs text-gray-500">Mar 12, 2023</p>
+          </div>
+        </div>
+        <p class="text-red-500">-₱350.00</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>
+

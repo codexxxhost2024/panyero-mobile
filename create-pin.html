@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Panyero - Create & Confirm PIN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+        :root {
+    --primary-color: #18385e;
+}
+        h1 {
+            font-size: 20px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        .pin-info {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .pin-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .pin-input {
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            text-align: center;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            outline: none;
+            transition: box-shadow 0.3s, background-color 0.3s;
+        }
+        .pin-input:focus {
+            box-shadow: 0 0 5px rgba(5, 150, 105, 0.5);
+            background-color: #f0fdf4;
+        }
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            transition: background-color 0.3s, transform 0.2s;
+            width: 100%;
+            max-width: 230px;
+        }
+        .btn:hover {
+            background-color: #122a47; /* Darker blue hover effect */
+            transform: scale(1.02);
+        }
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="createPinContainer">
+        <h1>Create a 4-Digit PIN</h1>
+        <p class="pin-info">Secure your account with a 4-digit PIN.</p>
+        <div class="pin-row">
+            <input class="pin-input" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+            <input class="pin-input" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+            <input class="pin-input" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+            <input class="pin-input" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+        </div>
+        <button id="createPinBtn" class="btn" disabled>Next</button>
+    </div>
+
+    <div class="container" id="confirmPinContainer" style="display: none;">
+        <h1>Confirm your 4-Digit PIN</h1>
+        <p class="pin-info">Re-enter the PIN you created.</p>
+        <div class="pin-row">
+            <input class="pin-input" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+            <input class="pin-input" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+            <input class="pin-input" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+            <input class="pin-input" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+        </div>
+        <button id="confirmPinBtn" class="btn" disabled>Confirm PIN</button>
+    </div>
+
+    <script>
+        const createPinContainer = document.getElementById('createPinContainer');
+        const confirmPinContainer = document.getElementById('confirmPinContainer');
+
+        const createPins = [...createPinContainer.querySelectorAll('.pin-input')];
+        const confirmPins = [...confirmPinContainer.querySelectorAll('.pin-input')];
+        const createPinBtn = document.getElementById('createPinBtn');
+        const confirmPinBtn = document.getElementById('confirmPinBtn');
+
+        let createdPIN = "";
+        let confirmedPIN = "";
+
+        // Function to handle PIN input flow
+        function handleInput(pins, callback) {
+            pins.forEach((p, i) => {
+                p.addEventListener('input', () => {
+                    if (p.value.length === 1 && i < pins.length - 1) {
+                        pins[i + 1].focus();
+                    }
+                    callback();
+                });
+                p.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && !p.value && i > 0) {
+                        pins[i - 1].focus();
+                    }
+                });
+            });
+        }
+
+        // Check created PIN
+        handleInput(createPins, () => {
+            createdPIN = createPins.map(p => p.value).join('');
+            createPinBtn.disabled = createdPIN.length !== 4;
+        });
+
+        // Check confirmed PIN
+        handleInput(confirmPins, () => {
+            confirmedPIN = confirmPins.map(p => p.value).join('');
+            confirmPinBtn.disabled = confirmedPIN.length !== 4;
+        });
+
+        // Proceed to Confirm PIN screen
+        createPinBtn.addEventListener('click', () => {
+            if (createdPIN.length === 4) {
+                createPinContainer.style.display = 'none';
+                confirmPinContainer.style.display = 'block';
+            }
+        });
+
+        // Confirm the PIN
+        confirmPinBtn.addEventListener('click', () => {
+            if (createdPIN === confirmedPIN) {
+                alert('PIN successfully set!');
+                window.location.href = "success.html";
+            } else {
+                alert('PINs do not match. Please try again.');
+                confirmPins.forEach(p => (p.value = ""));
+                confirmPins[0].focus();
+            }
+        });
+    </script>
+</body>
+</html>
+

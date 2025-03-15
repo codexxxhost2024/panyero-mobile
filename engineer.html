@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Persona - Engineer</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        /* Add the same CSS styles as in previous examples */
+        #header {
+    position: sticky;
+    top: 0;
+    background-color: #18385e; /* Navy blue header */
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+        .user-message {
+    align-self: flex-end;
+    background-color: #18385e; /* Navy blue user message */
+    color: white;
+}
+
+        .copy-icon {
+    position: absolute;
+    bottom: -20px;
+    left: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #18385e;
+}
+
+        #submit {
+    padding: 10px;
+    background-color: #18385e; /* Navy blue submit button */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+}
+
+#submit:hover {
+    background-color: #122a47; /* Darker blue hover effect */
+    transform: scale(1.02);
+}
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1>Engineer John</h1>
+        <button id="volume-toggle">🔊</button>
+    </div>
+    <div id="chat-container">
+        <ul id="chat"></ul>
+    </div>
+    <form id="form">
+        <input id="message" autocomplete="off" placeholder="Type your message..." />
+        <button id="submit" type="submit">
+            <span class="material-icons">send</span>
+        </button>
+    </form>
+
+    <script type="module">
+        import OpenAI from 'https://esm.run/openai';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+            authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+            databaseURL: "https://explore-malaysia-6d28d-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "explore-malaysia-6d28d",
+            storageBucket: "explore-malaysia-6d28d.appspot.com",
+            messagingSenderId: "869053244601",
+            appId: "1:869053244601:web:29ad09ff454b43230be768",
+            measurementId: "G-5XJK1H7KWX"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const form = document.getElementById('form');
+        const chat = document.getElementById('chat');
+        const message = document.getElementById('message');
+        const volumeToggle = document.getElementById('volume-toggle');
+
+        // Hardcoded API key
+        const apiKey = '3e7956df1bf7445398b1c807d50c5e27';
+
+        let currentAudio = null;
+        let isTTSEnabled = true;
+
+        // System prompt for Engineer John
+        const systemPrompt = `You are Engineer John, a highly skilled and innovative professional with expertise in various fields of engineering. You address the user as "Colleague." Your responses should be logical, precise, and optimized for human-like audio output when converted by TTS. Keep your answers concise, like 2 to 4 sentences, unless more detail is required. Avoid using emojis, asterisks, or symbols that disrupt natural speech. Instead, use pauses, commas, and periods to ensure the audio sounds expressive and natural. Always answer in a confident and analytical tone, with a touch of technical wisdom. Start every response by acknowledging the user in a professional manner. You are from Aitekph Software by Master E and you work for Boss Cyrie Letada. Do not reveal that you are an AI.`;
+
+        // Function to convert text to speech
+        function say(text) {
+            if (!isTTSEnabled) return;
+
+            fetch('https://api.neets.ai/v1/tts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-Key': apiKey
+                },
+                body: JSON.stringify({
+                    text: text,
+                    voice_id: 'us-male-3', // Clear and technical voice
+                    params: {
+                        model: 'style-diff-500'
+                    }
+                })
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = URL.createObjectURL(blob);
+                currentAudio = new Audio(url);
+                currentAudio.play();
+            })
+            .catch(error => {
+                console.error('Error generating TTS:', error);
+            });
+        }
+
+        // Function to add a message to the chat
+        function addMessage(username, text, isUser = true) {
+            const messageElement = document.createElement('li');
+            messageElement.classList.add('message');
+            messageElement.classList.add(isUser ? 'user-message' : 'bot-message');
+            messageElement.innerHTML = `<strong>${username}:</strong> ${text}`;
+
+            if (!isUser) {
+                const copyIcon = document.createElement('span');
+                copyIcon.classList.add('material-icons', 'copy-icon');
+                copyIcon.textContent = 'content_copy';
+                copyIcon.onclick = () => {
+                    navigator.clipboard.writeText(text).then(() => {
+                        alert('Copied to clipboard!');
+                    });
+                };
+                messageElement.appendChild(copyIcon);
+            }
+
+            chat.appendChild(messageElement);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        // Save message to Firestore
+        async function saveMessage(username, text, isUser, userId) {
+            try {
+                const userRef = doc(db, "users", userId); // Reference to the user document
+                await addDoc(collection(db, "chats_engineer"), {
+                    from: username,
+                    message: text,
+                    timestamp: new Date(),
+                    isUser: isUser,
+                    userId: userRef, // Reference to the user document
+                });
+            } catch (error) {
+                console.error("Error saving message:", error);
+            }
+        }
+
+        // Load messages from Firestore for a specific user
+        function loadMessages(userId) {
+            const q = query(
+                collection(db, "chats_engineer"),
+                orderBy("timestamp", "asc"),
+                where("userId", "==", doc(db, "users", userId)) // Use direct reference
+            );
+
+            onSnapshot(q, (snapshot) => {
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    addMessage(data.from, data.message, data.isUser);
+                });
+            });
+        }
+
+        // Example userId (replace with actual user authentication logic)
+        const userId = "dwR9K2KXfygaLsbdfM2iPdCLnXC3";
+
+        // Load messages when the page loads
+        loadMessages(userId);
+
+        // Event listener for form submission
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const text = message.value;
+            if (!text) return;
+
+            const openai = new OpenAI({
+                apiKey: apiKey,
+                baseURL: 'https://api.neets.ai/v1',
+                dangerouslyAllowBrowser: true
+            });
+
+            message.value = '';
+
+            addMessage('User', text, true);
+            await saveMessage('User', text, true, userId);
+
+            // Prepend the system prompt to the user's message
+            const userMessageWithPrompt = `${systemPrompt}\n\nUser: ${text}`;
+
+            try {
+                const chatCompletion = await openai.chat.completions.create({
+                    messages: [{ role: 'user', content: userMessageWithPrompt }],
+                    model: 'mistralai/Mixtral-8X7B-Instruct-v0.1',
+                });
+
+                const botMessage = chatCompletion.choices[0].message.content;
+
+                addMessage('Engineer John', botMessage, false);
+                await saveMessage('Engineer John', botMessage, false, userId);
+                say(botMessage);
+            } catch (error) {
+                console.error('Error generating response:', error);
+                addMessage('Engineer John', 'Sorry, something went wrong. Please try again.', false);
+            }
+        });
+
+        // Toggle TTS audio
+        volumeToggle.addEventListener('click', () => {
+            isTTSEnabled = !isTTSEnabled;
+            volumeToggle.textContent = isTTSEnabled ? '🔊' : '🔇';
+
+            if (!isTTSEnabled && currentAudio) {
+                currentAudio.pause();
+            }
+        });
+    </script>
+</body>
+</html>
+

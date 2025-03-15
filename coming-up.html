@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - Services</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <style>
+  :root {
+    --primary-color: #18385e;
+  }
+  .bg-primary {
+    background-color: var(--primary-color);
+  }
+  .text-primary {
+    color: var(--primary-color);
+  }
+  .border-primary {
+    border-color: var(--primary-color);
+  }
+  .bg-green-600 {
+    background-color: var(--primary-color);
+  }
+  .bg-green-100 {
+    background-color: #e6f0f9;
+  }
+  .bg-green-100:hover {
+    background-color: #d1e3f6;
+  }
+  .text-green-600 {
+    color: var(--primary-color);
+  }
+</style>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+  
+  <!-- Header -->
+  <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center space-x-4 sticky top-0 z-50">
+    <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+    <div class="flex-1 text-center">Services</div>
+  </header>
+  
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+    <div class="bg-white rounded-lg p-4 shadow w-full">
+      <h2 class="text-xl font-semibold mb-4">Our Services</h2>
+      <div class="grid grid-cols-1 gap-4">
+        <!-- Existing Services -->
+        <!-- Utility Payments -->
+        <a href="utility_payments.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">payment</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Utility Payments</h3>
+              <p class="text-sm text-gray-600">Pay your electricity, water, and other utility bills seamlessly.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Finance -->
+        <a href="finance.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">account_balance</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Finance</h3>
+              <p class="text-sm text-gray-600">Manage your finances with our comprehensive tools.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Maritime Media -->
+        <a href="maritime_media.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">public</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Maritime Media</h3>
+              <p class="text-sm text-gray-600">Stay updated with the latest maritime news and services.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Shop -->
+        <a href="shop.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">shopping_cart</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Shop</h3>
+              <p class="text-sm text-gray-600">Shop online effortlessly with integrated Panyero Wallet payments.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Games -->
+        <a href="games/index.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">sports_esports</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Games</h3>
+              <p class="text-sm text-gray-600">Enjoy a wide range of games and entertainment options.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Lotto -->
+        <a href="lottery.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">casino</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Lotto</h3>
+              <p class="text-sm text-gray-600">Participate in lotto games and stand a chance to win big.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Documents Generator -->
+        <a href="persona.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">description</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Documents Generator</h3>
+              <p class="text-sm text-gray-600">Generate professional documents tailored to your persona.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Voice Generator -->
+        <a href="voices.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">record_voice_over</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Voice Generator</h3>
+              <p class="text-sm text-gray-600">Convert text to speech with realistic and customizable voices.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Panyero Chatbot -->
+        <a href="panyero_chatbot.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">chat</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Panyero Chatbot</h3>
+              <p class="text-sm text-gray-600">Interact with our AI-powered chatbot for instant assistance.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Image Generator -->
+        <a href="image_generator.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">image</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Image Generator</h3>
+              <p class="text-sm text-gray-600">Create stunning images using AI-powered tools.</p>
+            </div>
+          </div>
+        </a>
+
+        <!-- New Services -->
+        <!-- To-Do List -->
+        <a href="todo.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">checklist</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">To-Do List</h3>
+              <p class="text-sm text-gray-600">Organize your tasks and stay productive.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Expense Tracker -->
+        <a href="expense_tracker.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">attach_money</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Expense Tracker</h3>
+              <p class="text-sm text-gray-600">Track your spending and manage your budget.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Habit Tracker -->
+        <a href="habit_tracker.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">self_improvement</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Habit Tracker</h3>
+              <p class="text-sm text-gray-600">Build and track daily habits for a better lifestyle.</p>
+            </div>
+          </div>
+        </a>
+        <!-- BMI Calculator -->
+        <a href="bmi_calculator.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">fitness_center</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">BMI Calculator</h3>
+              <p class="text-sm text-gray-600">Calculate your Body Mass Index and stay healthy.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Unit Converter -->
+        <a href="unit_converter.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">swap_horiz</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Unit Converter</h3>
+              <p class="text-sm text-gray-600">Convert between units of length, weight, and more.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Tip Calculator -->
+        <a href="tip_calculator.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">restaurant</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Tip Calculator</h3>
+              <p class="text-sm text-gray-600">Calculate tips and split bills with ease.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Countdown Timer -->
+        <a href="countdown_timer.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">timer</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Countdown Timer</h3>
+              <p class="text-sm text-gray-600">Set timers for events, tasks, or workouts.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Stopwatch -->
+        <a href="stopwatch.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">timer</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Stopwatch</h3>
+              <p class="text-sm text-gray-600">Track time with precision for workouts or tasks.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Random Quote Generator -->
+        <a href="quote_generator.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">format_quote</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Random Quote Generator</h3>
+              <p class="text-sm text-gray-600">Get inspired with random quotes.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Password Generator -->
+        <a href="password_generator.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">lock</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Password Generator</h3>
+              <p class="text-sm text-gray-600">Create strong, secure passwords instantly.</p>
+            </div>
+          </div>
+        </a>
+        <!-- QR Code Generator -->
+        <a href="qr_generator.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">qr_code</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">QR Code Generator</h3>
+              <p class="text-sm text-gray-600">Generate QR codes for URLs, text, and more.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Currency Converter -->
+        <a href="currency_converter.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">currency_exchange</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Currency Converter</h3>
+              <p class="text-sm text-gray-600">Convert currencies with real-time exchange rates.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Weather App -->
+        <a href="weather_app.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">cloud</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Weather App</h3>
+              <p class="text-sm text-gray-600">Get real-time weather updates for any location.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Recipe Finder -->
+        <a href="recipe_finder.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">restaurant_menu</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Recipe Finder</h3>
+              <p class="text-sm text-gray-600">Find recipes based on ingredients you have.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Daily Journal -->
+        <a href="daily_journal.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">edit</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Daily Journal</h3>
+              <p class="text-sm text-gray-600">Write and save your daily thoughts and reflections.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Word Counter -->
+        <a href="word_counter.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">text_fields</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Word Counter</h3>
+              <p class="text-sm text-gray-600">Count words and characters in your text.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Pomodoro Timer -->
+        <a href="pomodoro_timer.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">timer</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Pomodoro Timer</h3>
+              <p class="text-sm text-gray-600">Boost productivity with the Pomodoro technique.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Language Flashcards -->
+        <a href="language_flashcards.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">translate</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Language Flashcards</h3>
+              <p class="text-sm text-gray-600">Learn new words with interactive flashcards.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Simple Drawing App -->
+        <a href="drawing_app.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">brush</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Simple Drawing App</h3>
+              <p class="text-sm text-gray-600">Draw and create art on a digital canvas.</p>
+            </div>
+          </div>
+        </a>
+        <!-- Event Countdown -->
+        <a href="event_countdown.html" class="block bg-green-100 p-4 rounded-md shadow hover:bg-green-200">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-3xl text-green-600">event</span>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800">Event Countdown</h3>
+              <p class="text-sm text-gray-600">Count down to your important events.</p>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </main>
+  
+  <script>
+    // Ensure user is authenticated
+    const auth = firebase.auth();
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = 'signin.html';
+      }
+    });
+  </script>
+</body>
+</html>
+

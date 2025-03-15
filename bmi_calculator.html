@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - BMI Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen w-full">
+  <!-- Header -->
+  <header class="bg-green-600 text-white p-4 text-lg font-semibold flex items-center justify-between sticky top-0 z-50">
+    <h1 class="text-xl font-bold">BMI Calculator</h1>
+    <a href="#" class="icon-button" onclick="window.history.back();">
+      <span class="material-icons">close</span>
+    </a>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 space-y-4">
+    <div class="bg-white rounded-lg shadow p-4 w-full max-w-md">
+      <h2 class="text-lg font-bold mb-2">Calculate Your BMI</h2>
+      <input type="number" id="height" placeholder="Height (cm)" class="w-full p-2 border rounded mb-2">
+      <input type="number" id="weight" placeholder="Weight (kg)" class="w-full p-2 border rounded mb-2">
+      <button onclick="calculateBMI()" class="bg-green-500 text-white px-4 py-2 rounded w-full mb-4">
+        Calculate
+      </button>
+      <div id="result" class="text-center font-medium"></div>
+    </div>
+  </main>
+
+  <script>
+    function calculateBMI() {
+      const height = parseFloat(document.getElementById('height').value) / 100; // Convert cm to m
+      const weight = parseFloat(document.getElementById('weight').value);
+
+      if (!height || !weight) {
+        alert('Please enter valid height and weight.');
+        return;
+      }
+
+      const bmi = (weight / (height * height)).toFixed(2);
+      let category = '';
+
+      if (bmi < 18.5) {
+        category = 'Underweight';
+      } else if (bmi >= 18.5 && bmi < 24.9) {
+        category = 'Normal';
+      } else if (bmi >= 25 && bmi < 29.9) {
+        category = 'Overweight';
+      } else {
+        category = 'Obese';
+      }
+
+      document.getElementById('result').innerHTML = `
+        <p>Your BMI: <span class="font-bold">${bmi}</span></p>
+        <p>Category: <span class="font-bold">${category}</span></p>
+      `;
+    }
+  </script>
+</body>
+</html>
+

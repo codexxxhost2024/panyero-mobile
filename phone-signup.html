@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Prevent zooming out -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Panyero - Phone Signup</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <style>
+    /* Match signup.html styling */
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(180deg, #F5F5F5, #FFFFFF);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px; /* Keep general padding */
+      padding-left: 30px; /* Add more left padding for spacing */
+      padding-right: 30px; /* Add more right padding for spacing */
+      touch-action: manipulation;
+    }
+    .container {
+      width: 100%;
+      max-width: 350px; /* Reduced max-width for spacing */
+      text-align: center;
+      margin-left: auto; /* Center the container within the body */
+      margin-right: auto;
+    }
+    .logo img {
+      width: 150px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #2F4F4F; /* Match signup.html heading color */
+      margin-bottom: 10px;
+    }
+    p {
+      font-size: 1rem;
+      color: #666;
+      margin-bottom: 20px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .input-container {
+      position: relative;
+      margin-bottom: 5px;
+    }
+    .input-container input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #CCC;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    .input-container.phone-input input {
+      padding-left: 50px;
+    }
+    .phone-prefix {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #666;
+      font-weight: 500;
+    }
+    button {
+      width: 100%;
+      background-color: #18385e; /* Same primary color as signup.html */
+      color: #FFFFFF;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover,
+    button:active {
+      background-color: #152f54;
+    }
+    .links {
+      margin-top: 15px;
+      font-size: 0.9rem;
+    }
+    .links a {
+      color: #18385e;
+      text-decoration: none;
+    }
+    .links a:hover,
+    .links a:active {
+      text-decoration: underline;
+    }
+
+    /* Page transitions / multi-step pages */
+    .page {
+      display: none;
+    }
+    .page.active {
+      display: block;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* OTP container & inputs */
+    .otp-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .otp-input {
+      width: 40px; /* Reduced width */
+      height: 40px; /* Reduced height */
+      border: 1px solid #CCC;
+      border-radius: 4px;
+      font-size: 1.2rem; /* Adjusted font size for smaller input */
+      text-align: center;
+      font-weight: bold;
+      margin: 0 4px; /* Added small horizontal margin for visual separation */
+    }
+    .otp-input:focus {
+      border-color: #18385e;
+      outline: none;
+    }
+
+    /* Success animation */
+    .success-animation {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 30px 0;
+    }
+    .checkmark {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: block;
+      stroke-width: 2;
+      stroke: #4bb71b;
+      stroke-miterlimit: 10;
+      box-shadow: inset 0px 0px 0px #4bb71b;
+      animation: fill 0.4s ease-in-out 0.4s forwards, scale 0.3s ease-in-out 0.9s both;
+      position: relative;
+      margin: 0 auto 20px;
+    }
+    .checkmark__circle {
+      stroke-dasharray: 166;
+      stroke-dashoffset: 166;
+      stroke-width: 2;
+      stroke-miterlimit: 10;
+      stroke: #4bb71b;
+      fill: none;
+      animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+    }
+    .checkmark__check {
+      transform-origin: 50% 50%;
+      stroke-dasharray: 48;
+      stroke-dashoffset: 48;
+      animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+    }
+    @keyframes stroke {
+      100% {
+        stroke-dashoffset: 0;
+      }
+    }
+    @keyframes scale {
+      0%,
+      100% {
+        transform: none;
+      }
+      50% {
+        transform: scale3d(1.1, 1.1, 1);
+      }
+    }
+    @keyframes fill {
+      100% {
+        box-shadow: inset 0px 0px 0px 30px #4bb71b;
+      }
+    }
+
+    /* OTP Timer */
+    #otpTimer {
+      margin: 10px 0;
+      color: #666;
+      font-size: 0.9rem;
+    }
+    #otpTimer a {
+      color: #18385e;
+      text-decoration: none;
+    }
+    #otpTimer a:hover {
+      text-decoration: underline;
+    }
+
+     /* Added styles for error messages and loading indicators (same as before) */
+    .error-message {
+      color: red;
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+    .loading-indicator {
+      display: none; /* Hidden by default */
+      margin-left: 10px;
+    }
+    .loading-indicator.active {
+      display: inline-block; /* Show when active */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <img
+        src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/panyero-WcQ0nHtlRdqQuOnrn8XvD15CAryjxm.png"
+        alt="Panyero Logo"
+      />
+    </div>
+
+    <!-- Page 1: Phone Input -->
+    <div id="phonePage" class="page active">
+      <h1>Sign Up with Phone</h1>
+      <p>Enter your phone number to receive a verification code</p>
+
+      <form id="phoneForm">
+        <div class="input-container">
+          <input
+            type="text"
+            id="sponsorPhone"
+            placeholder="Sponsor Account (Phone Number)"
+            required
+          />
+        </div>
+        <div class="input-container">
+          <input
+            type="text"
+            id="fullName"
+            placeholder="Full Name"
+            required
+          />
+        </div>
+        <div class="input-container">
+          <input
+            type="email"
+            id="email"
+            placeholder="Email Address"
+            required
+          />
+        </div>
+        <div class="input-container phone-input">
+          <span class="phone-prefix">+63</span>
+          <input
+            type="tel"
+            id="phoneNumber"
+            placeholder="912 345 6789"
+            maxlength="12"
+            pattern="[0-9]{11}"
+            title="Please enter a valid 11-digit Philippine mobile number starting with 9"
+            required
+          />
+        </div>
+        <div class="error-message" id="phoneFormError"></div>  <!-- Error message area for phone form -->
+        <button type="submit" id="sendCodeBtn">
+          Verify Phone
+          <span class="loading-indicator" id="sendCodeLoading">
+            <i class="material-icons loading">refresh</i>
+          </span>
+        </button>
+      </form>
+
+      <div class="links">
+        <a href="signup.html">Back to Signup Options</a>
+      </div>
+    </div>
+
+    <!-- Page 2: OTP Verification -->
+    <div id="otpPage" class="page">
+      <h1>Verify Your Phone</h1>
+      <p>
+        Enter the 6-digit code sent to
+        <span id="displayPhone"></span>
+      </p>
+
+      <form id="otpForm">
+        <div class="otp-container">
+          <input
+            type="text"
+            class="otp-input"
+            maxlength="1"
+            pattern="[0-9]"
+            inputmode="numeric"
+            autocomplete="one-time-code" /* Added autocomplete attribute */
+            required
+          />
+          <input
+            type="text"
+            class="otp-input"
+            maxlength="1"
+            pattern="[0-9]"
+            inputmode="numeric"
+            autocomplete="one-time-code" /* Added autocomplete attribute */
+            required
+          />
+          <input
+            type="text"
+            class="otp-input"
+            maxlength="1"
+            pattern="[0-9]"
+            inputmode="numeric"
+            autocomplete="one-time-code" /* Added autocomplete attribute */
+            required
+          />
+          <input
+            type="text"
+            class="otp-input"
+            maxlength="1"
+            pattern="[0-9]"
+            inputmode="numeric"
+            autocomplete="one-time-code" /* Added autocomplete attribute */
+            required
+          />
+          <input
+            type="text"
+            class="otp-input"
+            maxlength="1"
+            pattern="[0-9]"
+            inputmode="numeric"
+            autocomplete="one-time-code" /* Added autocomplete attribute */
+            required
+          />
+          <input
+            type="text"
+            class="otp-input"
+            maxlength="1"
+            pattern="[0-9]"
+            inputmode="numeric"
+            autocomplete="one-time-code" /* Added autocomplete attribute */
+            required
+          />
+        </div>
+        <div class="error-message" id="otpFormError"></div> <!-- Error message area for OTP form -->
+        <p id="otpTimer">
+          Resend code in
+          <span id="countdown">60</span>s
+        </p>
+        <button type="submit" id="verifyCodeBtn">
+          Submit
+          <span class="loading-indicator" id="verifyCodeLoading">
+            <i class="material-icons loading">refresh</i>
+          </span>
+        </button>
+      </form>
+
+      <div class="links">
+        <a href="#" id="backToPhone">Change Phone Number</a>
+      </div>
+    </div>
+
+    <!-- Success Animation -->
+    <div id="successPage" class="page">
+      <div class="success-animation">
+        <svg
+          class="checkmark"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 52 52"
+        >
+          <circle
+            class="checkmark__circle"
+            cx="26"
+            cy="26"
+            r="25"
+            fill="none"
+          />
+          <path
+            class="checkmark__check"
+            fill="none"
+            d="M14.1 27.2l7.1 7.2 16.7-16.8"
+          />
+        </svg>
+        <h2>Success!</h2>
+        <p>Your phone has been verified</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Prevent zooming
+    document.addEventListener(
+      'touchmove',
+      function (e) {
+        if (e.scale !== 1) {
+          e.preventDefault();
+        }
+      },
+      { passive: false }
+    );
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      databaseURL: "https://explore-malaysia-6d28d-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // DOM elements
+    const phonePage = document.getElementById('phonePage');
+    const otpPage = document.getElementById('otpPage');
+    const successPage = document.getElementById('successPage');
+    const phoneForm = document.getElementById('phoneForm');
+    const otpForm = document.getElementById('otpForm');
+    const phoneInput = document.getElementById('phoneNumber');
+    const sponsorPhoneInput = document.getElementById('sponsorPhone');
+    const fullNameInput = document.getElementById('fullName');
+    const emailInput = document.getElementById('email');
+    const displayPhone = document.getElementById('displayPhone');
+    const otpInputs = document.querySelectorAll('.otp-input');
+    let countdownEl = document.getElementById('countdown');
+    const backToPhoneBtn = document.getElementById('backToPhone');
+
+    // Error message elements
+    const phoneFormError = document.getElementById('phoneFormError');
+    const otpFormError = document.getElementById('otpFormError');
+
+    // Loading indicators
+    const sendCodeLoading = document.getElementById('sendCodeLoading');
+    const verifyCodeLoading = document.getElementById('verifyCodeLoading');
+
+
+    // Global variables
+    let verificationId = '';
+    let countdownInterval;
+    let fullPhoneNumber = '';
+
+    // Function to get a cookie value by name
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    // Pre-fill sponsor phone from cookie if available
+    const referralCodeCookie = getCookie('referralCode');
+    if (referralCodeCookie) {
+      sponsorPhoneInput.value = referralCodeCookie;
+    }
+
+    // Phone number formatting
+    phoneInput.addEventListener('input', function () {
+      let input = this.value.replace(/\D/g, '');
+      if (input.length > 11) {
+        input = input.substring(0, 11);
+      }
+      if (input.length > 3 && input.length <= 7) {
+        input = input.substring(0, 3) + ' ' + input.substring(3);
+      } else if (input.length > 7) {
+        input = input.substring(0, 3) + ' ' + input.substring(3, 7) + ' ' + input.substring(7);
+      }
+      this.value = input;
+    });
+
+    // OTP input handling
+    otpInputs.forEach((input, index) => {
+      input.addEventListener('input', function () {
+        if (this.value.length === 1 && index < otpInputs.length - 1) {
+          otpInputs[index + 1].focus();
+        }
+      });
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Backspace' && this.value === '' && index > 0) {
+          otpInputs[index - 1].focus();
+        }
+      });
+    });
+
+    // Start countdown timer
+    function startCountdown() {
+      let seconds = 60;
+      countdownEl.textContent = seconds;
+      countdownInterval = setInterval(() => {
+        seconds--;
+        countdownEl.textContent = seconds;
+        if (seconds <= 0) {
+          clearInterval(countdownInterval);
+          document.getElementById('otpTimer').innerHTML = '<a href="#" id="resendCode">Resend code</a>';
+          document.getElementById('resendCode').addEventListener('click', resendCode);
+        }
+      }, 1000);
+    }
+
+    // Resend verification code
+    function resendCode(e) {
+      if (e) e.preventDefault();
+      clearInterval(countdownInterval);
+      const appVerifier = window.recaptchaVerifier;
+      // Clear previous error
+      otpFormError.textContent = '';
+      // Show loading indicator
+      showLoading(verifyCodeLoading);
+      auth
+        .signInWithPhoneNumber(fullPhoneNumber, appVerifier)
+        .then((confirmationResult) => {
+          verificationId = confirmationResult;
+          startCountdown();
+          document.getElementById('otpTimer').innerHTML = 'Resend code in <span id="countdown">60</span>s';
+          countdownEl = document.getElementById('countdown');
+          hideLoading(verifyCodeLoading); // Hide loading after success
+        })
+        .catch((error) => {
+          hideLoading(verifyCodeLoading); // Hide loading even on error
+          otpFormError.textContent = `Error resending verification code: ${error.message}`; // Display error in page
+        });
+    }
+
+    // Switch to OTP page
+    function showOtpPage() {
+      phonePage.classList.remove('active');
+      otpPage.classList.add('active');
+      otpInputs[0].focus();
+      startCountdown();
+    }
+
+    // Switch back to phone page
+    backToPhoneBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      otpPage.classList.remove('active');
+      phonePage.classList.add('active');
+      clearInterval(countdownInterval);
+      otpFormError.textContent = ''; // Clear OTP error when going back
+    });
+
+    // Show success page and redirect
+    function showSuccessPage() {
+      otpPage.classList.remove('active');
+      successPage.classList.add('active');
+      setTimeout(() => {
+        window.location.href = 'signup2.html';
+      }, 2000);
+    }
+
+    // Initialize reCAPTCHA verifier
+    window.onload = function () {
+      window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('sendCodeBtn', {
+        size: 'invisible',
+        callback: (response) => {
+          // reCAPTCHA solved, allow signInWithPhoneNumber.
+        },
+      });
+       // Attempt to autofill OTP on page load (more explicit approach)
+      if ('OTPCredential' in window) {
+        navigator.credentials
+          .get({
+            otp: { transport: ['sms'] },
+            signal: new AbortController().signal, // Optional: Add signal for timeout/abort
+          })
+          .then((otp) => {
+            if (otp) {
+              const code = otp.code;
+              for (let i = 0; i < code.length && i < otpInputs.length; i++) {
+                otpInputs[i].value = code[i];
+              }
+              // Optionally submit the form automatically after autofill
+              otpForm.dispatchEvent(new Event('submit'));
+            }
+          })
+          .catch((err) => {
+            console.log('Error retrieving OTP:', err);
+            // Consider displaying a message to the user if OTP autofill fails consistently
+          });
+      }
+    };
+
+    // Show loading indicator
+    function showLoading(loadingElement) {
+      loadingElement.classList.add('active');
+    }
+
+    // Hide loading indicator
+    function hideLoading(loadingElement) {
+      loadingElement.classList.remove('active');
+    }
+
+
+    // Send verification code
+    phoneForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const sponsorPhone = sponsorPhoneInput.value.trim();
+      const fullName = fullNameInput.value.trim();
+      const email = emailInput.value.trim();
+      const phoneNumber = phoneInput.value.replace(/\s/g, '');
+
+      // Clear previous errors
+      phoneFormError.textContent = '';
+
+      if (!phoneNumber || phoneNumber.length < 11) {
+        phoneFormError.textContent = 'Please enter a valid 11-digit phone number'; // In-page error message
+        return;
+      }
+      // Show loading indicator
+      showLoading(sendCodeLoading);
+
+      try {
+        const sponsorQuery = await db.collection('users').where('phoneNumber', '==', sponsorPhone).get();
+        if (sponsorQuery.empty) {
+          hideLoading(sendCodeLoading); // Hide loading even on error
+          phoneFormError.textContent = 'Sponsor account not found. Please check the sponsor phone number.'; // In-page error message
+          return;
+        }
+        fullPhoneNumber = `+63${phoneNumber}`;
+        displayPhone.textContent = fullPhoneNumber;
+        const appVerifier = window.recaptchaVerifier;
+        auth
+          .signInWithPhoneNumber(fullPhoneNumber, appVerifier)
+          .then((confirmationResult) => {
+            verificationId = confirmationResult;
+            showOtpPage();
+            hideLoading(sendCodeLoading); // Hide loading after success
+          })
+          .catch((error) => {
+            hideLoading(sendCodeLoading); // Hide loading even on error
+            phoneFormError.textContent = `Error sending verification code: ${error.message}`; // In-page error message
+          });
+      } catch (error) {
+        hideLoading(sendCodeLoading); // Hide loading in case of exception
+        phoneFormError.textContent = `Error: ${error.message}`; // In-page error message
+      }
+    });
+
+    // Verify OTP code
+    otpForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      let otpCode = '';
+      otpInputs.forEach((input) => {
+        otpCode += input.value;
+      });
+
+      // Clear previous errors
+      otpFormError.textContent = '';
+
+      if (otpCode.length !== 6) {
+        otpFormError.textContent = 'Please enter a valid 6-digit code'; // In-page error message
+        return;
+      }
+
+      // Show loading indicator
+      showLoading(verifyCodeLoading);
+
+      try {
+        const result = await verificationId.confirm(otpCode);
+        const user = result.user;
+        const sponsorPhone = sponsorPhoneInput.value.trim();
+        const fullName = fullNameInput.value.trim();
+        const email = emailInput.value.trim();
+        const sponsorQuery = await db.collection('users').where('phoneNumber', '==', sponsorPhone).get();
+        const sponsorDoc = sponsorQuery.docs[0];
+        const sponsorUserId = sponsorDoc.id;
+        const userData = {
+          id: user.uid,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          is_subscribe: false,
+          is_verified: true,
+          balance: 0.0,
+          is_pin_created: false,
+          user_type: 'user',
+          photo: 'https://cdn-icons-png.flaticon.com/256/5600/5600583.png',
+          address: 'from the city of oceanic',
+          dob: '01-01-1800',
+          token_balance: 1000.0,
+          total_affiliates: 0,
+          unilevel_income: 0.0,
+          displayName: fullName,
+          email: email || '',
+          phoneNumber: fullPhoneNumber,
+          sponsorAccountNumber: sponsorPhone,
+          sponsorUserId: sponsorUserId,
+          deviceAgent: navigator.userAgent,
+        };
+        await db.collection('users').doc(user.uid).set(userData);
+        await db.collection('users').doc(sponsorUserId).update({
+          total_affiliates: firebase.firestore.FieldValue.increment(1),
+        });
+        await db.collection('notifications').add({
+          userId: user.uid,
+          message: `Welcome to Panyero, ${fullName}! Your account has been successfully created.`,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          isRead: false,
+        });
+        await db.collection('notifications').add({
+          userId: sponsorUserId,
+          message: `You have a new affiliate: ${fullName} (${fullPhoneNumber}).`,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          isRead: false,
+        });
+        let currentUserId = sponsorUserId;
+        for (let level = 1; level <= 5; level++) {
+          const currentUserDoc = await db.collection('users').doc(currentUserId).get();
+          if (!currentUserDoc.exists) break;
+          await db.collection('users').doc(currentUserId).update({
+            unilevel_income: firebase.firestore.FieldValue.increment(5),
+          });
+          currentUserId = currentUserDoc.data().sponsorUserId;
+          if (!currentUserId) break;
+        }
+        showSuccessPage();
+        hideLoading(verifyCodeLoading); // Hide loading after success
+      } catch (error) {
+        hideLoading(verifyCodeLoading); // Hide loading even on error
+        otpFormError.textContent = `Error verifying code: ${error.message}`; // In-page error message
+      }
+    });
+
+     // Keep the existing auto-fill attempt in the submit handler as well, for broader coverage if needed
+    if ('OTPCredential' in window) {
+      otpForm.addEventListener('submit', (e) => {
+        navigator.credentials.preventSilentAccess(); // To prompt for OTP if needed during submit
+      });
+    }
+  </script>
+</body>
+</html>
+

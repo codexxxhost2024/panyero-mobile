@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Panyero - Account</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/assets/images/logo/panyero.png">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #18385e;
+        }
+        .bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+        .balance-card {
+            background: linear-gradient(135deg, #2a4d76 0%, #18385e 100%) !important;
+        }
+        .w-10.h-10.rounded-full.bg-white.flex.items-center.justify-center .material-icons {
+            color: var(--primary-color) !important;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            font-size: 14px; /* Default font size for the body */
+        }
+        .data-box {
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        .data-box.affiliate {
+            background: linear-gradient(135deg, #b575b9, #652969);
+            color: white;
+        }
+        .data-box.network {
+            background: linear-gradient(135deg, #e0995f, #b05919);
+            color: white;
+        }
+        .data-number {
+            font-size: 20px; /* Reduced from 24px */
+            font-weight: bold;
+        }
+        .data-label {
+            font-size: 12px; /* Reduced from 14px */
+        }
+        .share-link {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .share-link input {
+            flex: 1;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            margin-right: 5px;
+            font-size: 12px; /* Reduced from 14px */
+        }
+        .analytics-container {
+            margin-top: 20px;
+            border-radius: 10px;
+            padding: 15px;
+            background-color: white;
+        }
+        .analytics-title {
+            font-size: 16px; /* Reduced from 18px */
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .analytics-date {
+            font-size: 12px; /* Reduced from 14px */
+            color: #666;
+        }
+        .analytics-chart {
+            height: 100px;
+            background-color: #eee;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-end;
+            overflow: hidden;
+            margin-top: 20px;
+            border-radius: 10px;
+        }
+        .bar {
+            width: 45%;
+            background-color: #ccc;
+            margin: 0 2.5%;
+            position: relative;
+            border-radius: 5px 5px 0 0;
+        }
+        .bar.views {
+            background-color: #752f78;
+        }
+        .bar.registered {
+            background-color: #c47530;
+        }
+        .bar-value {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #333;
+            font-size: 10px; /* Reduced from 12px */
+        }
+        .bar-label {
+            text-align: center;
+            font-size: 10px; /* Reduced from 12px */
+            margin-top: 5px;
+        }
+        .legend {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .legend-color.views {
+            background-color: #752f78;
+        }
+        .legend-color.registered {
+            background-color: #c47530;
+        }
+        .legend-text {
+            font-size: 10px; /* Reduced from 12px */
+        }
+        .unilevel-container {
+            margin-top: 20px;
+            border-radius: 10px;
+            padding: 15px;
+            background-color: white;
+        }
+        .unilevel-title {
+            font-size: 16px; /* Reduced from 18px */
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .unilevel-level {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .unilevel-item {
+            display: inline-block;
+            margin: 0 5px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background-color: #f0f0f0;
+            font-size: 12px; /* Reduced from 14px */
+        }
+        .balance-card {
+            background: linear-gradient(135deg, #2a4d76 0%, #18385e 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .balance-title {
+            font-size: 16px; /* Reduced from 18px */
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .balance-amount {
+            font-size: 20px; /* Reduced from 22px */
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .balance-label {
+            font-size: 12px; /* Reduced from 14px */
+        }
+        .token-balance {
+            font-size: 20px; /* Reduced from 22px */
+            font-weight: 500;
+            margin-top: 10px;
+        }
+        /* Share Menu Styles */
+        .share-menu {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 20px;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            transition: bottom 0.3s ease;
+            z-index: 1000;
+        }
+        .share-menu.show {
+            bottom: 0;
+        }
+        .share-menu .share-icons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .share-menu .share-icons .icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+        .share-menu .share-icons .icon span {
+            font-size: 12px; /* Reduced from 14px */
+            margin-top: 5px;
+        }
+        .share-menu .share-icons .icon .material-icons {
+            font-size: 20px; /* Reduced from 24px */
+            width: 20px;
+            height: 20px;
+        }
+        /* Consistent icon color */
+        .share-menu .share-icons .icon .material-icons {
+            color: #000; /* Changed icon color to black */
+        }
+        .close-icon {
+            font-size: 16px; /* Reduced from 18px */
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+    <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center justify-between sticky top-0 z-50">
+        <span class="material-icons cursor-pointer" onclick="window.history.back()">
+            arrow_back
+        </span>
+        <div class="flex-1 text-center">
+            Account Overview
+        </div>
+        <span class="material-icons">
+            calendar_today
+        </span>
+    </header>
+
+    <main class="p-4 flex-1">
+        <!-- Combined Wallet Balance and Token Balance Card -->
+        <div class="balance-card">
+            <div class="flex justify-between items-center">
+                <div>
+                    <div class="balance-amount" id="currentBalance">₱0.00</div>
+                    <div class="balance-label">Wallet Balance</div>
+                    <div class="token-balance" id="tokenBalance">0 PTK</div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+                        <span class="material-icons text-primary">account_balance_wallet</span>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+                        <span class="material-icons text-primary">toll</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Affiliate and Network Overview -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="data-box affiliate">
+                <div class="data-number" id="affiliateRewards">₱0.00</div>
+                <div class="data-label">Rewards</div>
+            </div>
+            <div class="data-box network">
+                <div class="data-number" id="networkAffiliates">0</div>
+                <div class="data-label">Affiliates</div>
+            </div>
+        </div>
+
+        <!-- Share & Earn -->
+        <div class="bg-white rounded-lg shadow p-4 mb-6">
+            <h2 class="text-xl font-semibold mb-2">Share & Earn</h2>
+            <div class="share-link flex items-center gap-2">
+                <input type="text" id="shareUrl" readonly class="flex-1 p-2 border border-gray-300 rounded-lg">
+                <button onclick="copyShareLink()" class="bg-primary hover:bg-primary-dark text-white font-bold py-2 px-4 rounded">
+                    <span class="material-icons">content_copy</span>
+                </button>
+            </div>
+            <p class="text-sm text-gray-500 mt-2">Click the copy button to share your link.</p>
+        </div>
+
+        <!-- Analytics for Sharing -->
+        <div class="analytics-container">
+            <div class="flex justify-between items-center mb-3">
+                <div class="analytics-title">Analytics for Sharing</div>
+                <div class="analytics-date" id="currentDate"></div>
+            </div>
+            <div class="analytics-chart">
+                <div class="bar views" style="height: 60%;"><span class="bar-value" id="linkViews">0</span></div>
+                <div class="bar registered" style="height: 40%;"><span class="bar-value" id="registeredViews">0</span></div>
+            </div>
+            <div class="flex justify-around">
+                <div class="bar-label">Views</div>
+                <div class="bar-label">Registered</div>
+            </div>
+            <div class="legend mt-2">
+                <div class="legend-item">
+                    <div class="legend-color views"></div>
+                    <span class="legend-text">Total Link Views</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color registered"></div>
+                    <span class="legend-text">Registered Users</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Genealogy Overview and Chart -->
+        <div class="unilevel-container mt-6">
+             <div class="unilevel-title">Affiliate Network Genealogy (Levels 1-5)</div>
+             <div class="flex justify-center mt-4">
+                <!-- Placeholder for the genealogy graph -->
+                <canvas id="genealogyChart" width="300" height="150"></canvas>
+             </div>
+        </div>
+    </main>
+
+    <!-- Share Menu -->
+    <div class="share-menu" id="shareMenu">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Share Via</h2>
+            <span class="material-icons close-icon" onclick="hideShareMenu()">close</span>
+        </div>
+        <div class="share-icons">
+            <div class="icon" onclick="shareVia('facebook')">
+                <span class="material-icons">facebook</span>
+                <span>Facebook</span>
+            </div>
+            <div class="icon" onclick="shareVia('whatsapp')">
+                <span class="material-icons">whatsapp</span>
+                <span>WhatsApp</span>
+            </div>
+            <div class="icon" onclick="shareVia('telegram')">
+                <span class="material-icons">telegram</span>
+                <span>Telegram</span>
+            </div>
+            <div class="icon" onclick="shareVia('viber')">
+                <span class="material-icons">viber</span>
+                <span>Viber</span>
+            </div>
+            <div class="icon" onclick="shareVia('sms')">
+                <span class="material-icons">sms</span>
+                <span>SMS</span>
+            </div>
+            <div class="icon" onclick="shareVia('email')">
+                <span class="material-icons">email</span>
+                <span>Email</span>
+            </div>
+            <div class="icon" onclick="shareVia('instagram')">
+                <span class="material-icons">instagram</span>
+                <span>Instagram</span>
+            </div>
+            <div class="icon" onclick="shareVia('twitter')">
+                <span class="material-icons">twitter</span>
+                <span>Twitter</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+            authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+            projectId: "explore-malaysia-6d28d",
+            storageBucket: "explore-malaysia-6d28d.appspot.com",
+            messagingSenderId: "869053244601",
+            appId: "1:869053244601:web:29ad09ff454b43230be768",
+            measurementId: "G-5XJK1H7KWX"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Function to display the current date
+        function displayCurrentDate() {
+            const today = new Date();
+            const formattedDate = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+            document.getElementById('currentDate').textContent = formattedDate;
+        }
+
+        // Function to generate and display share link
+        function generateShareLink(phoneNumber) {
+            const shareUrl = `https://playstore.panyero.website/main/signup.html?ref=${phoneNumber}`;
+            document.getElementById('shareUrl').value = shareUrl;
+            return shareUrl;
+        }
+
+        // Function to copy the share link to clipboard and show share menu
+        function copyShareLink() {
+            const shareUrlInput = document.getElementById('shareUrl');
+            shareUrlInput.select();
+            document.execCommand('copy');
+            alert('Share link copied!');
+            showShareMenu();
+        }
+
+        // Function to show the share menu
+        function showShareMenu() {
+            const shareMenu = document.getElementById('shareMenu');
+            shareMenu.classList.add('show');
+        }
+
+        // Function to hide the share menu
+        function hideShareMenu() {
+            const shareMenu = document.getElementById('shareMenu');
+            shareMenu.classList.remove('show');
+        }
+
+        // Function to handle sharing via different platforms
+        function shareVia(platform) {
+            const shareUrl = document.getElementById('shareUrl').value;
+            let shareLink = '';
+
+            switch (platform) {
+                case 'facebook':
+                    shareLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+                    break;
+                case 'whatsapp':
+                    shareLink = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareUrl)}`;
+                    break;
+                case 'telegram':
+                    shareLink = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}`;
+                    break;
+                case 'viber':
+                    shareLink = `viber://forward?text=${encodeURIComponent(shareUrl)}`;
+                    break;
+                case 'sms':
+                    shareLink = `sms:?body=${encodeURIComponent(shareUrl)}`;
+                    break;
+                case 'email':
+                    shareLink = `mailto:?body=${encodeURIComponent(shareUrl)}`;
+                    break;
+                case 'instagram':
+                    shareLink = `https://www.instagram.com/?url=${encodeURIComponent(shareUrl)}`;
+                    break;
+                case 'twitter':
+                    shareLink = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}`;
+                    break;
+            }
+
+            window.open(shareLink, '_blank');
+            hideShareMenu();
+        }
+
+        // Ensure user is authenticated
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'signin.html';
+                return;
+            }
+
+            // Fetch user data and display current balance
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    const currentBalance = userData.balance || 0;
+                    const tokenBalance = userData.token_balance || 0;
+                    document.getElementById('currentBalance').textContent = `₱${currentBalance.toFixed(2)}`;
+                    document.getElementById('tokenBalance').textContent = `${tokenBalance} PTK`;
+
+                    // Generate share link with user's phone number
+                    const phoneNumber = userData.phoneNumber || 'unknown';
+                    generateShareLink(phoneNumber);
+                } else {
+                    console.error("User document does not exist.");
+                    alert("Your account data could not be found. Please contact support.");
+                }
+            } catch (error) {
+                console.error("Error fetching user data: ", error);
+                alert("An error occurred while loading your data. Please try again later.");
+            }
+
+            // Fetch and display unilevel income
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    const unilevelIncome = userData.unilevel_income || 0;
+                    document.getElementById('affiliateRewards').textContent = `₱${unilevelIncome.toFixed(2)}`;
+                }
+            } catch (error) {
+                console.error("Error fetching unilevel income: ", error);
+                document.getElementById('affiliateRewards').textContent = "Error";
+            }
+
+            // Fetch and display the count of users who are sponsored by the current user
+            try {
+                const usersSnapshot = await db.collection('users').where('sponsorUserID', '==', user.uid).get();
+                const sponsoredUserCount = usersSnapshot.size;
+                document.getElementById('networkAffiliates').textContent = sponsoredUserCount;
+            } catch (error) {
+                console.error("Error fetching sponsored users count: ", error);
+                document.getElementById('networkAffiliates').textContent = "Error";
+            }
+
+            // Fetch and display the link analytics data
+            try {
+                const linkAnalyticsSnapshot = await db.collection('link_analytics')
+                    .where('userId', '==', user.uid).get();
+                let totalViews = 0;
+                let totalRegistered = 0;
+
+                linkAnalyticsSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    totalViews += data.views || 0;
+                    totalRegistered += data.registered || 0;
+                });
+
+                document.getElementById('linkViews').textContent = totalViews;
+                document.getElementById('registeredViews').textContent = totalRegistered;
+
+            } catch (error) {
+                console.error("Error fetching Link Analytics data: ", error);
+                document.getElementById('linkViews').textContent = "Error";
+                document.getElementById('registeredViews').textContent = "Error";
+            }
+
+            // Fetch and display genealogy data
+            async function fetchGenealogyData() {
+                try {
+                    const userDoc = await db.collection('users').doc(user.uid).get();
+                    if (!userDoc.exists) {
+                        console.error('User document not found');
+                        return;
+                    }
+                    const userData = userDoc.data();
+                    const sponsorUserId = userData.sponsorUserId;
+
+                    // Fetch immediate affiliates (level 1)
+                    const level1Affiliates = await fetchAffiliates(user.uid);
+
+                    // Fetch level 2 affiliates
+                    const level2Affiliates = {};
+                    for (const affiliateId of level1Affiliates) {
+                        level2Affiliates[affiliateId] = await fetchAffiliates(affiliateId);
+                    }
+
+                    // Fetch level 3 affiliates
+                    const level3Affiliates = {};
+                    for (const affiliateId in level2Affiliates) {
+                        for (const subAffiliateId of level2Affiliates[affiliateId]) {
+                            if (!level3Affiliates[affiliateId]) {
+                                level3Affiliates[affiliateId] = [];
+                            }
+                            level3Affiliates[affiliateId] = [...level3Affiliates[affiliateId], ...(await fetchAffiliates(subAffiliateId))];
+                        }
+                    }
+
+                    // Fetch level 4 affiliates
+                    const level4Affiliates = {};
+                    for (const affiliateId in level3Affiliates) {
+                        for (const subAffiliateId of level3Affiliates[affiliateId]) {
+                            if (!level4Affiliates[affiliateId]) {
+                                level4Affiliates[affiliateId] = [];
+                            }
+                            level4Affiliates[affiliateId] = [...level4Affiliates[affiliateId], ...(await fetchAffiliates(subAffiliateId))];
+                        }
+                    }
+
+                    // Fetch level 5 affiliates
+                    const level5Affiliates = {};
+                    for (const affiliateId in level4Affiliates) {
+                        for (const subAffiliateId of level4Affiliates[affiliateId]) {
+                            if (!level5Affiliates[affiliateId]) {
+                                level5Affiliates[affiliateId] = [];
+                            }
+                            level5Affiliates[affiliateId] = [...level5Affiliates[affiliateId], ...(await fetchAffiliates(subAffiliateId))];
+                        }
+                    }
+
+                    const affiliatesData = {
+                        level1: level1Affiliates.length,
+                        level2: Object.values(level2Affiliates).flat().length,
+                        level3: Object.values(level3Affiliates).flat().length,
+                        level4: Object.values(level4Affiliates).flat().length,
+                        level5: Object.values(level5Affiliates).flat().length
+                    };
+
+                    renderGenealogyChart(affiliatesData);
+
+                } catch (error) {
+                    console.error("Error fetching genealogy data: ", error);
+                }
+            }
+
+            async function fetchAffiliates(userId) {
+                const affiliatesSnapshot = await db.collection('users').where('sponsorUserId', '==', userId).get();
+                return affiliatesSnapshot.docs.map(doc => doc.id);
+            }
+
+            function renderGenealogyChart(affiliatesData) {
+                const ctx = document.getElementById('genealogyChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'],
+                        datasets: [{
+                            label: 'Number of Affiliates',
+                            data: [
+                                affiliatesData.level1,
+                                affiliatesData.level2,
+                                affiliatesData.level3,
+                                affiliatesData.level4,
+                                affiliatesData.level5
+                            ],
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 2,
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    precision: 0
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            fetchGenealogyData();
+            displayCurrentDate();
+        });
+    </script>
+</body>
+</html>
+

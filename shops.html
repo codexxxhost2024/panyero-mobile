@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - Shops</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen w-full">
+  <header class="bg-green-600 text-white p-4 text-lg font-semibold flex items-center justify-between sticky top-0 z-50">
+    <h1 class="text-xl font-bold">Shops</h1>
+    <a href="#" class="icon-button" onclick="window.history.back();">
+      <span class="material-icons">close</span>
+    </a>
+  </header>
+  <main class="flex-1 flex flex-col items-center p-4 space-y-4">
+    <div class="bg-white rounded-lg shadow p-4 w-full max-w-md">
+      <h2 class="text-lg font-bold mb-2">Available Shops</h2>
+      <ul id="shopsList" class="space-y-2">
+        <!-- Shops will be populated here -->
+      </ul>
+    </div>
+  </main>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
+
+  <script>
+    const shopsList = document.getElementById('shopsList');
+
+    auth.onAuthStateChanged(async user => {
+      if (!user) {
+        window.location.href = 'signin.html';
+        return;
+      }
+
+      // Fetch and display available shops
+      const shopsSnapshot = await db.collection('shops').get();
+      if (shopsSnapshot.empty) {
+        shopsList.innerHTML = '<p class="text-gray-600">No shops available at the moment.</p>';
+        return;
+      }
+
+      shopsSnapshot.forEach(doc => {
+        const data = doc.data();
+        const shopItem = `
+          <li class="flex justify-between items-center p-2 border-b">
+            <span class="font-medium">${data.name}</span>
+            <button onclick="purchase('${doc.id}')" class="bg-green-500 text-white px-4 py-1 rounded">Visit</button>
+          </li>
+        `;
+        shopsList.innerHTML += shopItem;
+      });
+    });
+
+    async function purchase(shopId) {
+      const user = auth.currentUser;
+      if (!user) {
+        alert('You must be signed in to perform this action.');
+        window.location.href = 'signin.html';
+        return;
+      }
+
+      try {
+        // Fetch shop details
+        const shopDoc = await db.collection('shops').doc(shopId).get();
+        if (!shopDoc.exists) {
+          alert('Shop not found.');
+          return;
+        }
+        const shopData = shopDoc.data();
+
+        // Create purchase transaction
+        await db.collection('purchases').add({
+          userId: user.uid,
+          shopId: shopId,
+          shopName: shopData.name,
+          amount: shopData.price,
+          status: 'pending',
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // Create notification for Admin
+        await db.collection('notifications').add({
+          userId: 'admin', // Assuming 'admin' is the UID for Admin
+          type: 'purchase',
+          message: `User ${user.displayName || user.email} has made a purchase of ₱${shopData.price} from ${shopData.name}.`,
+          purchaseId: '',
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          read: false
+        });
+
+        alert('Purchase request submitted successfully and is pending confirmation!');
+      } catch (error) {
+        console.error('Error processing purchase:', error);
+        alert('There was an error processing your purchase. Please try again.');
+      }
+    }
+  </script>
+</body>
+</html>
+

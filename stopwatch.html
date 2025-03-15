@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - Stopwatch</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen w-full">
+  <!-- Header -->
+  <header class="bg-green-600 text-white p-4 text-lg font-semibold flex items-center justify-between sticky top-0 z-50">
+    <h1 class="text-xl font-bold">Stopwatch</h1>
+    <a href="#" class="icon-button" onclick="window.history.back();">
+      <span class="material-icons">close</span>
+    </a>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 space-y-4">
+    <div class="bg-white rounded-lg shadow p-4 w-full max-w-md">
+      <h2 class="text-lg font-bold mb-4">Stopwatch</h2>
+      <div class="space-y-4">
+        <!-- Timer Display -->
+        <div id="stopwatchDisplay" class="text-center text-4xl font-bold">00:00:00</div>
+        <!-- Buttons -->
+        <div class="flex justify-center space-x-4">
+          <button onclick="startStopwatch()" class="bg-green-500 text-white px-4 py-2 rounded">
+            Start
+          </button>
+          <button onclick="stopStopwatch()" class="bg-red-500 text-white px-4 py-2 rounded">
+            Stop
+          </button>
+          <button onclick="resetStopwatch()" class="bg-gray-500 text-white px-4 py-2 rounded">
+            Reset
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Ensure user is authenticated
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = 'signin.html';
+      }
+    });
+
+    let stopwatchInterval;
+    let startTime;
+    let elapsedTime = 0;
+
+    // Start the stopwatch
+    function startStopwatch() {
+      if (!stopwatchInterval) {
+        startTime = Date.now() - elapsedTime;
+        stopwatchInterval = setInterval(updateStopwatch, 10);
+      }
+    }
+
+    // Stop the stopwatch
+    function stopStopwatch() {
+      clearInterval(stopwatchInterval);
+      stopwatchInterval = null;
+    }
+
+    // Reset the stopwatch
+    function resetStopwatch() {
+      clearInterval(stopwatchInterval);
+      stopwatchInterval = null;
+      elapsedTime = 0;
+      document.getElementById("stopwatchDisplay").innerText = "00:00:00";
+    }
+
+    // Update the stopwatch display
+    function updateStopwatch() {
+      elapsedTime = Date.now() - startTime;
+      const time = new Date(elapsedTime);
+      const hours = String(time.getUTCHours()).padStart(2, "0");
+      const minutes = String(time.getUTCMinutes()).padStart(2, "0");
+      const seconds = String(time.getUTCSeconds()).padStart(2, "0");
+      const milliseconds = String(Math.floor(time.getUTCMilliseconds() / 10)).padStart(2, "0");
+      document.getElementById("stopwatchDisplay").innerText = `${hours}:${minutes}:${seconds}`;
+    }
+  </script>
+</body>
+</html>
+

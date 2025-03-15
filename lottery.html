@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panyero Wallet - Live Stream</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/assets/images/logo/panyero.png">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #18385e;
+        }
+        .bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+        .hover\:bg-primary-dark:hover {
+            background-color: #122a47 !important;
+        }
+        .lucky-pick-button {
+            background-color: var(--primary-color) !important;
+        }
+        .lucky-pick-button:hover {
+            background-color: #122a47 !important;
+        }
+        .countdown-timer {
+            color: #ffffff !important;
+            background: linear-gradient(145deg, #18385e, #2a4d76) !important;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
+    <style>
+       .lucky-pick-button {
+            background-color: var(--primary-color);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .lucky-pick-button:hover {
+            background-color: #122a47;
+        }
+
+         .lottery-ball.highlight {
+            background: radial-gradient(circle at 30% 30%, #ffffff, #ff0000);
+        }
+
+        .lottery-ball.rotating {
+          animation: rotateHighlight 0.3s linear infinite;
+        }
+
+        @keyframes rotateHighlight {
+            0% {
+                background: radial-gradient(circle at 30% 30%, #ffffff, #ff0000);
+             }
+            10% {
+               background: radial-gradient(circle at 50% 0%, #ffffff, #ff0000);
+            }
+            20%{
+                background: radial-gradient(circle at 70% 30%, #ffffff, #ff0000);
+             }
+             30% {
+               background: radial-gradient(circle at 100% 50%, #ffffff, #ff0000);
+             }
+            40% {
+              background: radial-gradient(circle at 70% 70%, #ffffff, #ff0000);
+             }
+            50% {
+               background: radial-gradient(circle at 50% 100%, #ffffff, #ff0000);
+            }
+            60%{
+                background: radial-gradient(circle at 30% 70%, #ffffff, #ff0000);
+             }
+              70% {
+                background: radial-gradient(circle at 0% 50%, #ffffff, #ff0000);
+              }
+            80%{
+                 background: radial-gradient(circle at 30% 30%, #ffffff, #ff0000);
+            }
+            100% {
+                 background: radial-gradient(circle at 30% 30%, #ffffff, #ff0000);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+    <!-- Header -->
+    <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center space-x-4 sticky top-0 z-50">
+        <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+        <div class="flex-1 text-center">Panyero Lotto</div>
+    </header>
+
+    <!-- Wallet Balance -->
+    <div class="bg-primary text-white p-2 text-center">
+        <div id="balanceAmount" class="text-2xl font-bold">₱0</div>
+    </div>
+
+    <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+        <!-- Latest Winning Numbers Section -->
+        <div class="bg-white rounded-lg p-4 shadow w-full">
+            <h2 class="text-xl font-semibold mb-4 text-center">Latest Winning Numbers</h2>
+            <div class="bg-yellow-100 p-4 rounded-lg shadow">
+                <ul id="winningNumbersList" class="space-y-2">
+                    <!-- Winning numbers will be loaded here -->
+                </ul>
+            </div>
+        </div>
+
+        <!-- YouTube Embed and Countdown Timers -->
+        <div class="bg-white rounded-lg p-4 shadow w-full">
+            <div class="relative" style="padding-bottom: 56.25%; height: 0; overflow: hidden;">
+                <iframe width="100%" height="100%"
+                    src="https://www.youtube.com/embed/tN428Q_U-kc?si=kQ-4RbAzV4mGlV0H&autoplay=1&mute=1"
+                    title="YouTube video player" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen
+                    class="absolute top-0 left-0 w-full h-full rounded-lg"></iframe>
+            </div>
+
+            <div class="mt-4 bg-white rounded-lg p-4 shadow w-full">
+                <h2 class="text-xl font-semibold mb-2 text-center">Next Draws</h2>
+                <!-- Countdown Timer 1 -->
+                <div id="countdown1" class="text-2xl font-bold text-center countdown-timer text-lime-500 mb-4"></div>
+                <!-- Countdown Timer 2 -->
+                <div id="countdown2" class="text-2xl font-bold text-center countdown-timer text-lime-500"></div>
+            </div>
+        </div>
+
+        <!-- Create Your Bet Section -->
+        <div class="bg-white rounded-lg p-4 shadow w-full">
+            <h2 class="text-xl font-semibold mb-2 text-center">Create Your Bet</h2>
+            <div class="relative mb-4">
+                <select id="gameType"
+                    class="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+                    style="padding: 10px; width: 100%; margin-bottom: 10px;" title="Select Game Type">
+                    <!-- Options will be populated dynamically -->
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <svg class="fill-current h-4 w-4" viewBox="0 0 20 20">
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                    </svg>
+                </div>
+            </div>
+            <div class="mb-4">
+                <input type="text" id="bettorName"
+                    class="w-full px-4 py-2 border rounded shadow focus:outline-none focus:shadow-outline"
+                    placeholder="Enter Bettor's Name" />
+            </div>
+            <div class="mb-4">
+                <select id="betAmount"
+                    class="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+                    style="padding: 10px; width: 100%; margin-bottom: 10px;" title="Select Bet Amount">
+                    <option value="10">₱10</option>
+                    <option value="20">₱20</option>
+                    <option value="30">₱30</option>
+                    <option value="40">₱40</option>
+                    <option value="50">₱50</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <svg class="fill-current h-4 w-4" viewBox="0 0 20 20">
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                    </svg>
+                </div>
+            </div>
+            <div id="numberGrid" class="mt-4 flex flex-wrap justify-center gap-2"></div>
+              <button id="luckyPickButton" class="lucky-pick-button mt-4 w-full">Lucky Pick</button>
+            <button id="betNowButton" class="bg-primary hover:bg-primary-dark text-white font-bold py-2 px-4 rounded mt-4 w-full focus:outline-none focus:shadow-outline" disabled>Bet Now</button>
+        </div>
+
+        <!-- Recent Bets Section -->
+        <div class="bg-white rounded-lg p-4 shadow w-full">
+            <h2 class="text-xl font-semibold mb-2 text-center">Recent Bets</h2>
+            <ul id="recentBetsList" class="divide-y divide-gray-200 overflow-y-auto" style="max-height: 300px;">
+                <!-- Bets will be listed here -->
+            </ul>
+        </div>
+
+        <!-- Lottery Bets List Section -->
+        <div class="bg-white rounded-lg p-4 shadow w-full mt-4">
+            <h2 class="text-xl font-semibold mb-4 text-center">Lottery Bets</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Game Type</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bettor</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Numbers</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expected Winning</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Receipt</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lotteryBetsList" class="bg-white divide-y divide-gray-200">
+                        <!-- Lottery bets will be listed here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bet Confirmation Modal -->
+    <div id="betConfirmationModal" class="hidden fixed z-50 inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Confirm Your Bet</h3>
+                <div class="mt-2 px-7 py-3">
+                    <div id="modalTicket" class="text-sm text-gray-500 flex flex-col items-center space-y-4">
+                        <div class="border-b border-gray-200 py-2 mb-2 text-center w-full">
+                            <h4 class="font-bold text-xl">Panyero Lottery</h4>
+                            <span id="receiptNumber" class="text-sm text-gray-500"></span>
+                        </div>
+                        <div class="w-full grid grid-cols-2 gap-4">
+                            <div class="text-left">
+                                <span class="font-bold text-md">Game:</span>
+                            </div>
+                            <div class="text-right">
+                                <span id="modalGame" class="text-sm"></span>
+                            </div>
+                            <div class="text-left">
+                                <span class="font-bold text-md">Time:</span>
+                            </div>
+                            <div class="text-right">
+                                <span id="modalTime" class="text-sm"></span>
+                            </div>
+                            <div class="text-left">
+                                <span class="font-bold text-md">Amount:</span>
+                            </div>
+                            <div class="text-right">
+                                <span id="modalAmount" class="text-sm"></span>
+                            </div>
+                            <div class="text-left">
+                                <span class="font-bold text-md">Expected Winning:</span>
+                            </div>
+                            <div class="text-right">
+                                <span id="modalWinning" class="text-sm"></span>
+                            </div>
+                            <div class="text-left">
+                                <span class="font-bold text-md">Bettor:</span>
+                            </div>
+                            <div class="text-right">
+                                <span id="modalBettor" class="text-sm"></span>
+                            </div>
+                            <div class="text-left">
+                                <span class="font-bold text-md">Numbers:</span>
+                            </div>
+                            <div class="text-right">
+                                <span id="modalNumbers" class="text-sm"></span>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-center w-full">
+                            <canvas id="barcode" class="mx-auto"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button id="cancelBet" class="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300">
+                        Cancel
+                    </button>
+                    <button id="confirmBet" class="px-4 py-2 bg-primary text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-blue-300 mt-2">
+                        Pay Now
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="luckyPickSound" src="https://playstore.panyero.website/main/assets/audio/luckypick.mp3"></audio>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+            authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+            projectId: "explore-malaysia-6d28d",
+            storageBucket: "explore-malaysia-6d28d.appspot.com",
+            messagingSenderId: "869053244601",
+            appId: "1:869053244601:web:29ad09ff454b43230be768",
+            measurementId: "G-5XJK1H7KWX"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        const lottoSchedule = {
+            "schedule": {
+                "Monday": [
+                    {
+                        "game": "Mega Lotto 6/45",
+                        "time": "9:00 PM"
+                    },
+                    {
+                        "game": "Grand Lotto 6/55",
+                        "time": "9:00 PM"
+                    }
+                ],
+                "Tuesday": [
+                    {
+                        "game": "6/42 Lotto",
+                        "time": "9:00 PM"
+                    },
+                    {
+                        "game": "Super Lotto 6/49",
+                        "time": "9:00 PM"
+                    },
+                    {
+                        "game": "Ultra Lotto 6/58",
+                        "time": "9:00 PM"
+                    }
+                ],
+                "Wednesday": [
+                    {
+                        "game": "Mega Lotto 6/45",
+                        "time": "9:00 PM"
+                    },
+                    {
+                        "game": "Grand Lotto 6/55",
+                        "time": "9:00 PM"
+                    }
+                ],
+                "Thursday": [
+                    {
+                        "game": "Lotto 6/42",
+                        "time": "9:00 PM"
+                    },
+                    {
+                        "game": "Super Lotto 6/49",
+                        "time": "9:00 PM"
+                    }
+                ],
+                "Friday": [
+                    {
+                        "game": "Mega Lotto 6/45",
+                        "time": "9:00 PM"
+                    },
+                    {
+                        "game": "Ultra Lotto 6/58",
+                        "time": "9:00 PM"
+                    }
+                ],
+                "Saturday": [
+                    {
+                        "game": "6/42 Lotto",
+                        "time": "9:00 PM"
+                    },
+                    {
+                        "game": "Grand Lotto 6/55",
+                        "time": "9:00 PM"
+                    }
+                ],
+                "Sunday": [
+                    {
+                        "game": "Super Lotto 6/49",
+                        "time": "9:00 PM"
+                    },
+                    {
+                        "game": "Ultra Lotto 6/58",
+                        "time": "9:00 PM"
+                    }
+                ]
+            }
+        };
+
+        // Expected winnings for a ₱10 bet
+        const expectedWinnings = {
+            "6/42": 6500,
+            "6/45": 7000,
+            "6/49": 7500,
+            "6/55": 8500,
+            "6/58": 9000
+        };
+
+        let currentNearestDraws = []; // Track the nearest draws
+        let selectedBalls = [];
+        let currentReceiptNumber = null;
+        let allBets = []; //Store all bets to use on luckyPick function
+
+        function generateReceiptNumber() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+
+            return `REC${year}${month}${day}${hours}${minutes}${seconds}${random}`;
+        }
+
+        function findNearestDraws(schedule) {
+            const now = new Date();
+            const philippinesTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            let nearestDraws = [];
+
+            for (let i = 0; i < 7; i++) {
+                const checkDay = days[(philippinesTime.getDay() + i) % 7];
+                schedule.schedule[checkDay].forEach(draw => {
+                    const [hours, minutes] = draw.time.match(/(\d+):(\d+)/);
+                    let drawHours = parseInt(hours);
+                    if (draw.time.includes('PM') && drawHours !== 12) drawHours += 12;
+                    if (draw.time.includes('AM') && drawHours === 12) drawHours = 0;
+
+                    const drawDate = new Date(philippinesTime);
+                    drawDate.setDate(philippinesTime.getDate() + i);
+                    drawDate.setHours(drawHours, parseInt(minutes), 0, 0);
+
+                    const diff = drawDate - philippinesTime;
+                    if (diff > 0) {
+                        nearestDraws.push({ date: drawDate, game: draw.game, time: draw.time });
+                    }
+                });
+            }
+            // Sort by time and return the two nearest draws
+            nearestDraws.sort((a, b) => a.date - b.date);
+            return nearestDraws.slice(0, 2);
+        }
+
+        function updateCountdown(nearestDraws) {
+            const now = new Date();
+            const philippinesTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
+
+            nearestDraws.forEach((draw, index) => {
+                const diff = draw.date - philippinesTime;
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                const countdownElement = document.getElementById(`countdown${index + 1}`);
+                if (countdownElement) {
+                    countdownElement.innerHTML = `
+                        <div class="game-info mb-2">${draw.game} - ${draw.time}</div>
+                        <div class="time-left">${days}d ${hours}h ${minutes}m ${seconds}s</div>
+                    `;
+                }
+            });
+        }
+
+        function populateGameDropdown(nearestDraws) {
+            const gameTypeDropdown = document.getElementById('gameType');
+            const selectedGame = gameTypeDropdown.value; // Store the currently selected game
+
+            gameTypeDropdown.innerHTML = ''; // Clear existing options
+
+            nearestDraws.forEach(draw => {
+                const option = document.createElement('option');
+                option.value = draw.game; // Use the full game name as the value
+                option.textContent = draw.game;
+                gameTypeDropdown.appendChild(option);
+            });
+
+            // Restore the selected game if it still exists in the dropdown
+            if (selectedGame && Array.from(gameTypeDropdown.options).some(option => option.value === selectedGame)) {
+                gameTypeDropdown.value = selectedGame;
+            } else if (nearestDraws.length > 0) {
+                gameTypeDropdown.value = nearestDraws[0].game;
+            }
+            // Update the number grid based on the selected game
+            if (gameTypeDropdown.value) {
+                generateNumberGrid(gameTypeDropdown.value);
+            }
+        }
+
+        function generateNumberGrid(gameType) {
+            let maxNumber;
+            const gameTypeWithoutTime = gameType.split(' ')[0];
+            switch (gameTypeWithoutTime) {
+                case 'Mega': maxNumber = 45; break;
+                case 'Grand': maxNumber = 55; break;
+                case '6/42': maxNumber = 42; break;
+                case 'Lotto': maxNumber = 42; break;
+                case 'Super': maxNumber = 49; break;
+                case 'Ultra': maxNumber = 58; break;
+                default: maxNumber = 42;
+            }
+            const numberGrid = document.getElementById('numberGrid');
+            numberGrid.innerHTML = '';
+             selectedBalls = []; // Clear selected balls
+
+            for (let i = 1; i <= maxNumber; i++) {
+                const button = document.createElement('button');
+                button.textContent = String(i).padStart(2, '0');
+                button.className = 'lottery-ball bg-blue-500 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline transition-all duration-200 ease-in-out';
+                button.addEventListener('click', function() {
+                    if (selectedBalls.length < 2) {
+                        this.classList.toggle('bg-red-500');
+                        this.classList.toggle('text-white');
+                        const ballNumber = parseInt(this.textContent);
+                        if (selectedBalls.includes(ballNumber)) {
+                            selectedBalls = selectedBalls.filter(num => num !== ballNumber);
+                        } else {
+                            selectedBalls.push(ballNumber);
+                        }
+                    } else {
+                        if (selectedBalls.includes(parseInt(this.textContent))) {
+                            this.classList.toggle('bg-red-500');
+                            this.classList.toggle('text-white');
+                            selectedBalls = selectedBalls.filter(num => num !== parseInt(this.textContent));
+                        }
+                    }
+                     updateBetNowButtonState();
+                 });
+                numberGrid.appendChild(button);
+            }
+             updateBetNowButtonState();
+        }
+
+         function updateBetNowButtonState() {
+             const betNowButton = document.getElementById('betNowButton');
+             if (selectedBalls.length === 2) {
+                 betNowButton.removeAttribute('disabled');
+             } else {
+                 betNowButton.setAttribute('disabled', true);
+             }
+         }
+
+        function checkAndUpdateDraws() {
+            const nearestDraws = findNearestDraws(lottoSchedule);
+
+            // Only update if the nearest draws have changed
+            if (JSON.stringify(nearestDraws) !== JSON.stringify(currentNearestDraws)) {
+                currentNearestDraws = nearestDraws;
+                updateCountdown(nearestDraws);
+                populateGameDropdown(nearestDraws);
+            }
+             updateBetNowButtonState();
+        }
+
+        function calculateExpectedWinning(gameType, betAmount) {
+            // Extract the game type (e.g., "6/42" from "6/42 Lotto")
+            const gameKey = gameType.match(/\d+\/\d+/)[0]; // Extract "6/42" from "6/42 Lotto"
+            const baseWinning = expectedWinnings[gameKey] || 0; // Get the base winning for a ₱10 bet
+            return (baseWinning / 10) * betAmount; // Scale based on the bet amount
+        }
+
+        function fetchAndUpdateWalletBalance() {
+            const user = auth.currentUser;
+            if (user) {
+                db.collection('users').doc(user.uid).get()
+                    .then(userDoc => {
+                        const balance = userDoc.data().balance || 0;
+                        document.getElementById('balanceAmount').innerText = `₱${balance}`;
+                    })
+                    .catch(error => {
+                        console.error("Error fetching wallet balance:", error);
+                        document.getElementById('balanceAmount').innerText = "₱0";
+                    });
+            } else {
+                document.getElementById('balanceAmount').innerText = "₱0";
+            }
+        }
+
+         document.getElementById('gameType').addEventListener('change', function() {
+             const selectedGameType = this.value;
+            generateNumberGrid(selectedGameType);
+        });
+
+        document.getElementById('betNowButton').addEventListener('click', () => {
+            const gameType = document.getElementById('gameType').value;
+            const bettorName = document.getElementById('bettorName').value;
+            const betAmount = parseInt(document.getElementById('betAmount').value);
+            const selectedNumbers = selectedBalls.join(',');
+            const expectedWinning = calculateExpectedWinning(gameType, betAmount);
+            const nearestDraw = currentNearestDraws.find(draw => draw.game === gameType);
+             const drawTime = nearestDraw.time;
+
+            // Update the modal with bet details
+            updateModalWithBetDetails(gameType, bettorName, betAmount, selectedNumbers, expectedWinning, drawTime);
+        });
+
+        document.getElementById('cancelBet').addEventListener('click', function() {
+            const modal = document.getElementById('betConfirmationModal');
+            modal.classList.add('hidden');
+        });
+
+        document.getElementById('confirmBet').addEventListener('click', function() {
+            const modal = document.getElementById('betConfirmationModal');
+            modal.classList.add('hidden');
+            saveBetToFirestore();
+        });
+
+        async function saveBetToFirestore() {
+            const user = auth.currentUser;
+            if (user) {
+                const userId = user.uid;
+                const gameType = document.getElementById('gameType').value;
+                const bettorName = document.getElementById('bettorName').value;
+                const betAmount = parseInt(document.getElementById('betAmount').value);
+                const selectedNumbers = selectedBalls;
+                const expectedWinning = calculateExpectedWinning(gameType, betAmount);
+                const nearestDraw = currentNearestDraws.find(draw => draw.game === gameType);
+                 const drawTime = nearestDraw.time;
+                // Fetch the user's wallet balance
+                const userDoc = await db.collection('users').doc(userId).get();
+                const userWalletBalance = userDoc.data().balance || 0;
+
+                if (userWalletBalance < betAmount) {
+                    alert("Insufficient balance. Please add funds to your wallet.");
+                    return;
+                }
+
+                const betData = {
+                    user: db.doc(`users/${userId}`),
+                    draw_game: gameType,
+                    draw_time: drawTime,
+                    bettor_name: bettorName,
+                    numbers: selectedNumbers,
+                    amount: betAmount,
+                    expected_winning: expectedWinning,
+                    receiptNumber: currentReceiptNumber,
+                    status: "pending",
+                    created: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                try {
+                    // Start a Firestore transaction
+                    await db.runTransaction(async (transaction) => {
+                        const userRef = db.collection('users').doc(userId);
+
+                        const userDoc = await transaction.get(userRef);
+                        const currentBalance = userDoc.data().balance || 0;
+
+                        if (currentBalance < betAmount) {
+                            throw new Error("Insufficient balance.");
+                        }
+
+                        transaction.update(userRef, {
+                            balance: firebase.firestore.FieldValue.increment(-betAmount)
+                        });
+
+                        const newBetRef = db.collection('lotterybets').doc();
+                        transaction.set(newBetRef, betData);
+                    });
+
+                   fetchAndDisplayRecentBets();
+                   fetchAndDisplayLotteryBets();
+                   fetchAndDisplayAllLotteryBets();
+                    alert("Bet Placed Successfully!");
+                    fetchAndUpdateWalletBalance(); // Update the displayed balance
+                } catch (error) {
+                    console.error("Error processing bet:", error);
+                    alert("Error processing bet: " + error.message);
+                }
+            } else {
+                alert('Please sign in to place a bet.');
+                window.location.href = 'signin.html';
+            }
+        }
+
+        function updateModalWithBetDetails(gameType, bettorName, betAmount, selectedNumbers, expectedWinning, drawTime) {
+            document.getElementById('modalGame').textContent = gameType;
+            document.getElementById('modalBettor').textContent = bettorName;
+            document.getElementById('modalAmount').textContent = `₱${betAmount}`;
+            document.getElementById('modalNumbers').textContent = selectedNumbers;
+            document.getElementById('modalWinning').textContent = `₱${expectedWinning}`;
+            document.getElementById('modalTime').textContent = drawTime;
+
+            // Generate a unique receipt number and barcode
+            currentReceiptNumber = generateReceiptNumber();
+            document.getElementById('receiptNumber').textContent = `Receipt#: ${currentReceiptNumber}`;
+
+            const barcodeCanvas = document.getElementById('barcode');
+            JsBarcode(barcodeCanvas, currentReceiptNumber, {
+                format: "CODE128",
+                displayValue: true,
+                width: 1.5,
+                height: 40,
+            });
+
+            // Show the modal
+            const modal = document.getElementById('betConfirmationModal');
+            modal.classList.remove('hidden');
+              const confirmButton = document.getElementById('confirmBet');
+            confirmButton.removeAttribute('disabled');
+        }
+
+        function fetchAndDisplayRecentBets() {
+            const user = auth.currentUser;
+            if (user) {
+                const userId = user.uid;
+                db.collection('lotterybets')
+                    .where('user', '==', db.doc(`users/${userId}`))                    .orderBy('created', 'desc')
+                    .limit(10)
+                    .get()
+                    .then((querySnapshot) => {
+                        const betsList = document.getElementById('recentBetsList');
+                        betsList.innerHTML = ''; // Clear the list
+                        querySnapshot.forEach((doc) => {
+                            const bet = doc.data();
+                            const betItem = document.createElement('li');
+                            betItem.className = 'py-3 sm:py-4';
+                            betItem.innerHTML = `
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium text-gray-900 truncate">
+                                            ${bet.draw_game} - ${bet.bettor_name}
+                                        </p>
+                                        <p class="text-sm text-gray-500 truncate">
+                                            ${bet.numbers.join(', ')} - ₱${bet.amount}
+                                        </p>
+                                    </div>
+                                    <div class="inline-flex items-center text-base font-semibold text-gray-900">
+                                        ${bet.draw_time}
+                                    </div>
+                                </div>
+                            `;
+                            betsList.appendChild(betItem);
+                        });
+                    })
+                    .catch((error) => {
+                        console.error("Error fetching bets:", error);
+                    });
+            }
+        }
+
+        function fetchAndDisplayLotteryBets() {
+             db.collection('lotterybets')
+                 .orderBy('created', 'desc')
+                 .limit(10)
+                 .get()
+                 .then((querySnapshot) => {
+                     const betsList = document.getElementById('lotteryBetsList');
+                     betsList.innerHTML = ''; // Clear the list
+                     querySnapshot.forEach((doc) => {
+                         const bet = doc.data();
+                        const betItem = document.createElement('tr');
+                         betItem.innerHTML = `
+                             <td class="px-6 py-4 whitespace-nowrap">
+                                 <div class="text-sm text-gray-900">${bet.draw_game}</div>
+                             </td>
+                             <td class="px-6 py-4 whitespace-nowrap">
+                                 <div class="text-sm text-gray-900">${bet.bettor_name}</div>
+                             </td>
+                             <td class="px-6 py-4 whitespace-nowrap">
+                                 <div class="text-sm text-gray-900">${bet.numbers.join(',')}</div>
+                             </td>
+                             <td class="px-6 py-4 whitespace-nowrap">
+                                 <div class="text-sm text-gray-900">₱${bet.amount}</div>
+                             </td>
+                             <td class="px-6 py-4 whitespace-nowrap">
+                                 <div class="text-sm text-gray-900">₱${bet.expected_winning}</div>
+                             </td>
+                             <td class="px-6 py-4 whitespace-nowrap">
+                                 <div class="text-sm text-gray-900">${bet.receiptNumber}</div>
+                             </td>
+                             <td class="px-6 py-4 whitespace-nowrap">                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${bet.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
+                                     ${bet.status}
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4 whitespace-nowrap">
+                                 <div class="text-sm text-gray-900">${new Date(bet.created.seconds * 1000).toLocaleString()}</div>
+                             </td>
+                         `;
+                         betsList.appendChild(betItem);
+                     });
+                 })
+                 .catch((error) => {
+                     console.error("Error fetching lottery bets:", error);
+                 });
+         }
+
+
+        function fetchAndDisplayAllLotteryBets() {
+            db.collection('lotterybets')
+                .orderBy('created', 'desc')
+                .get()
+                .then((querySnapshot) => {
+                    allBets = querySnapshot.docs.map(doc => doc.data());
+                })
+                .catch((error) => {
+                    console.error("Error fetching all lottery bets:", error);
+                });
+        }
+
+
+       function getLeastUsedNumbers(allBets, maxNumber) {
+            if (!allBets || allBets.length === 0) {
+              // If there are no bets yet, return two random numbers
+                return getRandomNumbers(maxNumber);
+             }
+
+              const numberCounts = new Array(maxNumber).fill(0);
+              allBets.forEach(bet => {
+                if (bet.numbers && Array.isArray(bet.numbers)) {
+                    bet.numbers.forEach(number => {
+                        if (number >= 1 && number <= maxNumber) {
+                            numberCounts[number - 1]++;
+                        }
+                    });
+                 }
+               });
+
+              const sortedNumbers = numberCounts.map((count, index) => ({
+                 number: index + 1,
+                  count: count
+              })).sort((a, b) => a.count - b.count);
+
+            return sortedNumbers.slice(0, 2).map(item => item.number);
+        }
+
+       function getRandomNumbers(maxNumber) {
+            const numbers = [];
+            while(numbers.length < 2) {
+                 const randomNumber = Math.floor(Math.random() * maxNumber) + 1;
+                  if(!numbers.includes(randomNumber)){
+                    numbers.push(randomNumber);
+                  }
+            }
+           return numbers;
+       }
+
+        document.getElementById('luckyPickButton').addEventListener('click', () => {
+            const gameType = document.getElementById('gameType').value;
+            let maxNumber;
+            const gameTypeWithoutTime = gameType.split(' ')[0];
+             switch (gameTypeWithoutTime) {
+                case 'Mega': maxNumber = 45; break;
+                case 'Grand': maxNumber = 55; break;
+                case '6/42': maxNumber = 42; break;
+                case 'Lotto': maxNumber = 42; break;
+                case 'Super': maxNumber = 49; break;
+                case 'Ultra': maxNumber = 58; break;
+                default: maxNumber = 42;
+           }
+
+             const leastUsedNumbers = getLeastUsedNumbers(allBets, maxNumber);
+            selectedBalls = leastUsedNumbers; // Set the selected balls to the lucky pick
+            updateNumberGridSelection(leastUsedNumbers);
+            triggerLuckyPickAnimation();
+            updateBetNowButtonState();
+        });
+
+       function triggerLuckyPickAnimation() {
+            const numberGrid = document.getElementById('numberGrid');
+            const balls = numberGrid.querySelectorAll('.lottery-ball');
+
+              balls.forEach(ball => {
+                  ball.classList.add('rotating');
+                   setTimeout(() => {
+                       ball.classList.remove('rotating');
+                  }, 5000);
+              });
+           const audio = document.getElementById('luckyPickSound');
+           audio.play();
+
+
+         }
+
+
+     function updateNumberGridSelection(selectedNumbers) {
+         const numberGrid = document.getElementById('numberGrid');
+         const balls = numberGrid.querySelectorAll('.lottery-ball');
+
+          balls.forEach(ball => {
+             const ballNumber = parseInt(ball.textContent);
+              ball.classList.remove('highlight');
+             if (selectedNumbers.includes(ballNumber)) {
+                   ball.classList.add('highlight');
+             }
+          });
+        }
+
+        fetch('winningdata.json')
+            .then(response => response.json())
+            .then(data => {
+                const winningNumbers = data.latestWinningNumbers;
+                const winningList = document.getElementById('winningNumbersList');
+                winningList.innerHTML = '';
+
+                winningNumbers.forEach(winning => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'text-sm font-medium text-green-600';
+                    const combinations = winning.combinations.split('-');
+                    const highlightedCombinations = combinations.slice(0, 2).map(combination => `<strong class="text-2xl text-blue-800">${combination}</strong>`).join('-');
+                    const remainingCombinations = combinations.slice(2).join('-');
+                    listItem.innerHTML = `${winning.game}: ${highlightedCombinations}-${remainingCombinations} (Draw Date: ${winning.drawDate}, Jackpot: ${winning.jackpot})`;
+                    winningList.appendChild(listItem);
+                });
+            })
+            .catch(error => console.error('Error loading winning data:', error));
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAndUpdateDraws();
+            fetchAndDisplayRecentBets();
+           fetchAndDisplayLotteryBets();
+           fetchAndDisplayAllLotteryBets();
+            fetchAndUpdateWalletBalance(); // Fetch balance on page load
+            setInterval(checkAndUpdateDraws, 1000); // Check every second
+        });
+    </script>
+
+    <style>
+        .countdown-timer {
+            background: linear-gradient(145deg, #18385e, #2a4d76);
+            color: #ffffff;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            animation: pulse 2s infinite;
+        }
+
+        .game-info {
+            color: #ffffff;
+            font-size: 1.2rem;
+        }
+
+        .time-left {
+            font-size: 1.8rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .lottery-ball {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #ff0000);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 5px;
+        }
+
+        .lottery-ball:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .lottery-ball:active {
+            transform: scale(0.9);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        #lotteryBetsList li {
+            background-color: #f9f9f9;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        #lotteryBetsList li:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+    </style>
+</body>
+</html>
+

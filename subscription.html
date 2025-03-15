@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Panyero Wallet - Subscription</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="/manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #18385e;
+        }
+        .bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+        .border-primary {
+            border-color: var(--primary-color) !important;
+        }
+        .hover\:bg-primary-dark:hover {
+            background-color: #122a47 !important;
+        }
+        .focus\:ring-primary:focus {
+            --tw-ring-color: var(--primary-color) !important;
+        }
+        .focus\:border-primary:focus {
+            border-color: var(--primary-color) !important;
+        }
+        .plan-card.selected {
+            border-color: var(--primary-color) !important;
+            background-color: rgba(24, 56, 94, 0.05) !important;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .subscription-card {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .subscription-card .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .subscription-card .title {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        .subscription-card .price {
+            font-size: 1.6rem;
+            font-weight: bold;
+        }
+        .subscription-card .description {
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 15px;
+        }
+        .subscription-card .features {
+            margin-bottom: 15px;
+        }
+        .subscription-card .features ul {
+            list-style: none;
+            padding: 0;
+        }
+        .subscription-card .features li {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        .subscription-card .features li .material-icons {
+            margin-right: 8px;
+            color: green;
+        }
+        .subscription-card .call-to-action button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-transform: uppercase;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        .subscription-card .call-to-action button:hover {
+            background-color: #367c39;
+        }
+        .subscription-card.current .header {
+            background-color: #059669;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+        .subscription-card.current .title, .subscription-card.current .price {
+            color: white;
+        }
+        .subscription-card.current .material-icons {
+            color: white;
+        }
+        .token-sale {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .token-sale .title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .token-sale .token-amount {
+            font-size: 1.4rem;
+            color: #059669;
+            margin-bottom: 10px;
+        }
+        .token-sale .token-price {
+            font-size: 1.1rem;
+            color: #333;
+        }
+        .token-package {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .token-package .package {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            flex: 1;
+            margin: 0 10px;
+        }
+        .token-package .package .amount {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #059669;
+            margin-bottom: 10px;
+        }
+        .token-package .package .price {
+            font-size: 1rem;
+            color: #555;
+        }
+        .tokens-section .title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-left: 55px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen max-w-sm w-full">
+    <!-- Header -->
+    <header class="bg-primary text-white p-4 text-lg font-semibold flex items-center space-x-4 sticky top-0 z-50">
+        <span class="material-icons cursor-pointer" onclick="window.history.back()">arrow_back</span>
+        <div class="flex-1 text-center">Subscription</div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col items-center p-4 w-full overflow-y-auto pb-24 space-y-4">
+        <!-- Current Subscription Status -->
+        <div class="bg-white rounded-lg p-4 shadow w-full">
+            <h2 class="text-xl font-semibold mb-2">Current Subscription</h2>
+            <div id="currentSubscription" class="text-center p-4 bg-gray-100 rounded-md">
+                <p class="text-gray-600">Loading subscription status...</p>
+            </div>
+        </div>
+
+        <!-- Subscription Plans -->
+        <div class="bg-white rounded-lg p-4 shadow w-full">
+            <h2 class="text-xl font-semibold mb-4">Choose a Plan</h2>
+            
+            <!-- Free Plan -->
+            <div class="plan-card border-2 border-gray-200 rounded-lg p-4 mb-4 cursor-pointer hover:bg-gray-50 transition-colors" data-plan="free">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-lg font-medium">Free Plan</h3>
+                    <span class="text-xl font-bold">₱0</span>
+                </div>
+                <ul class="text-sm text-gray-600 space-y-2 mb-4">
+                    <li class="flex items-center">
+                        <span class="material-icons text-green-500 mr-2 text-sm">check_circle</span>
+                        Basic wallet functionality
+                    </li>
+                    <li class="flex items-center">
+                        <span class="material-icons text-green-500 mr-2 text-sm">check_circle</span>
+                        Limited transactions per month
+                    </li>
+                    <li class="flex items-center">
+                        <span class="material-icons text-green-500 mr-2 text-sm">check_circle</span>
+                        Access to essential services
+                    </li>
+                </ul>
+                <button class="w-full bg-primary text-white py-2 rounded font-medium hover:bg-primary-dark">Select Free Plan</button>
+            </div>
+            
+            <!-- Premium Plan -->
+            <div class="plan-card border-2 border-gray-200 rounded-lg p-4 mb-4 cursor-pointer hover:bg-gray-50 transition-colors" data-plan="premium">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-lg font-medium">Premium Plan</h3>
+                    <span class="text-xl font-bold">₱199/mo</span>
+                </div>
+                <ul class="text-sm text-gray-600 space-y-2 mb-4">
+                    <li class="flex items-center">
+                        <span class="material-icons text-green-500 mr-2 text-sm">check_circle</span>
+                        All Free Plan features
+                    </li>
+                    <li class="flex items-center">
+                        <span class="material-icons text-green-500 mr-2 text-sm">check_circle</span>
+                        Unlimited transactions
+                    </li>
+                    <li class="flex items-center">
+                        <span class="material-icons text-green-500 mr-2 text-sm">check_circle</span>
+                        Priority customer support
+                    </li>
+                    <li class="flex items-center">
+                        <span class="material-icons text-green-500 mr-2 text-sm">check_circle</span>
+                        Advanced analytics
+                    </li>
+                </ul>
+                <button class="w-full bg-primary text-white py-2 rounded font-medium hover:bg-primary-dark">Select Premium Plan</button>
+            </div>
+            
+            <!-- Business Plan -->
+            <div class="plan-card border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors" data-plan="business">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-lg font-medium">Business Plan</h3>
+                    <span class="text-xl font-bold">₱499/mo</span>
+                </div>
+                <ul class="text-sm text-gray-600 space-y-2 mb-4">
+                    <li class="flex items-center">
+                        <span class="material-icons text-green-500 mr-2 text-sm">check_circle</span>
+                        All Premium Plan features
+                    </li>
+                    <li class="flex items-center">
+                        <span class="material-icons text-green-500 mr-2 text-sm">check_circle</span>
+                        Multiple user accounts
+                    </li>
+                    <li class="flex items-center">
+                        <span class="material-icons text-green-500 mr-2 text-sm">check_circle</span>
+                        Business analytics dashboard
+                    </li>
+                    <li class="flex items-center">
+                        <span class="material-icons text-green-500 mr-2 text-sm">check_circle</span>
+                        API access for integration
+                    </li>
+                    <li class="flex items-center">
+                        <span class="material-icons text-green-500 mr-2 text-sm">check_circle</span>
+                        Dedicated account manager
+                    </li>
+                </ul>
+                <button class="w-full bg-primary text-white py-2 rounded font-medium hover:bg-primary-dark">Select Business Plan</button>
+            </div>
+        </div>
+
+        <!-- Token Purchase -->
+        <div class="bg-white rounded-lg p-4 shadow w-full">
+            <h2 class="text-xl font-semibold mb-4">Purchase Tokens</h2>
+            <p class="text-sm text-gray-600 mb-4">Tokens can be used for premium features and services within the app.</p>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Token Package 1 -->
+                <div class="border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-50 transition-colors">
+                    <h3 class="text-lg font-medium mb-1">100 PTK</h3>
+                    <p class="text-xl font-bold text-primary mb-2">₱99</p>
+                    <button class="w-full bg-primary text-white py-2 rounded font-medium hover:bg-primary-dark text-sm">Buy Now</button>
+                </div>
+                
+                <!-- Token Package 2 -->
+                <div class="border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-50 transition-colors">
+                    <h3 class="text-lg font-medium mb-1">250 PTK</h3>
+                    <p class="text-xl font-bold text-primary mb-2">₱199</p>
+                    <button class="w-full bg-primary text-white py-2 rounded font-medium hover:bg-primary-dark text-sm">Buy Now</button>
+                </div>
+                
+                <!-- Token Package 3 -->
+                <div class="border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-50 transition-colors">
+                    <h3 class="text-lg font-medium mb-1">500 PTK</h3>
+                    <p class="text-xl font-bold text-primary mb-2">₱349</p>
+                    <button class="w-full bg-primary text-white py-2 rounded font-medium hover:bg-primary-dark text-sm">Buy Now</button>
+                </div>
+                
+                <!-- Token Package 4 -->
+                <div class="border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-50 transition-colors">
+                    <h3 class="text-lg font-medium mb-1">1000 PTK</h3>
+                    <p class="text-xl font-bold text-primary mb-2">₱599</p>
+                    <button class="w-full bg-primary text-white py-2 rounded font-medium hover:bg-primary-dark text-sm">Buy Now</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+            authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+            projectId: "explore-malaysia-6d28d",
+            storageBucket: "explore-malaysia-6d28d.appspot.com",
+            messagingSenderId: "869053244601",
+            appId: "1:869053244601:web:29ad09ff454b43230be768",
+            measurementId: "G-5XJK1H7KWX"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Plan selection functionality
+        const planCards = document.querySelectorAll('.plan-card');
+        planCards.forEach(card => {
+            card.addEventListener('click', function() {
+                // Remove selected class from all cards
+                planCards.forEach(c => c.classList.remove('selected'));
+                // Add selected class to clicked card
+                this.classList.add('selected');
+                
+                // Get the plan type from data attribute
+                const planType = this.getAttribute('data-plan');
+                console.log(`Selected plan: ${planType}`);
+                
+                // Here you would typically update the UI or prepare for subscription
+            });
+        });
+
+        // Check current subscription status
+        auth.onAuthStateChanged(async user => {
+            if (!user) {
+                window.location.href = 'signin.html';
+                return;
+            }
+            
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    const subscriptionStatus = userData.subscription || 'free';
+                    const subscriptionExpiry = userData.subscriptionExpiry ? new Date(userData.subscriptionExpiry.seconds * 1000) : null;
+                    
+                    // Update the UI with subscription info
+                    const currentSubscriptionDiv = document.getElementById('currentSubscription');
+                    if (subscriptionStatus === 'free') {
+                        currentSubscriptionDiv.innerHTML = `
+                            <p class="font-medium text-lg">Free Plan</p>
+                            <p class="text-gray-600">You are currently on the Free Plan.</p>
+                        `;
+                    } else {
+                        currentSubscriptionDiv.innerHTML = `
+                            <p class="font-medium text-lg">${subscriptionStatus.charAt(0).toUpperCase() + subscriptionStatus.slice(1)} Plan</p>
+                            <p class="text-gray-600">Your subscription is active until ${subscriptionExpiry ? subscriptionExpiry.toLocaleDateString() : 'N/A'}.</p>
+                        `;
+                    }
+                    
+                    // Highlight the current plan
+                    const currentPlanCard = document.querySelector(`.plan-card[data-plan="${subscriptionStatus}"]`);
+                    if (currentPlanCard) {
+                        currentPlanCard.classList.add('selected');
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching subscription data:", error);
+                document.getElementById('currentSubscription').innerHTML = `
+                    <p class="text-red-500">Error loading subscription data. Please try again later.</p>
+                `;
+            }
+        });
+
+        // Token purchase functionality
+        const tokenButtons = document.querySelectorAll('.border button');
+        tokenButtons.forEach(button => {
+            button.addEventListener('click', async function(e) {
+                e.preventDefault();
+                const tokenPackage = this.parentElement.querySelector('h3').textContent;
+                const tokenPrice = this.parentElement.querySelector('p').textContent;
+                
+                if (confirm(`Confirm purchase of ${tokenPackage} for ${tokenPrice}?`)) {
+                    try {
+                        const user = auth.currentUser;
+                        if (!user) {
+                            alert('You must be signed in to purchase tokens.');
+                            return;
+                        }
+                        
+                        // Here you would implement the actual token purchase logic
+                        alert(`Token purchase successful! ${tokenPackage} have been added to your account.`);
+                    } catch (error) {
+                        console.error("Error purchasing tokens:", error);
+                        alert('There was an error processing your purchase. Please try again.');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

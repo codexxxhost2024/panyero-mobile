@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Panyero Wallet - Language Flashcards</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <style>
+    :root {
+      --primary-color: #18385e;
+    }
+    .bg-primary {
+      background-color: var(--primary-color) !important;
+    }
+    .text-primary {
+      color: var(--primary-color) !important;
+    }
+    .border-primary {
+      border-color: var(--primary-color) !important;
+    }
+    .hover\:bg-primary-dark:hover {
+      background-color: #122a47 !important;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 flex flex-col mx-auto min-h-screen w-full">
+  <!-- Header -->
+  <header class="bg-green-600 text-white p-4 text-lg font-semibold flex items-center justify-between sticky top-0 z-50">
+    <h1 class="text-xl font-bold">Language Flashcards</h1>
+    <a href="#" class="icon-button" onclick="window.history.back();">
+      <span class="material-icons">close</span>
+    </a>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center p-4 space-y-4">
+    <div class="bg-white rounded-lg shadow p-4 w-full max-w-md">
+      <h2 class="text-lg font-bold mb-4">Learn New Words</h2>
+      <div class="space-y-4">
+        <!-- Flashcard Display -->
+        <div id="flashcardDisplay" class="text-center text-lg font-semibold p-4 border rounded cursor-pointer" onclick="flipCard()">
+          Click to start
+        </div>
+        <!-- Next Button -->
+        <button onclick="nextCard()" class="bg-primary text-white px-4 py-2 rounded w-full">
+          Next Card
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTsjYZNWFfZOESP-2QQfbD7jc5fG9FJdc",
+      authDomain: "explore-malaysia-6d28d.firebaseapp.com",
+      projectId: "explore-malaysia-6d28d",
+      storageBucket: "explore-malaysia-6d28d.appspot.com",
+      messagingSenderId: "869053244601",
+      appId: "1:869053244601:web:29ad09ff454b43230be768",
+      measurementId: "G-5XJK1H7KWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Ensure user is authenticated
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = 'signin.html';
+      } else {
+        loadFlashcards();
+      }
+    });
+
+    let flashcards = [];
+    let currentCardIndex = 0;
+    let isFlipped = false;
+
+    // Load flashcards from Firestore
+    async function loadFlashcards() {
+      const snapshot = await db.collection("flashcards").get();
+      flashcards = snapshot.docs.map(doc => doc.data());
+      if (flashcards.length > 0) {
+        showCard();
+      }
+    }
+
+    // Show the current card
+    function showCard() {
+      const card = flashcards[currentCardIndex];
+      document.getElementById("flashcardDisplay").innerText = card.word;
+      isFlipped = false;
+    }
+
+    // Flip the card
+    function flipCard() {
+      const card = flashcards[currentCardIndex];
+      document.getElementById("flashcardDisplay").innerText = isFlipped ? card.word : card.definition;
+      isFlipped = !isFlipped;
+    }
+
+    // Show the next card
+    function nextCard() {
+      currentCardIndex = (currentCardIndex + 1) % flashcards.length;
+      showCard();
+    }
+  </script>
+</body>
+</html>
+
